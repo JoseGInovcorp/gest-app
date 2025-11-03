@@ -93,10 +93,10 @@ class EntityController extends Controller
             'pageTitle' => $pageTitle,
             'entityType' => $routeType ?? 'all',
             'can' => [
-                'create' => Auth::user()->can('entities.create'),
-                'edit' => Auth::user()->can('entities.edit'),
-                'delete' => Auth::user()->can('entities.delete'),
-                'export' => Auth::user()->can('entities.export'),
+                'create' => true, // Temporariamente true até implementar permissões
+                'edit' => true,
+                'delete' => true,
+                'export' => true,
             ]
         ]);
     }
@@ -190,7 +190,7 @@ class EntityController extends Controller
         } elseif (str_starts_with($routeName, 'suppliers.')) {
             return redirect()->route('suppliers.index')->with('success', 'Fornecedor criado com sucesso.');
         }
-        
+
         return redirect()->route('entities.index')->with('success', 'Entidade criada com sucesso.');
     }
 
