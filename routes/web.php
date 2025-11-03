@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\EntityController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -22,6 +23,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Rotas das Entidades (Clientes/Fornecedores)
+    Route::resource('entities', EntityController::class);
+    Route::post('/entities/{entity}/revalidate-vat', [EntityController::class, 'revalidateVat'])->name('entities.revalidate-vat');
 });
 
 require __DIR__.'/auth.php';
