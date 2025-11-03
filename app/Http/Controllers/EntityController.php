@@ -6,6 +6,7 @@ use App\Models\Entity;
 use App\Services\ViesService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
@@ -134,6 +135,13 @@ class EntityController extends Controller
      */
     public function store(Request $request)
     {
+        // Debug: Log da request recebida
+        \Log::info('Store request received', [
+            'url' => $request->url(),
+            'method' => $request->method(),
+            'all_data' => $request->all()
+        ]);
+
         $validated = $request->validate([
             'type' => ['required', Rule::in(['client', 'supplier', 'both'])],
             'number' => 'required|integer|unique:entities,number',

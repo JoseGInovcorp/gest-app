@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 const props = defineProps({
     modelValue: {
         type: [String, Number],
-        default: ""
+        default: "",
     },
     class: {
         type: String,
@@ -28,5 +28,5 @@ const props = defineProps({
     },
 });
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(["update:modelValue"]);
 </script>

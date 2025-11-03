@@ -6,6 +6,89 @@ O formato segue as convenções [Keep a Changelog](https://keepachangelog.com/en
 
 ---
 
+## [0.3.0] — 2025-11-03 (Noite)
+
+### 🎨 Formulários Shadcn/ui - Sistema CRUD Completo
+
+**Milestone:** Implementação completa de formulários modernos Create/Edit para Clientes e Fornecedores usando componentes Shadcn/ui com validação avançada e UX profissional.
+
+#### ✨ **Formulários Modernos Implementados**
+
+**Biblioteca UI Componentes:**
+
+-   ✅ **Form Component** - Wrapper funcional com emissão de eventos submit
+-   ✅ **Input Component** - Campo de texto com v-model, estados error/disabled
+-   ✅ **Select Component** - Dropdown com opções e v-model binding
+-   ✅ **Textarea Component** - Campo de texto multilinha responsivo
+-   ✅ **Checkbox Component** - Toggle com label integrado
+-   ✅ **Button Component** - Múltiplas variantes (default, outline, destructive)
+-   ✅ **FormField Component** - Wrapper com label, descrição e mensagens erro
+
+**Páginas Create/Edit:**
+
+-   ✅ **Clients/Create** (`/clients/create`) - Formulário completo tipo 'client' pré-selecionado
+-   ✅ **Suppliers/Create** (`/suppliers/create`) - Formulário completo tipo 'supplier' pré-selecionado
+-   ✅ **Todos os campos** - Tipo, Número, NIF, Nome, Morada, CP, Localidade, País, Telefones, Website, Email, RGPD, Observações, Estado
+
+#### 🔧 **Validação & UX Avançada**
+
+**Sistema de Validação:**
+
+-   ✅ **Real-time validation** - Computed `isFormValid` verifica campos obrigatórios
+-   ✅ **Visual feedback** - Botão ativo/inativo baseado na validação
+-   ✅ **Estados loading** - "A criar..." durante submissão
+-   ✅ **Mensagens contextuais** - "Preencha os campos obrigatórios" vs "Criar Cliente"
+
+**Formatação Automática:**
+
+-   ✅ **Código Postal** - Auto-formato XXXX-XXX durante digitação
+-   ✅ **NIF Validation** - Preparado para integração VIES (validateNIF function)
+-   ✅ **Form submission** - Inertia.js com callbacks success/error completos
+
+#### 🏗️ **Backend Integrado**
+
+**EntityController Melhorado:**
+
+-   ✅ **Store method** - Criação de entidades com mapeamento correto de campos
+-   ✅ **VIES Integration** - Validação automática VAT para países UE
+-   ✅ **Contextual redirect** - Redirecciona para clients.index ou suppliers.index conforme rota
+-   ✅ **Field mapping** - NIF → tax_number, country → country_code, etc.
+-   ✅ **Data validation** - Rules Laravel completas com unique constraints
+
+#### 🐛 **Correções Críticas**
+
+**Filtros Funcionais:**
+
+-   ✅ **Auto-apply filters** - Watchers que aplicam filtros automaticamente
+-   ✅ **Debounced search** - 500ms delay na pesquisa para melhor performance
+-   ✅ **Preserve state** - Filtros mantêm estado durante navegação
+-   ✅ **Backend processing** - EntityController processa corretamente active/search params
+
+**Layout & Duplicações:**
+
+-   ✅ **Nome duplicado corrigido** - Removida duplicação entity.name na tabela
+-   ✅ **NIF layout melhorado** - Coluna fiscal sem duplicações tax_number/vat_number
+-   ✅ **VIES indicator** - Ícone vermelho só aparece se houve verificação VIES
+-   ✅ **Country display** - Código país só aparece se diferente de PT
+
+#### 📊 **Funcionalidades Ativas**
+
+**Sistema CRUD Completo:**
+
+-   ✅ **Create** - Formulários funcionais para ambos os contextos
+-   ✅ **Read** - Listagens filtradas com pesquisa e status
+-   ✅ **Update** - Backend preparado (frontend será implementado)
+-   ✅ **Delete** - Backend preparado (frontend será implementado)
+
+**Navegação & UX:**
+
+-   ✅ **Breadcrumbs** - Navegação contextual em todas as páginas
+-   ✅ **Mobile responsive** - Formulários adaptam a todos os ecrãs
+-   ✅ **Loading states** - Feedback visual durante operações
+-   ✅ **Error handling** - Mensagens de erro contextuais
+
+---
+
 ## [0.2.1] — 2025-11-03 (Tarde)
 
 ### 🔧 Correções e Melhorias Interface

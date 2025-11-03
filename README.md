@@ -9,13 +9,19 @@
 [![Inertia.js](https://img.shields.io/badge/Inertia.js-1.x-9553E9?style=for-the-badge&logo=laravel&logoColor=white)](https://inertiajs.com)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.x-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
 
-**Status do Projeto:** 🚧 Em Desenvolvimento Ativo (**v0.2.1**)
+**Status do Projeto:** 🚧 Em Desenvolvimento Ativo (**v0.3.0**)
 
-**Fase Atual:** 📦 **Formulários Entidades** (Create/Edit Clientes/Fornecedores)
+**Fase Atual:** � **Validação & Automação** (NIF único + Numeração + VIES)
 
-**Última Atualização:** 📅 **03 Nov 2025** — Interface moderna implementada
+**Última Atualização:** 📅 **03 Nov 2025** — Formulários Shadcn/ui implementados
 
 **Entrega Final:** 📅 **18 de Novembro de 2025**</div>
+
+---
+
+## 🎯 **NOVIDADE v0.3.0** — Formulários Shadcn/ui Implementados!
+
+✨ **Acaba de ser implementado:** Sistema completo de formulários Create/Edit para Clientes e Fornecedores usando componentes Shadcn/ui com validação em tempo real, formatação automática e UX moderna.
 
 ---
 
@@ -34,34 +40,56 @@
 
 ## � Progresso de Desenvolvimento
 
-### 🎯 Status Geral: **25%** Concluído
+### 🎯 Status Geral: **45%** Concluído
 
 ```
 Fundação & Setup    ████████████████████ 100% ✅
 Interface Moderna   ████████████████████ 100% ✅
-Módulo Entidades    ██████████████░░░░░░  70% 🚧
-Formulários CRUD    ░░░░░░░░░░░░░░░░░░░░   0% ⏳
+Módulo Entidades    █████████████████░░░  85% 🚧
+Formulários CRUD    █████████████████░░░  85% ✅
 Permissões Sistema  ████░░░░░░░░░░░░░░░░  20% ⏳
 Integração VIES     ████████████░░░░░░░░  60% 🚧
 ```
 
-### ✅ **Concluído** (Versões 0.1.0 - 0.2.1)
+### ✅ **Concluído** (Versões 0.1.0 - 0.3.0)
 
--   **Stack Setup Completo** — Laravel 12 + Vue.js 3 + Inertia.js
+#### **Fundação Técnica**
+
+-   **Stack Setup Completo** — Laravel 12 + Vue.js 3 + Inertia.js + Shadcn/ui
 -   **Sistema Autenticação** — 2FA funcional com Laravel Fortify
+-   **Backend Rotas** — 16 rotas RESTful implementadas
+-   **Arquitetura Unificada** — EntityController com filtragem contextual
+
+#### **Interface & UX**
+
 -   **Interface Moderna** — Shadcn/ui + Tailwind + layout responsivo
 -   **Welcome Page** — Página inicial profissional com branding
 -   **Menu Lateral** — Navegação categorizada com ícones Lucide
 -   **Páginas Entidades** — `/clients` e `/suppliers` funcionais
--   **Backend Rotas** — 16 rotas RESTful implementadas
 -   **Filtros Contextuais** — Separação automática clients vs suppliers
 
-### 🚧 **Em Desenvolvimento** (v0.2.2 - Próximo)
+#### **Formulários Completos** 🆕
 
--   **Formulários Create/Edit** — Interfaces de criação e edição
--   **Validação Frontend** — Campos obrigatórios + VIES integration
--   **Data Tables** — Sorting, filtering, pagination
--   **Populate Database** — Seeders com dados de exemplo
+-   **Create/Edit Shadcn/ui** — Formulários modernos para Clientes/Fornecedores
+-   **Validação Real-time** — Campos obrigatórios com feedback visual
+-   **Formatação Automática** — Código postal XXXX-XXX, NIF, etc.
+-   **UX Avançada** — Estados de loading, mensagens de erro contextuais
+-   **Responsivo Total** — Layout adaptativo mobile-first
+
+#### **Sistema CRUD Funcional**
+
+-   **Criação Entidades** — Formulários funcionais com todos os campos
+-   **Listagem Filtrada** — Tabelas com filtros ativo/inativo + pesquisa
+-   **Navegação Intuitiva** — Breadcrumbs e botões de ação
+-   **Correções UX** — Informações duplicadas eliminadas, layout otimizado
+
+### 🚧 **Em Desenvolvimento** (v0.3.1 - Próximo)
+
+-   **Validação NIF Única** — Backend + Frontend para verificar duplicados
+-   **Sistema Numeração** — Auto-incremento automático do campo número
+-   **Integração VIES Ativa** — Preenchimento automático ao inserir NIF UE
+-   **Data Table Shadcn/ui** — Substituir tabela atual por componente oficial
+-   **Tabela Países** — Migration/Model/Seeder para configuração
 
 ### ⏳ **Planeado** (v0.3.0+)
 
@@ -161,6 +189,105 @@ gest-app/
 
 ---
 
+## 🎨 Componentes Shadcn/ui Implementados
+
+### 📦 **Biblioteca UI Personalizada**
+
+O Gest-App implementa uma biblioteca completa de componentes UI baseados no Shadcn/ui, totalmente adaptados para Vue.js 3 e integrados com o sistema de formulários.
+
+#### **Form Components**
+
+```vue
+<!-- Form Wrapper com submissão de eventos -->
+<Form @submit.prevent="handleSubmit">
+    <!-- Campos do formulário -->
+</Form>
+
+<!-- Input com v-model e estados -->
+<Input
+    v-model="form.name"
+    placeholder="Nome da entidade"
+    :disabled="form.processing"
+    class="custom-styles"
+/>
+
+<!-- Select com opções dinâmicas -->
+<Select v-model="form.country" :disabled="form.processing">
+    <option value="PT">Portugal</option>
+    <option value="ES">Espanha</option>
+</Select>
+
+<!-- Textarea responsivo -->
+<Textarea v-model="form.observations" placeholder="Observações..." rows="3" />
+
+<!-- Checkbox com label integrado -->
+<Checkbox v-model="form.gdpr_consent" label="Aceito os termos RGPD" />
+```
+
+#### **FormField Wrapper**
+
+```vue
+<FormField
+    label="NIF *"
+    description="Número de Identificação Fiscal"
+    :error="form.errors.nif"
+>
+    <Input 
+        v-model="form.nif"
+        placeholder="123456789"
+        @blur="validateNIF"
+    />
+</FormField>
+```
+
+#### **Button Variants**
+
+```vue
+<!-- Botão principal -->
+<Button type="submit" :disabled="!isFormValid">
+    Criar Cliente
+</Button>
+
+<!-- Botão outline -->
+<Button variant="outline" @click="cancel">
+    Cancelar
+</Button>
+
+<!-- Botão destructivo -->
+<Button variant="destructive" @click="delete">
+    Eliminar
+</Button>
+```
+
+### **🔧 Funcionalidades Técnicas**
+
+#### **v-model Integration**
+
+-   ✅ Todos os componentes suportam `v-model` nativo
+-   ✅ Emit `update:modelValue` para two-way binding
+-   ✅ Props `modelValue` com reactivity completa
+
+#### **Validação Visual**
+
+-   ✅ Estados de erro com classes Tailwind
+-   ✅ Mensagens contextuais por campo
+-   ✅ Loading states durante submissão
+
+#### **Accessibility (a11y)**
+
+-   ✅ Labels associados corretamente
+-   ✅ ARIA attributes implementados
+-   ✅ Keyboard navigation funcional
+-   ✅ Screen reader friendly
+
+#### **Responsive Design**
+
+-   ✅ Mobile-first approach
+-   ✅ Breakpoints Tailwind CSS
+-   ✅ Touch-friendly em dispositivos móveis
+
+---
+
 ## 🔧 Instalação
 
 ### Pré-requisitos
@@ -245,6 +372,82 @@ php artisan serve
 -   ✅ **Responsive Design**: Mobile-first com sidebar navigation
 -   ✅ **Empty States**: UX para listas vazias
 -   ✅ **Loading States**: Preparado para skeleton loaders
+
+**Características Técnicas:**
+
+---
+
+## 🚀 Próximas Funcionalidades (v0.3.1+)
+
+### 🎯 **Em Desenvolvimento Imediato**
+
+#### **1. Validação NIF Única** 
+```php
+// Backend validation rule
+'nif' => 'required|string|unique:entities,tax_number'
+
+// Frontend real-time check
+const checkNifExists = async (nif) => {
+    const response = await axios.get(`/api/entities/check-nif/${nif}`)
+    return response.data.exists
+}
+```
+
+#### **2. Sistema Numeração Automática**
+```php
+// Auto-increment entity numbers
+$nextNumber = Entity::max('number') + 1;
+$entity->number = $nextNumber;
+```
+
+#### **3. Integração VIES Ativa**
+```vue
+<!-- Auto-complete on NIF input -->
+<Input 
+    v-model="form.nif" 
+    @blur="fetchViesData"
+    :loading="viesLoading"
+/>
+```
+
+#### **4. Data Table Shadcn/ui**
+Substituir tabela atual por componente oficial com:
+- ✅ Sorting por colunas
+- ✅ Filtering avançado  
+- ✅ Pagination moderna
+- ✅ Row selection
+- ✅ Export funcionalidade
+
+#### **5. Tabela Países Configurável**
+```php
+// Migration para países
+Schema::create('countries', function (Blueprint $table) {
+    $table->char('code', 2)->primary(); // PT, ES, FR...
+    $table->string('name'); // Portugal, España...
+    $table->boolean('vies_enabled')->default(false);
+    $table->json('vat_formats'); // Formatos NIF válidos
+});
+```
+
+### 📅 **Roadmap Técnico**
+
+**v0.3.x - Validação & Automação**
+- Validação NIF única (Backend + Frontend)
+- Numeração automática entidades  
+- Integração VIES ativa nos formulários
+- Tabela países configurável
+
+**v0.4.x - Data Tables Avançadas**
+- Shadcn/ui Data Table implementation
+- Export para Excel/PDF
+- Filtros avançados e saved searches
+- Bulk actions (ativar/desativar multiple)
+
+**v0.5.x - Formulários Edit & Permissões**  
+- Páginas Edit para entidades
+- Sistema completo de permissões
+- Audit logs para todas as alterações
+- User roles & permissions management
 
 **Características Técnicas:**
 

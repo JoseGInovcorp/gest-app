@@ -1,6 +1,6 @@
 <script setup>
-import { ref, computed } from "vue";
-import { Head, Link } from "@inertiajs/vue3";
+import { ref, computed, watch } from "vue";
+import { Head, Link, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import {
     UserCheck,
@@ -39,8 +39,38 @@ const clearFilters = () => {
     searchQuery.value = "";
     activeFilter.value = null;
     // Redirecionar para limpar filtros
-    window.location.href = route("suppliers.index");
+    router.get(route("suppliers.index"));
 };
+
+const applyFilters = () => {
+    const params = {};
+
+    if (searchQuery.value) {
+        params.search = searchQuery.value;
+    }
+
+    if (activeFilter.value !== null) {
+        params.active = activeFilter.value;
+    }
+
+    router.get(route("suppliers.index"), params, {
+        preserveState: true,
+        preserveScroll: true,
+    });
+};
+
+// Debounce timeout
+let filterTimeout = null;
+
+// Watchers para aplicar filtros automaticamente
+watch([searchQuery, activeFilter], () => {
+    if (filterTimeout) {
+        clearTimeout(filterTimeout);
+    }
+    filterTimeout = setTimeout(() => {
+        applyFilters();
+    }, 500);
+});
 
 const getStatusBadge = (entity) => {
     if (!entity.active) {
@@ -256,15 +286,13 @@ const formatDate = (date) => {
                                             <div
                                                 class="text-sm font-medium text-gray-900 dark:text-white"
                                             >
-                                                {{
-                                                    entity.commercial_name ||
-                                                    entity.name
-                                                }}
+                                                {{ entity.name }}
                                             </div>
                                             <div
                                                 class="text-sm text-gray-500 dark:text-gray-400"
                                             >
-                                                {{ entity.name }}
+                                                NIF:
+                                                {{ entity.tax_number || "-" }}
                                             </div>
                                         </div>
                                     </div>
@@ -286,29 +314,40 @@ const formatDate = (date) => {
 
                                 <!-- Fiscal -->
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div
-                                        class="text-sm text-gray-900 dark:text-white"
-                                    >
-                                        {{ entity.tax_number || "-" }}
-                                    </div>
-                                    <div
-                                        v-if="entity.vat_number"
-                                        class="flex items-center space-x-1 text-sm"
-                                    >
-                                        <span
-                                            class="text-gray-500 dark:text-gray-400"
-                                            >{{ entity.vat_number }}</span
+                                    <div class="flex items-center space-x-2">
+                                        <div>
+                                            <div
+                                                class="text-sm text-gray-900 dark:text-white"
+                                            >
+                                                {{ entity.tax_number || "-" }}
+                                            </div>
+                                            <div
+                                                v-if="
+                                                    entity.country_code &&
+                                                    entity.country_code !== 'PT'
+                                                "
+                                                class="text-xs text-gray-500 dark:text-gray-400"
+                                            >
+                                                {{ entity.country_code }}
+                                            </div>
+                                        </div>
+                                        <div
+                                            v-if="
+                                                entity.vat_number &&
+                                                entity.vies_last_check
+                                            "
                                         >
-                                        <CheckCircle
-                                            v-if="entity.vies_valid"
-                                            class="h-3 w-3 text-green-500"
-                                            title="VAT válido (VIES)"
-                                        />
-                                        <XCircle
-                                            v-else-if="entity.vat_number"
-                                            class="h-3 w-3 text-red-500"
-                                            title="VAT inválido (VIES)"
-                                        />
+                                            <CheckCircle
+                                                v-if="entity.vies_valid"
+                                                class="h-4 w-4 text-green-500"
+                                                title="VAT válido (VIES)"
+                                            />
+                                            <XCircle
+                                                v-else
+                                                class="h-4 w-4 text-red-500"
+                                                title="VAT inválido (VIES)"
+                                            />
+                                        </div>
                                     </div>
                                 </td>
 

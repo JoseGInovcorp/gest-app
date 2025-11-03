@@ -1,9 +1,10 @@
 <template>
-    <div class="space-y-6">
+    <form class="space-y-6" @submit="$emit('submit', $event)">
         <slot />
-    </div>
+    </form>
 </template>
 
 <script setup>
-// Form wrapper component - simple container for now
+// Form wrapper component that emits submit event
+defineEmits(["submit"]);
 </script>
