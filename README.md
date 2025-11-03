@@ -9,13 +9,13 @@
 [![Inertia.js](https://img.shields.io/badge/Inertia.js-1.x-9553E9?style=for-the-badge&logo=laravel&logoColor=white)](https://inertiajs.com)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.x-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
 
-**Status do Projeto:** 🚧 Em Desenvolvimento Ativo
+**Status do Projeto:** 🚧 Em Desenvolvimento Ativo (**v0.2.1**)
 
-**Fase Atual:** 📦 **Módulo Entidades** (Clientes/Fornecedores) 
+**Fase Atual:** 📦 **Formulários Entidades** (Create/Edit Clientes/Fornecedores)
 
-**Entrega Final:** 📅 **18 de Novembro de 2025**
+**Última Atualização:** 📅 **03 Nov 2025** — Interface moderna implementada
 
-</div>
+**Entrega Final:** 📅 **18 de Novembro de 2025**</div>
 
 ---
 
@@ -32,14 +32,54 @@
 
 ---
 
-## 📖 Visão Geral
+## � Progresso de Desenvolvimento
 
-O **Gest-App** é um sistema de gestão empresarial desenvolvido como projeto final de estágio, focado em fornecer uma solução completa e moderna para pequenas e médias empresas portuguesas. 
+### 🎯 Status Geral: **25%** Concluído
+
+```
+Fundação & Setup    ████████████████████ 100% ✅
+Interface Moderna   ████████████████████ 100% ✅  
+Módulo Entidades    ██████████████░░░░░░  70% 🚧
+Formulários CRUD    ░░░░░░░░░░░░░░░░░░░░   0% ⏳
+Permissões Sistema  ████░░░░░░░░░░░░░░░░  20% ⏳
+Integração VIES     ████████████░░░░░░░░  60% 🚧
+```
+
+### ✅ **Concluído** (Versões 0.1.0 - 0.2.1)
+
+-   **Stack Setup Completo** — Laravel 12 + Vue.js 3 + Inertia.js
+-   **Sistema Autenticação** — 2FA funcional com Laravel Fortify  
+-   **Interface Moderna** — Shadcn/ui + Tailwind + layout responsivo
+-   **Welcome Page** — Página inicial profissional com branding
+-   **Menu Lateral** — Navegação categorizada com ícones Lucide
+-   **Páginas Entidades** — `/clients` e `/suppliers` funcionais
+-   **Backend Rotas** — 16 rotas RESTful implementadas
+-   **Filtros Contextuais** — Separação automática clients vs suppliers
+
+### 🚧 **Em Desenvolvimento** (v0.2.2 - Próximo)
+
+-   **Formulários Create/Edit** — Interfaces de criação e edição
+-   **Validação Frontend** — Campos obrigatórios + VIES integration  
+-   **Data Tables** — Sorting, filtering, pagination
+-   **Populate Database** — Seeders com dados de exemplo
+
+### ⏳ **Planeado** (v0.3.0+)
+
+-   Sistema de Permissões Completo
+-   Módulo Contactos  
+-   Gestão de Artigos
+-   Propostas Comerciais
+
+---
+
+## �📖 Visão Geral
+
+O **Gest-App** é um sistema de gestão empresarial desenvolvido como projeto final de estágio, focado em fornecer uma solução completa e moderna para pequenas e médias empresas portuguesas.
 
 ### 🎯 Objetivos Principais
 
 -   **Centralização**: Unified dashboard para gestão completa do negócio
--   **Automatização**: Processos automatizados de faturação, stock e relatórios  
+-   **Automatização**: Processos automatizados de faturação, stock e relatórios
 -   **Conformidade**: Integração com APIs portuguesas (VIES, AT) para validação fiscal
 -   **Escalabilidade**: Arquitetura preparada para crescimento futuro
 -   **Segurança**: 2FA, permissões granulares e encriptação de dados
@@ -58,6 +98,7 @@ O **Gest-App** é um sistema de gestão empresarial desenvolvido como projeto fi
 ## 🛠️ Stack Tecnológico
 
 ### Backend
+
 -   **Laravel 12** — Framework PHP moderno com ecosystem completo
 -   **Laravel Fortify** — Autenticação 2FA com Google Authenticator
 -   **Laravel Sanctum** — API authentication para integrações futuras
@@ -65,6 +106,7 @@ O **Gest-App** é um sistema de gestão empresarial desenvolvido como projeto fi
 -   **MySQL 8.0** — Base de dados relacional otimizada
 
 ### Frontend
+
 -   **Vue.js 3** — Framework reativo com Composition API
 -   **Inertia.js** — Modern monolith sem necessidade de APIs REST
 -   **Shadcn/ui** — Componentes UI modernos e acessíveis
@@ -72,6 +114,7 @@ O **Gest-App** é um sistema de gestão empresarial desenvolvido como projeto fi
 -   **FullCalendar** — Biblioteca avançada de calendários
 
 ### Ferramentas & Integrações
+
 -   **Herd** — Ambiente de desenvolvimento Laravel otimizado
 -   **VIES API** — Validação automática de VAT numbers europeus
 -   **Git & GitHub** — Controlo de versões e colaboração
@@ -93,7 +136,7 @@ O **Gest-App** é um sistema de gestão empresarial desenvolvido como projeto fi
 ```
 gest-app/
 ├── 📦 Core Modules/
-│   ├── 👥 Entities (Clientes/Fornecedores) ✅ 
+│   ├── 👥 Entities (Clientes/Fornecedores) ✅
 │   ├── 📞 Contacts (Contactos)
 │   ├── 📦 Articles (Produtos/Serviços)
 │   ├── 📄 Proposals (Orçamentos/Propostas)
@@ -103,7 +146,7 @@ gest-app/
 │   └── 🔐 Access Management (Utilizadores/Permissões)
 ├── ⚙️ Configuration Modules/
 │   ├── 🏢 Company Settings
-│   ├── 💸 Tax Configuration  
+│   ├── 💸 Tax Configuration
 │   ├── 🏷️ Categories & Tags
 │   ├── 📋 Document Templates
 │   ├── 🔗 API Integrations
@@ -121,6 +164,7 @@ gest-app/
 ## 🔧 Instalação
 
 ### Pré-requisitos
+
 -   **PHP 8.2+** com extensões necessárias
 -   **Node.js 18+** e npm/yarn
 -   **MySQL 8.0+** ou MariaDB 10.4+
@@ -155,6 +199,7 @@ php artisan serve
 ```
 
 ### Acesso Inicial
+
 -   **URL:** `https://gest-app.test` (Herd) ou `http://localhost:8000`
 -   **Super Admin:** `admin@gest-app.com` / `password`
 -   **2FA:** Configurar Google Authenticator no primeiro login
@@ -181,28 +226,46 @@ php artisan serve
 
 ## 📦 Módulos Implementados
 
-### ✅ **Entidades** (Clientes/Fornecedores) — **COMPLETO**
+### ✅ **Entidades** (Clientes/Fornecedores) — **IMPLEMENTADO v0.2.1**
 
-**Funcionalidades Implementadas:**
--   ✅ **CRUD Completo**: Create, Read, Update, Delete (soft deletes)
--   ✅ **Validação VIES**: Integração com API europeia para VAT validation
--   ✅ **Filtros Avançados**: Por tipo, status, pesquisa textual
--   ✅ **Informação Fiscal**: NIF, VAT, país, validação automática
--   ✅ **Moradas Múltiplas**: Principal e faturação separadas
--   ✅ **Dados Comerciais**: Limite crédito, condições pagamento, descontos
--   ✅ **Auditoria**: Created/updated by tracking
--   ✅ **Permissões**: Controlo granular por role
+**Backend Completo:**
 
-**Funcionalidades Técnicas:**
--   ✅ **Modelo Eloquent**: 40+ campos otimizados com relacionamentos
--   ✅ **Migração Robusta**: Índices, foreign keys, constraints
--   ✅ **Controlador RESTful**: Endpoints completos com validação
--   ✅ **Serviço VIES**: Classe dedicada para integração API
+-   ✅ **Modelo Entity**: 40+ campos com relacionamentos e soft deletes
+-   ✅ **EntityController**: CRUD completo com filtros inteligentes por contexto
+-   ✅ **VIES Integration**: Validação automática VAT UE (27 países + NI)
+-   ✅ **16 Rotas RESTful**: Cobertura completa clients, suppliers, entities
+-   ✅ **Filtros Automáticos**: Baseados no nome da rota para separação contextos
+-   ✅ **Auditoria**: Created/updated by tracking automático
+
+**Frontend Moderno:**
+
+-   ✅ **Interface Separada**: `/clients` e `/suppliers` com temáticas distintas
+-   ✅ **Design Shadcn/ui**: Componentes modernos com interatividade
+-   ✅ **Data Tables**: Headers, sorting, status badges, action buttons
+-   ✅ **Responsive Design**: Mobile-first com sidebar navigation
+-   ✅ **Empty States**: UX para listas vazias
+-   ✅ **Loading States**: Preparado para skeleton loaders
+
+**Características Técnicas:**
+
+-   ✅ **Unified Backend**: Um controller para múltiplos contextos
+-   ✅ **Context Detection**: Detecção automática cliente vs fornecedor por rota
+-   ✅ **Type Filtering**: Entidades 'both' aparecem em ambos os contextos
+-   ✅ **VIES Service**: Classe dedicada com cache e error handling
+-   ✅ **Permission Ready**: Estrutura preparada para sistema granular
+
+**Status Atual:**
+
+-   🟢 **Páginas Index**: Funcionais para clientes e fornecedores
+-   🟡 **Formulários**: Em desenvolvimento (create/edit)
+-   🟡 **Validações**: VIES backend pronto, frontend a implementar
+-   🟡 **Permissões**: Middleware preparado mas desabilitado temporariamente
 -   ✅ **Middleware Permissões**: Proteção automática de rotas
 
 **Países VIES Suportados:** 🇦🇹🇧🇪🇧🇬🇨🇾🇨🇿🇩🇪🇩🇰🇪🇪🇬🇷🇪🇸🇫🇮🇫🇷🇭🇷🇭🇺🇮🇪🇮🇹🇱🇹🇱🇺🇱🇻🇲🇹🇳🇱🇵🇱🇵🇹🇷🇴🇸🇪🇸🇮🇸🇰
 
 ### 🚧 **Em Desenvolvimento**
+
 -   📞 **Contacts** — Próxima fase
 -   📦 **Articles** — A seguir
 -   📄 **Proposals** — Fase 2
@@ -215,10 +278,10 @@ php artisan serve
 
 ```
 👑 Super Admin
-├── 🔧 Administrator  
+├── 🔧 Administrator
 ├── 📊 Manager
 ├── 💼 Sales Representative
-├── 💰 Financial Manager  
+├── 💰 Financial Manager
 ├── 📦 Warehouse Manager
 └── 👤 Employee
 ```
@@ -226,13 +289,15 @@ php artisan serve
 ### 🛡️ Permissões por Módulo
 
 **Entities (Implementado):**
+
 -   `entities.view` — Visualizar lista e detalhes
--   `entities.create` — Criar novas entidades  
+-   `entities.create` — Criar novas entidades
 -   `entities.edit` — Editar entidades existentes
 -   `entities.delete` — Eliminar entidades (soft delete)
 -   `entities.export` — Exportar dados
 
 **Sistema Escalável:**
+
 -   **70+ permissões** granulares cobrindo todos os módulos
 -   **Middleware automático** para proteção de rotas
 -   **Métodos auxiliares** no User model para verificações
@@ -242,6 +307,7 @@ php artisan serve
 ## 📈 Roadmap de Desenvolvimento
 
 ### 📅 **Fase 1** — Fundação ✅ **CONCLUÍDA**
+
 -   ✅ Setup Laravel 12 + Vue.js 3 + Inertia.js
 -   ✅ Sistema de autenticação 2FA
 -   ✅ Sistema de permissões (Spatie)
@@ -250,18 +316,21 @@ php artisan serve
 -   ✅ Documentação base
 
 ### 🚧 **Fase 2** — Módulos Core (Em Curso)
+
 -   📞 **Contacts** — Sistema de contactos
 -   📦 **Articles** — Gestão de produtos/serviços
 -   📄 **Proposals** — Orçamentos e propostas
 -   🛒 **Orders** — Sistema de encomendas
 
 ### 📅 **Fase 3** — Financeiro & Relatórios
+
 -   💰 **Financial** — Faturação e pagamentos
 -   📊 **Reports** — Dashboard e analytics
 -   📅 **Calendar** — Calendário empresarial
 -   🔗 **Integrations** — APIs externas (AT, Bancos)
 
 ### 📅 **Fase 4** — Otimização & Deploy
+
 -   🚀 **Performance** — Otimizações e caching
 -   🛡️ **Security** — Hardening e compliance
 -   📱 **Mobile** — Responsividade avançada
