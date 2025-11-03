@@ -282,7 +282,7 @@ const stats = [
                     </div>
                     
                     <div class="flex items-center space-x-6 text-sm text-gray-600 dark:text-gray-400">
-                        <a href="mailto:jose.gil@inovcorp.com" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center space-x-1">
+                        <a href="mailto:jose.goncalves@inovcorp.com" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center space-x-1">
                             <Mail class="h-4 w-4" />
                             <span>Contacto</span>
                         </a>
@@ -290,7 +290,7 @@ const stats = [
                             <Github class="h-4 w-4" />
                             <span>GitHub</span>
                         </a>
-                        <span class="text-xs">© 2025 José Gil | Inovcorp</span>
+                        <span class="text-xs">© 2025 José Gonçalves | Inovcorp</span>
                     </div>
                 </div>
             </div>
