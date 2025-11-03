@@ -16,7 +16,7 @@ class EntityController extends Controller
     public function __construct(ViesService $viesService)
     {
         $this->viesService = $viesService;
-        
+
         // Aplicar middleware de permissões
         $this->middleware('permission:entities.view')->only(['index', 'show']);
         $this->middleware('permission:entities.create')->only(['create', 'store']);
@@ -31,8 +31,18 @@ class EntityController extends Controller
     {
         $query = Entity::with(['creator', 'updater']);
 
-        // Filtros
-        if ($request->has('type')) {
+        // Filtro por tipo da rota (clients, suppliers ou todos)
+        $routeType = $request->route()->getDefault('type');
+        if ($routeType) {
+            if ($routeType === 'client') {
+                $query->whereIn('type', ['client', 'both']);
+            } elseif ($routeType === 'supplier') {
+                $query->whereIn('type', ['supplier', 'both']);
+            }
+        }
+
+        // Filtros adicionais
+        if ($request->has('type') && !$routeType) {
             $query->where('type', $request->type);
         }
 
@@ -42,11 +52,11 @@ class EntityController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'LIKE', "%{$search}%")
-                  ->orWhere('commercial_name', 'LIKE', "%{$search}%")
-                  ->orWhere('email', 'LIKE', "%{$search}%")
-                  ->orWhere('tax_number', 'LIKE', "%{$search}%");
+                    ->orWhere('commercial_name', 'LIKE', "%{$search}%")
+                    ->orWhere('email', 'LIKE', "%{$search}%")
+                    ->orWhere('tax_number', 'LIKE', "%{$search}%");
             });
         }
 
@@ -57,9 +67,22 @@ class EntityController extends Controller
 
         $entities = $query->paginate(15)->withQueryString();
 
-        return Inertia::render('Entities/Index', [
+        // Determinar o template baseado no tipo da rota
+        $template = 'Entities/Index';
+        $pageTitle = 'Entidades';
+        if ($routeType === 'client') {
+            $template = 'Clients/Index';
+            $pageTitle = 'Clientes';
+        } elseif ($routeType === 'supplier') {
+            $template = 'Suppliers/Index';
+            $pageTitle = 'Fornecedores';
+        }
+
+        return Inertia::render($template, [
             'entities' => $entities,
             'filters' => $request->only(['type', 'active', 'search', 'sort', 'direction']),
+            'pageTitle' => $pageTitle,
+            'entityType' => $routeType ?? 'all',
             'can' => [
                 'create' => Auth::user()->can('entities.create'),
                 'edit' => Auth::user()->can('entities.edit'),
@@ -179,7 +202,7 @@ class EntityController extends Controller
         }
 
         $viesResult = $this->viesService->validateVat($entity->country_code, $entity->vat_number);
-        
+
         $entity->update([
             'vies_valid' => $viesResult['valid'],
             'vies_last_check' => now(),

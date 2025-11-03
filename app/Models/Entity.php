@@ -118,7 +118,7 @@ class Entity extends Model
             $this->district,
             $this->country
         ]);
-        
+
         return implode(', ', $parts);
     }
 
@@ -135,14 +135,14 @@ class Entity extends Model
             $this->billing_district,
             $this->billing_country
         ]);
-        
+
         return implode(', ', $parts);
     }
 
     public function needsViesCheck(): bool
     {
-        return $this->country_code !== 'PT' 
-            && $this->vat_number 
+        return $this->country_code !== 'PT'
+            && $this->vat_number
             && (!$this->vies_last_check || $this->vies_last_check->diffInDays(now()) > 30);
     }
 
@@ -153,7 +153,7 @@ class Entity extends Model
 
     public function getTypeDisplayAttribute(): string
     {
-        return match($this->type) {
+        return match ($this->type) {
             'client' => 'Cliente',
             'supplier' => 'Fornecedor',
             'both' => 'Cliente/Fornecedor',

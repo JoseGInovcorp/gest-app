@@ -9,7 +9,7 @@ use Exception;
 class ViesService
 {
     private const VIES_URL = 'http://ec.europa.eu/taxation_customs/vies/services/checkVatService';
-    
+
     /**
      * Validar número de IVA europeu através da API VIES
      */
@@ -18,7 +18,7 @@ class ViesService
         try {
             // Limpar o número de IVA
             $vatNumber = preg_replace('/[^0-9A-Za-z]/', '', $vatNumber);
-            
+
             // Remover prefixo do país se existir
             if (str_starts_with($vatNumber, $countryCode)) {
                 $vatNumber = substr($vatNumber, strlen($countryCode));
@@ -36,7 +36,6 @@ class ViesService
             }
 
             return $this->parseSoapResponse($response->body());
-
         } catch (Exception $e) {
             Log::error('Erro na validação VIES', [
                 'country_code' => $countryCode,
@@ -82,17 +81,17 @@ XML;
     {
         try {
             $xml = simplexml_load_string($xmlResponse, 'SimpleXMLElement', LIBXML_NOCDATA);
-            
+
             if ($xml === false) {
                 throw new Exception('Resposta XML inválida do VIES');
             }
 
             $namespaces = $xml->getNamespaces(true);
             $body = $xml->children('soap', true)->Body;
-            
+
             if (isset($body->children('')->checkVatResponse)) {
                 $response = $body->children('')->checkVatResponse;
-                
+
                 return [
                     'valid' => (bool) $response->valid,
                     'country_code' => (string) $response->countryCode,
@@ -111,7 +110,6 @@ XML;
             }
 
             throw new Exception('Formato de resposta VIES inesperado');
-
         } catch (Exception $e) {
             throw new Exception('Erro ao processar resposta VIES: ' . $e->getMessage());
         }
@@ -123,9 +121,34 @@ XML;
     public static function isViesCountry(string $countryCode): bool
     {
         $viesCountries = [
-            'AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'EL', 'ES',
-            'FI', 'FR', 'HR', 'HU', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT',
-            'NL', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK', 'XI' // XI = Ireland do Norte
+            'AT',
+            'BE',
+            'BG',
+            'CY',
+            'CZ',
+            'DE',
+            'DK',
+            'EE',
+            'EL',
+            'ES',
+            'FI',
+            'FR',
+            'HR',
+            'HU',
+            'IE',
+            'IT',
+            'LT',
+            'LU',
+            'LV',
+            'MT',
+            'NL',
+            'PL',
+            'PT',
+            'RO',
+            'SE',
+            'SI',
+            'SK',
+            'XI' // XI = Ireland do Norte
         ];
 
         return in_array(strtoupper($countryCode), $viesCountries);

@@ -29,28 +29,28 @@ O formato segue as convenções [Keep a Changelog](https://keepachangelog.com/en
 -   ✅ **Autenticação 2FA** - Laravel Fortify com Google Authenticator
 -   ✅ **Rotas protegidas** - Middleware de autenticação configurado
 -   ✅ **Sistema de Permissões** - Spatie Laravel Permission implementado
-    - 6 níveis hierárquicos: Super Admin → Administrator → Manager → Sales Rep → Financial Manager → Warehouse Manager → Employee
-    - 70+ permissões granulares cobrindo todos os módulos do sistema
-    - Middleware personalizado para proteção de rotas (PermissionMiddleware)
-    - Métodos auxiliares no User model para verificação de roles e permissões
+    -   6 níveis hierárquicos: Super Admin → Administrator → Manager → Sales Rep → Financial Manager → Warehouse Manager → Employee
+    -   70+ permissões granulares cobrindo todos os módulos do sistema
+    -   Middleware personalizado para proteção de rotas (PermissionMiddleware)
+    -   Métodos auxiliares no User model para verificação de roles e permissões
 
 **Módulo Entidades (Clientes/Fornecedores) - Base:**
 
 -   ✅ **Modelo Entity** - Estrutura completa com 40+ campos
-    - Suporte para Clientes, Fornecedores ou ambos
-    - Informação fiscal completa (NIF, IVA, país)
-    - Moradas principais e de faturação separadas
-    - Informação comercial (limite crédito, dias pagamento, desconto)
-    - Dados bancários (IBAN, BIC)
-    - Campos personalizáveis (JSON)
-    - Soft deletes e auditoria (created_by, updated_by)
+    -   Suporte para Clientes, Fornecedores ou ambos
+    -   Informação fiscal completa (NIF, IVA, país)
+    -   Moradas principais e de faturação separadas
+    -   Informação comercial (limite crédito, dias pagamento, desconto)
+    -   Dados bancários (IBAN, BIC)
+    -   Campos personalizáveis (JSON)
+    -   Soft deletes e auditoria (created_by, updated_by)
 -   ✅ **Migração Entities** - Tabela otimizada com índices e foreign keys
 -   ✅ **Serviço VIES** - Integração API europeia para validação IVA
-    - Validação automática de números IVA UE
-    - Suporte 27 países europeus + Irlanda do Norte
-    - Cache inteligente (revalidação após 30 dias)
-    - Tratamento robusto de erros e logging
-    - Formatos VAT por país
+    -   Validação automática de números IVA UE
+    -   Suporte 27 países europeus + Irlanda do Norte
+    -   Cache inteligente (revalidação após 30 dias)
+    -   Tratamento robusto de erros e logging
+    -   Formatos VAT por país
 -   ✅ **CSRF Protection** - Proteção ativa em formulários
 -   ✅ **Sanctum** - Gestão segura de tokens API
 
