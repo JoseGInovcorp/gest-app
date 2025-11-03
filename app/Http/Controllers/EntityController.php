@@ -17,11 +17,11 @@ class EntityController extends Controller
     {
         $this->viesService = $viesService;
 
-        // Aplicar middleware de permissões
-        $this->middleware('permission:entities.view')->only(['index', 'show']);
-        $this->middleware('permission:entities.create')->only(['create', 'store']);
-        $this->middleware('permission:entities.edit')->only(['edit', 'update']);
-        $this->middleware('permission:entities.delete')->only(['destroy']);
+        // TODO: Adicionar middleware de permissões quando as permissões estiverem configuradas
+        // $this->middleware('permission:entities.view')->only(['index', 'show']);
+        // $this->middleware('permission:entities.create')->only(['create', 'store']);
+        // $this->middleware('permission:entities.edit')->only(['edit', 'update']);
+        // $this->middleware('permission:entities.delete')->only(['destroy']);
     }
 
     /**
@@ -31,8 +31,17 @@ class EntityController extends Controller
     {
         $query = Entity::with(['creator', 'updater']);
 
+        // Detectar tipo baseado na rota atual
+        $routeName = $request->route()->getName();
+        $routeType = null;
+        
+        if (str_starts_with($routeName, 'clients.')) {
+            $routeType = 'client';
+        } elseif (str_starts_with($routeName, 'suppliers.')) {
+            $routeType = 'supplier';
+        }
+
         // Filtro por tipo da rota (clients, suppliers ou todos)
-        $routeType = $request->route()->getDefault('type');
         if ($routeType) {
             if ($routeType === 'client') {
                 $query->whereIn('type', ['client', 'both']);
