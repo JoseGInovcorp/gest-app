@@ -19,6 +19,12 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+// API Routes for AJAX calls
+Route::middleware('auth')->prefix('api')->group(function () {
+    Route::get('/entities/check-nif/{nif}', [EntityController::class, 'checkNifExists'])->name('api.entities.check-nif');
+    Route::get('/entities/vies-lookup/{country}/{nif}', [EntityController::class, 'viesLookup'])->name('api.entities.vies-lookup');
+});
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

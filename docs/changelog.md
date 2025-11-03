@@ -6,6 +6,85 @@ O formato segue as convenções [Keep a Changelog](https://keepachangelog.com/en
 
 ---
 
+## [0.3.1] — 2025-11-03 (Madrugada)
+
+### 🔐 Validação NIF Única + Integração VIES Ativa
+
+**Milestone:** Implementação de validação em tempo real de NIF único e integração ativa do VIES para preenchimento automático de dados de empresas europeias.
+
+#### ✨ **Validação NIF Única Implementada**
+
+**Backend API:**
+- ✅ **Nova rota API**: `/api/entities/check-nif/{nif}` para verificação AJAX
+- ✅ **Método checkNifExists**: Verifica duplicação na base de dados
+- ✅ **Response estruturada**: `{exists: boolean, nif: string, message: string}`
+- ✅ **Validação Laravel**: Rule `unique:entities,tax_number` mantida no store
+
+**Frontend Real-time:**
+- ✅ **Estado reativo**: `nifValidation` com checking/exists/message/error
+- ✅ **Debounced validation**: 800ms delay para otimizar requests
+- ✅ **Visual feedback**: Border vermelho (existe) / verde (disponível)
+- ✅ **UX messages**: "A verificar NIF..." → "Este NIF já está registado"
+- ✅ **Form blocking**: Botão desativado se NIF duplicado
+
+#### 🌍 **Integração VIES Ativa no Formulário**
+
+**Backend VIES API:**
+- ✅ **Nova rota API**: `/api/entities/vies-lookup/{country}/{nif}`
+- ✅ **Método viesLookup**: Consulta API VIES e retorna dados empresa
+- ✅ **Validação países UE**: Verificação automática se país suporta VIES
+- ✅ **Error handling**: Tratamento robusto de timeouts e erros SOAP
+
+**Auto-preenchimento Inteligente:**
+- ✅ **28 países VIES**: ['AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES', 'FI', 'FR', 'GR', 'HR', 'HU', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT', 'NL', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK', 'XI']
+- ✅ **Preenchimento automático**: `company_name` → Nome, `company_address` → Morada
+- ✅ **Smart fill**: Só preenche se campos estiverem vazios
+- ✅ **Watcher país**: Re-executa VIES se mudar para país UE
+
+**UX Estados Visuais:**
+- ✅ **Loading states**: "A verificar NIF..." durante consulta VIES
+- ✅ **Success feedback**: "✅ Dados preenchidos via VIES"
+- ✅ **Error handling**: "⚠️ Erro na consulta VIES" com detalhes
+- ✅ **Non-intrusive**: Não sobrescreve dados já preenchidos
+
+#### 🔄 **Fluxo de Validação Integrado**
+
+**Sequência Automática:**
+1. **User input**: Digita NIF no campo
+2. **Debounce**: 800ms delay para otimizar
+3. **Check único**: Verifica se NIF já existe na BD
+4. **Auto VIES**: Se não existe + país UE → consulta VIES
+5. **Auto-fill**: Preenche nome e morada automaticamente
+6. **Visual feedback**: Estados visuais em tempo real
+
+**Implementado em Ambos:**
+- ✅ **Clients/Create.vue**: Validação NIF + VIES completa
+- ✅ **Suppliers/Create.vue**: Funcionalidade idêntica
+- ✅ **Consistent UX**: Experiência uniforme em ambos contextos
+
+#### 🎯 **Sistema Numeração Confirmado**
+
+**Funcionalidade Existente Validada:**
+- ✅ **Backend**: `Entity::max('number') + 1` calcula próximo número
+- ✅ **Frontend**: Campo pré-preenchido via `props.nextNumber`
+- ✅ **UX**: Placeholder "Gerado automaticamente" 
+- ✅ **Read-only**: Campo não editável pelo utilizador
+
+#### 📊 **Performance e Otimizações**
+
+**Debouncing Inteligente:**
+- ✅ **NIF validation**: 800ms delay para reduzir requests
+- ✅ **Country watcher**: Re-executa VIES só quando necessário
+- ✅ **State management**: Estados reativos otimizados
+- ✅ **Error recovery**: Fallback gracioso em caso de erro
+
+**Console Logging:**
+- ✅ **Debug completo**: Logs detalhados para desenvolvimento
+- ✅ **VIES responses**: Tracking de respostas da API
+- ✅ **Error tracking**: Monitorização de erros para debug
+
+---
+
 ## [0.3.0] — 2025-11-03 (Noite)
 
 ### 🎨 Formulários Shadcn/ui - Sistema CRUD Completo

@@ -26,6 +26,65 @@ class EntityController extends Controller
     }
 
     /**
+     * Verificar se NIF já existe na base de dados
+     */
+    public function checkNifExists(Request $request, $nif)
+    {
+        $exists = Entity::where('tax_number', $nif)->exists();
+
+        return response()->json([
+            'exists' => $exists,
+            'nif' => $nif,
+            'message' => $exists ? 'NIF já existe na base de dados' : 'NIF disponível'
+        ]);
+    }
+
+    /**
+     * Consultar dados da empresa via VIES
+     */
+    public function viesLookup(Request $request, $country, $nif)
+    {
+        // Verificar se é país UE
+        if (!$this->viesService->isViesCountry($country)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'País não suporta validação VIES',
+                'country' => $country
+            ]);
+        }
+
+        try {
+            $result = $this->viesService->validateVat($country, $nif);
+            
+            if ($result['valid']) {
+                return response()->json([
+                    'success' => true,
+                    'valid' => true,
+                    'data' => [
+                        'name' => $result['company_name'] ?? '',
+                        'address' => $result['company_address'] ?? '',
+                        'country' => $country,
+                        'nif' => $nif,
+                    ],
+                    'message' => 'Dados obtidos via VIES'
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'valid' => false,
+                    'message' => 'NIF não válido no sistema VIES',
+                    'error' => $result['error'] ?? 'NIF inválido'
+                ]);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao consultar VIES: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Mostrar lista de entidades
      */
     public function index(Request $request)

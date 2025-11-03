@@ -381,7 +381,8 @@ php artisan serve
 
 ### 🎯 **Em Desenvolvimento Imediato**
 
-#### **1. Validação NIF Única** 
+#### **1. Validação NIF Única**
+
 ```php
 // Backend validation rule
 'nif' => 'required|string|unique:entities,tax_number'
@@ -394,6 +395,7 @@ const checkNifExists = async (nif) => {
 ```
 
 #### **2. Sistema Numeração Automática**
+
 ```php
 // Auto-increment entity numbers
 $nextNumber = Entity::max('number') + 1;
@@ -401,24 +403,24 @@ $entity->number = $nextNumber;
 ```
 
 #### **3. Integração VIES Ativa**
+
 ```vue
 <!-- Auto-complete on NIF input -->
-<Input 
-    v-model="form.nif" 
-    @blur="fetchViesData"
-    :loading="viesLoading"
-/>
+<Input v-model="form.nif" @blur="fetchViesData" :loading="viesLoading" />
 ```
 
 #### **4. Data Table Shadcn/ui**
+
 Substituir tabela atual por componente oficial com:
-- ✅ Sorting por colunas
-- ✅ Filtering avançado  
-- ✅ Pagination moderna
-- ✅ Row selection
-- ✅ Export funcionalidade
+
+-   ✅ Sorting por colunas
+-   ✅ Filtering avançado
+-   ✅ Pagination moderna
+-   ✅ Row selection
+-   ✅ Export funcionalidade
 
 #### **5. Tabela Países Configurável**
+
 ```php
 // Migration para países
 Schema::create('countries', function (Blueprint $table) {
@@ -432,22 +434,25 @@ Schema::create('countries', function (Blueprint $table) {
 ### 📅 **Roadmap Técnico**
 
 **v0.3.x - Validação & Automação**
-- Validação NIF única (Backend + Frontend)
-- Numeração automática entidades  
-- Integração VIES ativa nos formulários
-- Tabela países configurável
+
+-   Validação NIF única (Backend + Frontend)
+-   Numeração automática entidades
+-   Integração VIES ativa nos formulários
+-   Tabela países configurável
 
 **v0.4.x - Data Tables Avançadas**
-- Shadcn/ui Data Table implementation
-- Export para Excel/PDF
-- Filtros avançados e saved searches
-- Bulk actions (ativar/desativar multiple)
 
-**v0.5.x - Formulários Edit & Permissões**  
-- Páginas Edit para entidades
-- Sistema completo de permissões
-- Audit logs para todas as alterações
-- User roles & permissions management
+-   Shadcn/ui Data Table implementation
+-   Export para Excel/PDF
+-   Filtros avançados e saved searches
+-   Bulk actions (ativar/desativar multiple)
+
+**v0.5.x - Formulários Edit & Permissões**
+
+-   Páginas Edit para entidades
+-   Sistema completo de permissões
+-   Audit logs para todas as alterações
+-   User roles & permissions management
 
 **Características Técnicas:**
 

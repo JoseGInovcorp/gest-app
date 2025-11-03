@@ -1,6 +1,7 @@
 <script setup>
-import { ref, computed } from "vue";
-import { Head, useForm } from "@inertiajs/vue3";
+import { ref, computed, watch } from "vue";
+import { Head, useForm, router } from "@inertiajs/vue3";
+import axios from "axios";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Form from "@/Components/ui/Form.vue";
 import FormField from "@/Components/ui/FormField.vue";
@@ -35,17 +36,34 @@ const form = useForm({
     active: true,
 });
 
+// Estados para validação NIF
+const nifValidation = ref({
+    checking: false,
+    exists: false,
+    message: "",
+    error: "",
+});
+
+// Debounce timeout para validação NIF
+let nifValidationTimeout = null;
+
+// Estados para VIES lookup
+const viesLookup = ref({
+    loading: false,
+    error: "",
+    success: false
+});
+
+// Países que suportam VIES
+const VIES_COUNTRIES = ['AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES', 'FI', 'FR', 'GR', 'HR', 'HU', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT', 'NL', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK', 'XI'];
+
 // Computed properties
 const isFormValid = computed(() => {
-    const valid = form.nif && form.name && form.address && form.city;
-    // Debug temporário
-    console.log("Form validation:", {
-        nif: form.nif,
-        name: form.name,
-        address: form.address,
-        city: form.city,
-        valid: valid,
-    });
+    const basicValid = form.nif && form.name && form.address && form.city;
+    const nifValid =
+        !nifValidation.value.exists && !nifValidation.value.checking;
+    const valid = basicValid && nifValid;
+
     return valid;
 });
 
@@ -81,11 +99,98 @@ const formatPostalCode = (event) => {
 };
 
 const validateNIF = async () => {
-    if (form.nif && form.nif.length >= 9) {
-        // TODO: Implementar validação VIES aqui
-        console.log("Validando NIF:", form.nif);
+    if (!form.nif || form.nif.length < 9) {
+        nifValidation.value = {
+            checking: false,
+            exists: false,
+            message: "",
+            error: "",
+        };
+        return;
+    }
+
+    nifValidation.value.checking = true;
+    nifValidation.value.error = "";
+
+    try {
+        const response = await axios.get(`/api/entities/check-nif/${form.nif}`);
+
+        nifValidation.value = {
+            checking: false,
+            exists: response.data.exists,
+            message: response.data.message,
+            error: "",
+        };
+
+        console.log("NIF validation result:", response.data);
+        
+        // Se NIF é válido e não existe, verificar VIES para países UE
+        if (!response.data.exists && VIES_COUNTRIES.includes(form.country)) {
+            await performViesLookup();
+        }
+    } catch (error) {
+        console.error("Erro ao validar NIF:", error);
+        nifValidation.value = {
+            checking: false,
+            exists: false,
+            message: "",
+            error: "Erro ao verificar NIF",
+        };
     }
 };
+
+const performViesLookup = async () => {
+    if (!form.nif || !VIES_COUNTRIES.includes(form.country)) {
+        return;
+    }
+
+    viesLookup.value.loading = true;
+    viesLookup.value.error = "";
+    viesLookup.value.success = false;
+
+    try {
+        const response = await axios.get(`/api/entities/vies-lookup/${form.country}/${form.nif}`);
+        
+        if (response.data.success && response.data.valid) {
+            // Preencher campos automaticamente
+            if (response.data.data.name && !form.name) {
+                form.name = response.data.data.name;
+            }
+            if (response.data.data.address && !form.address) {
+                form.address = response.data.data.address;
+            }
+            
+            viesLookup.value.success = true;
+            console.log("VIES lookup success:", response.data);
+        } else {
+            viesLookup.value.error = response.data.message || "Erro na consulta VIES";
+        }
+    } catch (error) {
+        console.error("Erro VIES lookup:", error);
+        viesLookup.value.error = "Erro ao consultar dados VIES";
+    } finally {
+        viesLookup.value.loading = false;
+    }
+};
+
+const debouncedValidateNIF = () => {
+    if (nifValidationTimeout) {
+        clearTimeout(nifValidationTimeout);
+    }
+    nifValidationTimeout = setTimeout(() => {
+        validateNIF();
+    }, 800); // 800ms delay
+};
+
+// Watcher para mudanças de país - re-executar VIES se necessário
+watch(() => form.country, async (newCountry, oldCountry) => {
+    if (newCountry !== oldCountry && form.nif && VIES_COUNTRIES.includes(newCountry)) {
+        // Reset VIES state
+        viesLookup.value = { loading: false, error: "", success: false };
+        // Re-executar validação que inclui VIES
+        await validateNIF();
+    }
+});
 </script>
 
 <template>
@@ -161,16 +266,42 @@ const validateNIF = async () => {
                             id="nif"
                             label="NIF"
                             required
-                            :error="form.errors.nif"
-                            description="Número de Identificação Fiscal"
+                            :error="
+                                form.errors.nif ||
+                                nifValidation.error ||
+                                (nifValidation.exists
+                                    ? 'NIF já existe na base de dados'
+                                    : '')
+                            "
+                            :description="
+                                nifValidation.checking || viesLookup.loading
+                                    ? 'A verificar NIF...'
+                                    : viesLookup.success
+                                    ? '✅ Dados preenchidos via VIES'
+                                    : viesLookup.error
+                                    ? `⚠️ ${viesLookup.error}`
+                                    : nifValidation.exists
+                                    ? 'Este NIF já está registado'
+                                    : nifValidation.message ||
+                                      'Número de Identificação Fiscal'
+                            "
                         >
                             <Input
                                 v-model="form.nif"
                                 id="nif"
+                                @input="debouncedValidateNIF"
                                 @blur="validateNIF"
                                 placeholder="123456789"
                                 maxlength="20"
                                 required
+                                :class="[
+                                    nifValidation.exists
+                                        ? 'border-red-500'
+                                        : nifValidation.message &&
+                                          !nifValidation.exists
+                                        ? 'border-green-500'
+                                        : '',
+                                ]"
                             />
                         </FormField>
 
