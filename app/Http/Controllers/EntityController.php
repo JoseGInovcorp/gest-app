@@ -34,7 +34,7 @@ class EntityController extends Controller
         // Detectar tipo baseado na rota atual
         $routeName = $request->route()->getName();
         $routeType = null;
-        
+
         if (str_starts_with($routeName, 'clients.')) {
             $routeType = 'client';
         } elseif (str_starts_with($routeName, 'suppliers.')) {
@@ -104,9 +104,29 @@ class EntityController extends Controller
     /**
      * Mostrar formulário de criação
      */
-    public function create()
+    public function create(Request $request)
     {
-        return Inertia::render('Entities/Create');
+        // Detectar contexto baseado na rota
+        $routeName = $request->route()->getName();
+        $template = 'Entities/Create';
+        $defaultType = 'client';
+
+        if (str_starts_with($routeName, 'clients.')) {
+            $template = 'Clients/Create';
+            $defaultType = 'client';
+        } elseif (str_starts_with($routeName, 'suppliers.')) {
+            $template = 'Suppliers/Create';
+            $defaultType = 'supplier';
+        }
+
+        // Próximo número sequencial
+        $nextNumber = Entity::max('number') + 1;
+
+        return Inertia::render($template, [
+            'nextNumber' => $nextNumber,
+            'defaultType' => $defaultType,
+            'countries' => [], // TODO: Carregar da tabela países
+        ]);
     }
 
     /**
@@ -116,32 +136,62 @@ class EntityController extends Controller
     {
         $validated = $request->validate([
             'type' => ['required', Rule::in(['client', 'supplier', 'both'])],
+            'number' => 'required|integer|unique:entities,number',
+            'nif' => 'required|string|max:20|unique:entities,tax_number',
             'name' => 'required|string|max:255',
-            'commercial_name' => 'nullable|string|max:255',
-            'email' => 'nullable|email|max:255',
+            'address' => 'required|string|max:255',
+            'postal_code' => 'nullable|string|max:10',
+            'city' => 'required|string|max:100',
+            'country' => 'required|string|max:2',
             'phone' => 'nullable|string|max:20',
-            'tax_number' => 'nullable|string|max:20|unique:entities,tax_number',
-            'vat_number' => 'nullable|string|max:20',
-            'country_code' => 'required|string|size:2',
-            'address' => 'nullable|string|max:255',
-            'city' => 'nullable|string|max:100',
-            'country' => 'required|string|max:100',
+            'mobile' => 'nullable|string|max:20',
+            'website' => 'nullable|url|max:255',
+            'email' => 'nullable|email|max:255',
+            'gdpr_consent' => 'boolean',
+            'observations' => 'nullable|string|max:1000',
+            'active' => 'boolean',
         ]);
 
-        $validated['created_by'] = Auth::id();
+        // Mapear campos do formulário para BD
+        $entityData = [
+            'type' => $validated['type'],
+            'number' => $validated['number'],
+            'name' => $validated['name'],
+            'tax_number' => $validated['nif'], // NIF -> tax_number
+            'vat_number' => $validated['nif'], // Usar NIF como VAT também
+            'country_code' => $validated['country'],
+            'address' => $validated['address'],
+            'postal_code' => $validated['postal_code'] ?? null,
+            'city' => $validated['city'],
+            'country' => $validated['country'] === 'PT' ? 'Portugal' : $validated['country'],
+            'phone' => $validated['phone'] ?? null,
+            'mobile' => $validated['mobile'] ?? null,
+            'website' => $validated['website'] ?? null,
+            'email' => $validated['email'] ?? null,
+            'observations' => $validated['observations'] ?? null,
+            'active' => $validated['active'] ?? true,
+            'created_by' => Auth::id(),
+        ];
 
-        // Validar VAT se necessário
-        if (isset($validated['vat_number']) && $validated['vat_number'] && ViesService::isViesCountry($validated['country_code'])) {
-            $viesResult = $this->viesService->validateVat($validated['country_code'], $validated['vat_number']);
-            $validated['vies_valid'] = $viesResult['valid'];
-            $validated['vies_last_check'] = now();
-            $validated['vies_data'] = $viesResult;
+        // Validar VAT se necessário (usar NIF como VAT)
+        if ($entityData['vat_number'] && ViesService::isViesCountry($entityData['country_code'])) {
+            $viesResult = $this->viesService->validateVat($entityData['country_code'], $entityData['vat_number']);
+            $entityData['vies_valid'] = $viesResult['valid'];
+            $entityData['vies_last_check'] = now();
+            $entityData['vies_data'] = $viesResult;
         }
 
-        $entity = Entity::create($validated);
+        $entity = Entity::create($entityData);
 
-        return redirect()->route('entities.show', $entity)
-            ->with('success', 'Entidade criada com sucesso.');
+        // Redirecionar baseado no contexto
+        $routeName = $request->route()->getName();
+        if (str_starts_with($routeName, 'clients.')) {
+            return redirect()->route('clients.index')->with('success', 'Cliente criado com sucesso.');
+        } elseif (str_starts_with($routeName, 'suppliers.')) {
+            return redirect()->route('suppliers.index')->with('success', 'Fornecedor criado com sucesso.');
+        }
+        
+        return redirect()->route('entities.index')->with('success', 'Entidade criada com sucesso.');
     }
 
     /**

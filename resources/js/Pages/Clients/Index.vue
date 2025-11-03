@@ -161,7 +161,7 @@ const formatDate = (date) => {
                     <div>
                         <select
                             v-model="activeFilter"
-                            class="block rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500"
+                            class="block rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 pl-3 pr-8 py-2 text-sm focus:border-blue-500 focus:ring-blue-500 min-w-[140px]"
                         >
                             <option :value="null">Todos os status</option>
                             <option :value="true">Apenas ativos</option>

@@ -38,7 +38,7 @@
 
 ```
 Fundação & Setup    ████████████████████ 100% ✅
-Interface Moderna   ████████████████████ 100% ✅  
+Interface Moderna   ████████████████████ 100% ✅
 Módulo Entidades    ██████████████░░░░░░  70% 🚧
 Formulários CRUD    ░░░░░░░░░░░░░░░░░░░░   0% ⏳
 Permissões Sistema  ████░░░░░░░░░░░░░░░░  20% ⏳
@@ -48,7 +48,7 @@ Integração VIES     ████████████░░░░░░░�
 ### ✅ **Concluído** (Versões 0.1.0 - 0.2.1)
 
 -   **Stack Setup Completo** — Laravel 12 + Vue.js 3 + Inertia.js
--   **Sistema Autenticação** — 2FA funcional com Laravel Fortify  
+-   **Sistema Autenticação** — 2FA funcional com Laravel Fortify
 -   **Interface Moderna** — Shadcn/ui + Tailwind + layout responsivo
 -   **Welcome Page** — Página inicial profissional com branding
 -   **Menu Lateral** — Navegação categorizada com ícones Lucide
@@ -59,14 +59,14 @@ Integração VIES     ████████████░░░░░░░�
 ### 🚧 **Em Desenvolvimento** (v0.2.2 - Próximo)
 
 -   **Formulários Create/Edit** — Interfaces de criação e edição
--   **Validação Frontend** — Campos obrigatórios + VIES integration  
+-   **Validação Frontend** — Campos obrigatórios + VIES integration
 -   **Data Tables** — Sorting, filtering, pagination
 -   **Populate Database** — Seeders com dados de exemplo
 
 ### ⏳ **Planeado** (v0.3.0+)
 
 -   Sistema de Permissões Completo
--   Módulo Contactos  
+-   Módulo Contactos
 -   Gestão de Artigos
 -   Propostas Comerciais
 
