@@ -51,11 +51,17 @@ let nifValidationTimeout = null;
 const viesLookup = ref({
     loading: false,
     error: "",
-    success: false
+    success: false,
 });
 
-// Países que suportam VIES
-const VIES_COUNTRIES = ['AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES', 'FI', 'FR', 'GR', 'HR', 'HU', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT', 'NL', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK', 'XI'];
+// Países que suportam VIES - agora dinâmico da base de dados
+const viesCountries = computed(() => {
+    return (
+        props.countries
+            ?.filter((country) => country.vies_enabled)
+            .map((country) => country.code) || []
+    );
+});
 
 // Computed properties
 const isFormValid = computed(() => {
@@ -123,9 +129,12 @@ const validateNIF = async () => {
         };
 
         console.log("NIF validation result:", response.data);
-        
+
         // Se NIF é válido e não existe, verificar VIES para países UE
-        if (!response.data.exists && VIES_COUNTRIES.includes(form.country)) {
+        if (
+            !response.data.exists &&
+            viesCountries.value.includes(form.country)
+        ) {
             await performViesLookup();
         }
     } catch (error) {
@@ -140,7 +149,7 @@ const validateNIF = async () => {
 };
 
 const performViesLookup = async () => {
-    if (!form.nif || !VIES_COUNTRIES.includes(form.country)) {
+    if (!form.nif || !viesCountries.value.includes(form.country)) {
         return;
     }
 
@@ -149,8 +158,10 @@ const performViesLookup = async () => {
     viesLookup.value.success = false;
 
     try {
-        const response = await axios.get(`/api/entities/vies-lookup/${form.country}/${form.nif}`);
-        
+        const response = await axios.get(
+            `/api/entities/vies-lookup/${form.country}/${form.nif}`
+        );
+
         if (response.data.success && response.data.valid) {
             // Preencher campos automaticamente
             if (response.data.data.name && !form.name) {
@@ -159,11 +170,12 @@ const performViesLookup = async () => {
             if (response.data.data.address && !form.address) {
                 form.address = response.data.data.address;
             }
-            
+
             viesLookup.value.success = true;
             console.log("VIES lookup success:", response.data);
         } else {
-            viesLookup.value.error = response.data.message || "Erro na consulta VIES";
+            viesLookup.value.error =
+                response.data.message || "Erro na consulta VIES";
         }
     } catch (error) {
         console.error("Erro VIES lookup:", error);
@@ -183,14 +195,21 @@ const debouncedValidateNIF = () => {
 };
 
 // Watcher para mudanças de país - re-executar VIES se necessário
-watch(() => form.country, async (newCountry, oldCountry) => {
-    if (newCountry !== oldCountry && form.nif && VIES_COUNTRIES.includes(newCountry)) {
-        // Reset VIES state
-        viesLookup.value = { loading: false, error: "", success: false };
-        // Re-executar validação que inclui VIES
-        await validateNIF();
+watch(
+    () => form.country,
+    async (newCountry, oldCountry) => {
+        if (
+            newCountry !== oldCountry &&
+            form.nif &&
+            viesCountries.value.includes(newCountry)
+        ) {
+            // Reset VIES state
+            viesLookup.value = { loading: false, error: "", success: false };
+            // Re-executar validação que inclui VIES
+            await validateNIF();
+        }
     }
-});
+);
 </script>
 
 <template>
@@ -373,12 +392,13 @@ watch(() => form.country, async (newCountry, oldCountry) => {
                             :error="form.errors.country"
                         >
                             <Select v-model="form.country" id="country">
-                                <option value="PT">Portugal</option>
-                                <option value="ES">Espanha</option>
-                                <option value="FR">França</option>
-                                <option value="DE">Alemanha</option>
-                                <option value="IT">Itália</option>
-                                <!-- TODO: Carregar da tabela países -->
+                                <option
+                                    v-for="country in countries"
+                                    :key="country.code"
+                                    :value="country.code"
+                                >
+                                    {{ country.name }}
+                                </option>
                             </Select>
                         </FormField>
 

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\EntityController;
+use App\Http\Controllers\ContactController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -54,10 +55,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('entities', EntityController::class);
     Route::post('/entities/{entity}/revalidate-vat', [EntityController::class, 'revalidateVat'])->name('entities.revalidate-vat');
 
-    // Placeholders para outros módulos (implementar posteriormente)
-    Route::get('/contacts', function () {
-        return redirect()->route('dashboard')->with('info', 'Módulo Contactos em desenvolvimento');
-    })->name('contacts.index');
+    // Rotas dos Contactos
+    Route::resource('contacts', ContactController::class);
     Route::get('/articles', function () {
         return redirect()->route('dashboard')->with('info', 'Módulo Artigos em desenvolvimento');
     })->name('articles.index');

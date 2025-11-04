@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Entity;
+use App\Models\Country;
 use App\Services\ViesService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -55,7 +56,7 @@ class EntityController extends Controller
 
         try {
             $result = $this->viesService->validateVat($country, $nif);
-            
+
             if ($result['valid']) {
                 return response()->json([
                     'success' => true,
@@ -185,7 +186,7 @@ class EntityController extends Controller
         return Inertia::render($template, [
             'nextNumber' => $nextNumber,
             'defaultType' => $defaultType,
-            'countries' => [], // TODO: Carregar da tabela países
+            'countries' => Country::active()->orderBy('name')->get(['code', 'name', 'vies_enabled']),
         ]);
     }
 
