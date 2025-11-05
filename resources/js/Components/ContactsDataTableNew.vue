@@ -22,7 +22,7 @@
 
         <!-- Custom cell renderers -->
         <template #entity="{ row }">
-            {{ row.entity?.nome || "-" }}
+            {{ row.entity?.name || "-" }}
         </template>
 
         <template #actions="{ row }">
@@ -129,7 +129,7 @@ const filteredContacts = computed(() => {
                 contact.nome?.toLowerCase().includes(term) ||
                 contact.apelido?.toLowerCase().includes(term) ||
                 contact.funcao?.toLowerCase().includes(term) ||
-                contact.entity?.nome?.toLowerCase().includes(term) ||
+                contact.entity?.name?.toLowerCase().includes(term) ||
                 contact.email?.toLowerCase().includes(term) ||
                 contact.telefone?.includes(term) ||
                 contact.telemovel?.includes(term)
@@ -143,8 +143,8 @@ const filteredContacts = computed(() => {
             let aVal, bVal;
 
             if (sortColumn.value === "entity") {
-                aVal = a.entity?.nome || "";
-                bVal = b.entity?.nome || "";
+                aVal = a.entity?.name || "";
+                bVal = b.entity?.name || "";
             } else {
                 aVal = a[sortColumn.value] || "";
                 bVal = b[sortColumn.value] || "";

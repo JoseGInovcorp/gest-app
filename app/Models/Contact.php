@@ -34,6 +34,16 @@ class Contact extends Model
         'deleted_at' => 'datetime'
     ];
 
+    protected $appends = [
+        'nome',
+        'apelido',
+        'funcao',
+        'telefone',
+        'telemovel',
+        'full_name',
+        'display_name'
+    ];
+
     // Relacionamentos
     public function entity(): BelongsTo
     {

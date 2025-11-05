@@ -7,6 +7,7 @@ use App\Models\Entity;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -17,7 +18,7 @@ class ContactController extends Controller
      */
     public function index(Request $request): Response
     {
-        $query = Contact::with(['entity:id,name,type']);
+        $query = Contact::with(['entity']);
 
         // Filtros
         if ($request->filled('search')) {

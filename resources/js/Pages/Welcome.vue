@@ -115,17 +115,16 @@ const stats = [
                 </div>
 
                 <div class="flex lg:flex-1 lg:justify-end">
-                    <div class="flex items-center space-x-4" v-if="canLogin">
+                    <div class="flex items-center space-x-4 relative z-50">
                         <Link
                             :href="route('login')"
-                            class="text-sm font-semibold leading-6 text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                            class="cursor-pointer text-sm font-semibold leading-6 text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors relative z-50 pointer-events-auto"
                         >
                             Entrar
                         </Link>
                         <Link
-                            v-if="canRegister"
                             :href="route('register')"
-                            class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 transition-all"
+                            class="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 transition-all relative z-50 pointer-events-auto"
                         >
                             Registar
                         </Link>
