@@ -161,34 +161,34 @@ const systemNavigationItems = [
 const accessManagementItems = [
     {
         name: "Utilizadores",
-        href: "dashboard", // Temporário até implementar
+        href: "users.index",
         icon: UserCog,
-        current: false,
-        disabled: true,
+        current: route().current("users.*"),
+        disabled: false,
     },
     {
         name: "Permissões",
-        href: "dashboard", // Temporário até implementar
+        href: "roles.index",
         icon: Lock,
-        current: false,
-        disabled: true,
+        current: route().current("roles.*"),
+        disabled: false,
     },
 ];
 
 const configurationItems = [
     {
         name: "Entidades - Países",
-        href: "dashboard", // Temporário até implementar
+        href: "countries.index",
         icon: Globe,
         current: false,
-        disabled: true,
+        disabled: false,
     },
     {
         name: "Contactos - Funções",
-        href: "dashboard", // Temporário até implementar
+        href: "contact-functions.index",
         icon: UserCog,
         current: false,
-        disabled: true,
+        disabled: false,
     },
     {
         name: "Calendário - Tipos",
@@ -206,24 +206,24 @@ const configurationItems = [
     },
     {
         name: "Artigos",
-        href: "dashboard", // Temporário até implementar
+        href: "articles.index",
         icon: Package,
         current: false,
-        disabled: true,
+        disabled: false,
     },
     {
         name: "Financeiro - IVA",
-        href: "dashboard", // Temporário até implementar
+        href: "vat-rates.index",
         icon: DollarSign,
         current: false,
-        disabled: true,
+        disabled: false,
     },
     {
         name: "Logs",
-        href: "dashboard", // Temporário até implementar
+        href: "logs.index",
         icon: Activity,
-        current: false,
-        disabled: true,
+        current: route().current("logs.*"),
+        disabled: false,
     },
     {
         name: "Empresa",
@@ -263,6 +263,12 @@ accessManagementItems.forEach((item) => {
 configurationItems.forEach((item) => {
     item.current = isCurrentRoute(item.href);
 });
+
+// Auto-expand menus based on current route
+const currentRouteName = route().current();
+if (currentRouteName && currentRouteName.includes("articles")) {
+    configurationExpanded.value = true;
+}
 
 const logout = () => {
     router.post(route("logout"));
@@ -543,6 +549,7 @@ const logout = () => {
                                             :key="item.name"
                                         >
                                             <Link
+                                                v-if="!item.disabled"
                                                 :href="route(item.href)"
                                                 :class="[
                                                     item.current
@@ -562,6 +569,18 @@ const logout = () => {
                                                 />
                                                 {{ item.name }}
                                             </Link>
+                                            <div
+                                                v-else
+                                                :class="[
+                                                    'group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-medium text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50',
+                                                ]"
+                                            >
+                                                <component
+                                                    :is="item.icon"
+                                                    class="h-4 w-4 shrink-0 text-gray-400"
+                                                />
+                                                {{ item.name }}
+                                            </div>
                                         </li>
                                     </ul>
                                 </li>
@@ -821,6 +840,7 @@ const logout = () => {
                                     :key="item.name"
                                 >
                                     <Link
+                                        v-if="!item.disabled"
                                         :href="route(item.href)"
                                         :class="[
                                             item.current
@@ -842,6 +862,18 @@ const logout = () => {
                                             item.name
                                         }}</span>
                                     </Link>
+                                    <div
+                                        v-else
+                                        class="group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-medium text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50"
+                                    >
+                                        <component
+                                            :is="item.icon"
+                                            class="h-4 w-4 shrink-0 text-gray-400"
+                                        />
+                                        <span class="text-xs">{{
+                                            item.name
+                                        }}</span>
+                                    </div>
                                 </li>
                             </ul>
                         </li>

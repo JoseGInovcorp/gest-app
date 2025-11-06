@@ -119,18 +119,27 @@ class Country extends Model
 
     /**
      * Accessor para flag emoji baseado no código do país
+     * TEMPORARIAMENTE DESATIVADO - causa problemas de serialização
      */
-    public function getFlagAttribute()
+    // public function getFlagAttribute()
+    // {
+    //     if (strlen($this->code) !== 2) {
+    //         return '🏳️'; // Flag genérica para códigos inválidos
+    //     }
+
+    //     // Converter código do país para emoji flag
+    //     $codePoints = array_map(function ($char) {
+    //         return 127397 + ord($char);
+    //     }, str_split(strtoupper($this->code)));
+
+    //     return mb_convert_encoding('&#' . implode(';&#', $codePoints) . ';', 'UTF-8', 'HTML-ENTITIES');
+    // }
+
+    /**
+     * Relacionamento com entidades (clientes/fornecedores)
+     */
+    public function entities()
     {
-        if (strlen($this->code) !== 2) {
-            return '🏳️'; // Flag genérica para códigos inválidos
-        }
-
-        // Converter código do país para emoji flag
-        $codePoints = array_map(function ($char) {
-            return 127397 + ord($char);
-        }, str_split(strtoupper($this->code)));
-
-        return mb_convert_encoding('&#' . implode(';&#', $codePoints) . ';', 'UTF-8', 'HTML-ENTITIES');
+        return $this->hasMany(\App\Models\Entity::class, 'country_code', 'code');
     }
 }

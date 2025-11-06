@@ -68,6 +68,10 @@ class Entity extends Model
         'custom_fields' => 'array',
     ];
 
+    protected $appends = [
+        'nif',
+    ];
+
     // Relacionamentos
     public function creator(): BelongsTo
     {
@@ -176,5 +180,19 @@ class Entity extends Model
             'both' => 'Cliente/Fornecedor',
             default => 'N/D'
         };
+    }
+
+    // Accessor para compatibilidade com formulários que usam "nif"
+    public function getNifAttribute(): ?string
+    {
+        return $this->tax_number;
+    }
+
+    // Accessor para retornar country_code quando se acede a "country" em contexto de formulário
+    // Nota: Isto pode causar conflito com o campo "country" da BD (nome completo)
+    // Solução: usar sempre country_code no formulário
+    protected function getCountryCodeForFormAttribute(): ?string
+    {
+        return $this->country_code;
     }
 }

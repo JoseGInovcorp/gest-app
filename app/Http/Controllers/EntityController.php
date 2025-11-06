@@ -251,6 +251,16 @@ class EntityController extends Controller
 
         $entity = Entity::create($entityData);
 
+        // Log activity
+        activity()
+            ->performedOn($entity)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ])
+            ->log('created');
+
         // Redirecionar baseado no contexto
         $routeName = $request->route()->getName();
         if (str_starts_with($routeName, 'clients.')) {
@@ -283,8 +293,13 @@ class EntityController extends Controller
      */
     public function edit(Entity $entity)
     {
+        $countries = Country::where('active', true)
+            ->orderBy('name')
+            ->get();
+
         return Inertia::render('Entities/Edit', [
-            'entity' => $entity
+            'entity' => $entity,
+            'countries' => $countries
         ]);
     }
 
@@ -295,17 +310,72 @@ class EntityController extends Controller
     {
         $validated = $request->validate([
             'type' => ['required', Rule::in(['client', 'supplier', 'both'])],
+            'number' => 'required|integer|unique:entities,number,' . $entity->id,
+            'nif' => 'required|string|max:20|unique:entities,tax_number,' . $entity->id,
             'name' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255',
+            'address' => 'required|string|max:255',
+            'postal_code' => 'nullable|string|max:10',
+            'city' => 'required|string|max:100',
+            'country' => 'required|string|max:2',
             'phone' => 'nullable|string|max:20',
+            'mobile' => 'nullable|string|max:20',
+            'website' => 'nullable|url|max:255',
+            'email' => 'nullable|email|max:255',
+            'gdpr_consent' => 'boolean',
+            'observations' => 'nullable|string|max:1000',
             'active' => 'boolean',
         ]);
 
-        $validated['updated_by'] = Auth::id();
-        $entity->update($validated);
+        // Mapear campos do formulário para BD
+        $entityData = [
+            'type' => $validated['type'],
+            'number' => $validated['number'],
+            'name' => $validated['name'],
+            'tax_number' => $validated['nif'], // NIF -> tax_number
+            'vat_number' => $validated['nif'], // Usar NIF como VAT também
+            'country_code' => $validated['country'],
+            'address' => $validated['address'],
+            'postal_code' => $validated['postal_code'] ?? null,
+            'city' => $validated['city'],
+            'country' => $validated['country'] === 'PT' ? 'Portugal' : $validated['country'],
+            'phone' => $validated['phone'] ?? null,
+            'mobile' => $validated['mobile'] ?? null,
+            'website' => $validated['website'] ?? null,
+            'email' => $validated['email'] ?? null,
+            'observations' => $validated['observations'] ?? null,
+            'active' => $validated['active'] ?? true,
+            'updated_by' => Auth::id(),
+        ];
 
-        return redirect()->route('entities.show', $entity)
-            ->with('success', 'Entidade atualizada com sucesso.');
+        // Validar VAT se necessário (usar NIF como VAT) e se mudou
+        if ($entityData['vat_number'] !== $entity->vat_number && ViesService::isViesCountry($entityData['country_code'])) {
+            $viesResult = $this->viesService->validateVat($entityData['country_code'], $entityData['vat_number']);
+            $entityData['vies_valid'] = $viesResult['valid'];
+            $entityData['vies_last_check'] = now();
+            $entityData['vies_data'] = $viesResult;
+        }
+
+        $entity->update($entityData);
+
+        // Log activity
+        activity()
+            ->performedOn($entity)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ])
+            ->log('updated');
+
+        // Redirecionar baseado no contexto
+        $routeName = $request->route()->getName();
+        if (str_starts_with($routeName, 'clients.')) {
+            return redirect()->route('clients.index')->with('success', 'Cliente atualizado com sucesso.');
+        } elseif (str_starts_with($routeName, 'suppliers.')) {
+            return redirect()->route('suppliers.index')->with('success', 'Fornecedor atualizado com sucesso.');
+        }
+
+        return redirect()->route('entities.index')->with('success', 'Entidade atualizada com sucesso.');
     }
 
     /**
@@ -313,6 +383,17 @@ class EntityController extends Controller
      */
     public function destroy(Entity $entity)
     {
+        // Log activity antes de eliminar
+        activity()
+            ->performedOn($entity)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'entity_name' => $entity->name,
+            ])
+            ->log('deleted');
+
         $entity->delete();
 
         return redirect()->route('entities.index')

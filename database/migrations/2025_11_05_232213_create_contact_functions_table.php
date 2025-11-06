@@ -1,0 +1,34 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('contact_functions', function (Blueprint $table) {
+            $table->id();
+            $table->string('name'); // Nome da função (ex: Diretor, Gerente, Técnico)
+            $table->text('description')->nullable(); // Descrição opcional
+            $table->boolean('active')->default(true); // Função ativa no sistema
+            $table->timestamps();
+
+            // Índices
+            $table->index('name');
+            $table->index('active');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('contact_functions');
+    }
+};

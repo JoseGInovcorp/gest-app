@@ -21,6 +21,9 @@ class DatabaseSeeder extends Seeder
         // Seed countries
         $this->call(CountrySeeder::class);
 
+        // Seed articles
+        $this->call(ArticleSeeder::class);
+
         // User::factory(10)->create();
 
         User::factory()->create([

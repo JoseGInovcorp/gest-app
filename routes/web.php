@@ -3,6 +3,13 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\EntityController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\CountryController;
+use App\Http\Controllers\ContactFunctionController;
+use App\Http\Controllers\VatRateController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\LogController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -57,9 +64,26 @@ Route::middleware('auth')->group(function () {
 
     // Rotas dos Contactos
     Route::resource('contacts', ContactController::class);
-    Route::get('/articles', function () {
-        return redirect()->route('dashboard')->with('info', 'Módulo Artigos em desenvolvimento');
-    })->name('articles.index');
+
+    // Rotas dos Artigos
+    Route::resource('articles', ArticleController::class);
+
+    // Rotas dos Países (Configurações)
+    Route::resource('countries', CountryController::class);
+
+    // Rotas das Funções de Contactos (Configurações)
+    Route::resource('contact-functions', ContactFunctionController::class);
+
+    // Rotas das Taxas de IVA (Configurações - Financeiro)
+    Route::resource('vat-rates', VatRateController::class);
+
+    // Rotas de Gestão de Acessos
+    Route::resource('roles', RoleController::class);
+    Route::resource('users', UserManagementController::class);
+
+    // Rotas de Logs
+    Route::get('/logs', [LogController::class, 'index'])->name('logs.index');
+
     Route::get('/proposals', function () {
         return redirect()->route('dashboard')->with('info', 'Módulo Propostas em desenvolvimento');
     })->name('proposals.index');
