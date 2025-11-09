@@ -2,6 +2,126 @@
 
 ---
 
+## [0.9.0] — 2025-11-09
+
+### 🏢 Módulo Configurações - Empresa
+
+**Gestão Centralizada dos Dados da Empresa**
+
+#### 🎯 Objetivo
+
+Permitir que o utilizador personalize os dados da empresa que aparecem em toda a aplicação (login, welcome page, sidebar, documentos PDF, etc.).
+
+#### ✨ Funcionalidades Implementadas
+
+**Campos Configuráveis:**
+
+-   **Logotipo**: Upload de imagem (PNG, JPG, GIF - máx 2MB)
+-   **Nome da Empresa**: Texto livre (aparece em documentos e interface)
+-   **NIF**: 9 dígitos (Número de Identificação Fiscal)
+-   **Morada**: Endereço completo
+-   **Código Postal**: Formato português
+-   **Localidade**: Cidade/Vila
+
+**Características Técnicas:**
+
+-   **Singleton Pattern**: Apenas 1 registo de empresa no sistema
+-   **Upload de Logo**: Armazenamento em `storage/app/public/company/logos`
+-   **Validação**: NIF com 9 dígitos, logo até 2MB
+-   **Preview em Tempo Real**: Visualização do logo durante upload
+-   **Flash Messages**: Confirmação de sucesso após guardar
+
+**Integração Visual:**
+
+-   **Login Page (GuestLayout)**: Logo grande (160px altura) + nome da empresa
+-   **Welcome Page**: Logo médio (80px altura) + nome da empresa + "Sistema Empresarial powered by Inovcorp"
+-   **Sidebar (Mobile + Desktop)**: Logo pequeno (48px altura) + nome da empresa + "Sistema Empresarial powered by Inovcorp"
+-   **Fallback**: Ícone Building2 quando não há logo configurado
+
+#### 🔐 Permissões
+
+**2 Permissões Específicas** (não segue padrão CRUD por ser singleton):
+
+-   `company.read` - Ver configurações da empresa
+-   `company.update` - Editar configurações da empresa
+
+**Distribuição por Grupos:**
+
+-   **Super Admin / Administrador**: read + update (gestão completa)
+-   **Todos os outros grupos**: apenas read (visualização)
+
+#### 📂 Estrutura de Ficheiros
+
+**Backend:**
+
+-   `app/Models/Company.php` - Model Eloquent com método `getInstance()`
+-   `app/Http/Controllers/CompanyController.php` - Edit e Update com upload
+-   `app/Http/Middleware/HandleInertiaRequests.php` - Partilha dados da empresa globalmente
+-   `database/migrations/2025_11_09_000001_create_companies_table.php`
+-   `database/seeders/CompanySeeder.php` - Dados iniciais
+-   `database/seeders/AddCompanyPermissionsSeeder.php` - Permissões
+
+**Frontend:**
+
+-   `resources/js/Pages/Company/Edit.vue` - Formulário completo com upload
+-   `resources/js/Layouts/GuestLayout.vue` - Integração do logo na página de login
+-   `resources/js/Pages/Welcome.vue` - Integração do logo na página inicial
+-   `resources/js/Layouts/AuthenticatedLayout.vue` - Integração do logo na sidebar
+-   Menu: **Configurações → Empresa** (item adicionado ao submenu)
+
+**Routes:**
+
+```php
+Route::get('/company/settings', [CompanyController::class, 'edit'])->name('company.edit');
+Route::patch('/company/settings', [CompanyController::class, 'update'])->name('company.update');
+```
+
+#### 📍 Onde São Utilizados os Dados
+
+-   **Logotipo**:
+    -   Página de login (160px altura)
+    -   Welcome page (80px altura)
+    -   Sidebar da aplicação (48px altura)
+    -   Futuramente: PDFs, relatórios
+-   **Nome da Empresa**: Aparece em todas as páginas junto ao logo
+-   **Nome + NIF**: Faturas, propostas, orçamentos (implementação futura)
+-   **Morada Completa**: Rodapé de documentos oficiais (implementação futura)
+
+#### 💡 Como Usar
+
+1. Aceder a **Configurações → Empresa** no menu lateral
+2. Fazer upload do logotipo (opcional - PNG, JPG, GIF até 2MB)
+3. Preencher dados da empresa (nome, NIF, morada, código postal, localidade)
+4. Clicar **Guardar Alterações**
+5. O logo aparecerá automaticamente:
+    - Na página de login
+    - Na welcome page (com texto "Sistema Empresarial powered by Inovcorp")
+    - Na sidebar da aplicação (desktop e mobile)
+
+#### 🔧 Comandos de Instalação
+
+```bash
+php artisan migrate
+php artisan db:seed --class=CompanySeeder
+php artisan db:seed --class=AddCompanyPermissionsSeeder
+php artisan storage:link  # Criar link simbólico para storage público
+```
+
+#### 🎨 Especificações Visuais
+
+**Tamanhos do Logo:**
+
+-   **Login Page**: 160px altura (h-40), largura máxima adaptável
+-   **Welcome Page**: 80px altura (h-20), largura máxima 280px
+-   **Sidebar**: 48px altura (h-12), largura máxima 180px
+
+**Texto Acompanhante:**
+
+-   Nome da empresa sempre visível
+-   Subtítulo: "Sistema Empresarial powered by Inovcorp"
+
+---
+
 ## [0.8.5] — 2025-11-09
 
 ### 🔐 Sistema de Visibilidade de Botões Baseado em Permissões

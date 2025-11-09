@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Company;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -37,6 +38,12 @@ class HandleInertiaRequests extends Middleware
                     ? $request->user()->getAllPermissions()->pluck('name')->toArray()
                     : [],
             ],
+            'flash' => [
+                'success' => fn() => $request->session()->get('success'),
+                'error' => fn() => $request->session()->get('error'),
+                'info' => fn() => $request->session()->get('info'),
+            ],
+            'company' => fn() => Company::first(),
         ];
     }
 }

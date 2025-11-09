@@ -264,6 +264,7 @@ class RoleController extends Controller
             'roles' => ['name' => 'Permissões', 'order' => 31, 'group' => 'Gestão de Acessos'],
 
             // Submenu Configurações (ordem 40-47)
+            'company' => ['name' => 'Empresa', 'order' => 39, 'group' => 'Configurações'],
             'countries' => ['name' => 'Países', 'order' => 40, 'group' => 'Configurações → Entidades'],
             'contact-functions' => ['name' => 'Funções Contacto', 'order' => 41, 'group' => 'Configurações → Contactos'],
             'articles' => ['name' => 'Artigos', 'order' => 42, 'group' => 'Configurações'],

@@ -10,6 +10,7 @@ use App\Http\Controllers\VatRateController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\LogController;
+use App\Http\Controllers\CompanyController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -116,6 +117,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/vat-rates/{vatRate}/edit', [VatRateController::class, 'edit'])->name('vat-rates.edit')->middleware('permission:vat-rates.update');
     Route::patch('/vat-rates/{vatRate}', [VatRateController::class, 'update'])->name('vat-rates.update')->middleware('permission:vat-rates.update');
     Route::delete('/vat-rates/{vatRate}', [VatRateController::class, 'destroy'])->name('vat-rates.destroy')->middleware('permission:vat-rates.delete');
+
+    // Rotas de Configurações - Empresa
+    Route::middleware('permission:company.read')->group(function () {
+        Route::get('/company/settings', [CompanyController::class, 'edit'])->name('company.edit');
+    });
+    Route::patch('/company/settings', [CompanyController::class, 'update'])->name('company.update')->middleware('permission:company.update');
 
     // Rotas de Gestão de Acessos
     Route::get('/roles/create', [RoleController::class, 'create'])->name('roles.create')->middleware('permission:roles.create');

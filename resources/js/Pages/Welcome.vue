@@ -1,5 +1,6 @@
 <script setup>
-import { Head, Link } from "@inertiajs/vue3";
+import { computed } from "vue";
+import { Head, Link, usePage } from "@inertiajs/vue3";
 import {
     Building2,
     Users,
@@ -13,6 +14,13 @@ import {
     Mail,
     Globe,
 } from "lucide-vue-next";
+
+const page = usePage();
+const company = computed(() => page.props.company || null);
+const companyLogo = computed(() =>
+    company.value?.logo ? `/storage/${company.value.logo}` : null
+);
+const companyName = computed(() => company.value?.name || "Gest-App");
 
 defineProps({
     canLogin: {
@@ -95,20 +103,30 @@ const stats = [
                 aria-label="Global"
             >
                 <div class="flex lg:flex-1">
-                    <div class="flex items-center space-x-3">
+                    <div class="flex items-center space-x-4">
+                        <!-- Company Logo if available -->
+                        <img
+                            v-if="companyLogo"
+                            :src="companyLogo"
+                            :alt="companyName"
+                            class="h-20 w-auto max-w-[280px] object-contain rounded-lg"
+                        />
+                        <!-- Fallback icon when no logo -->
                         <div
-                            class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-lg"
+                            v-else
+                            class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-lg"
                         >
-                            <Building2 class="h-6 w-6" />
+                            <Building2 class="h-7 w-7" />
                         </div>
+                        <!-- Company name and subtitle (always show) -->
                         <div>
                             <h1
-                                class="text-xl font-bold text-gray-900 dark:text-white"
+                                class="text-2xl font-bold text-gray-900 dark:text-white"
                             >
-                                Gest-App
+                                {{ companyName }}
                             </h1>
-                            <p class="text-xs text-gray-600 dark:text-gray-400">
-                                Sistema Empresarial
+                            <p class="text-sm text-gray-600 dark:text-gray-400">
+                                Sistema Empresarial powered by Inovcorp
                             </p>
                         </div>
                     </div>

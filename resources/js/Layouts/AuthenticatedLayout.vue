@@ -48,6 +48,11 @@ const permissions = computed(() => {
     const perms = page.props.auth?.permissions;
     return Array.isArray(perms) ? perms : [];
 });
+const company = computed(() => page.props.company || null);
+const companyLogo = computed(() =>
+    company.value?.logo ? `/storage/${company.value.logo}` : null
+);
+const companyName = computed(() => company.value?.name || "Gest-App");
 
 // Helper function para verificar permissões
 const hasPermission = (permission) => {
@@ -236,6 +241,13 @@ const accessManagementItems = computed(() => {
 
 const allConfigurationItems = [
     {
+        name: "Empresa",
+        href: "company.edit",
+        icon: Building,
+        disabled: false,
+        permission: "company",
+    },
+    {
         name: "Entidades - Países",
         href: "countries.index",
         icon: Globe,
@@ -284,13 +296,6 @@ const allConfigurationItems = [
         current: route().current("logs.*"),
         disabled: false,
         permission: "logs", // Verificar permissões de logs
-    },
-    {
-        name: "Empresa",
-        href: "dashboard", // Temporário até implementar
-        icon: Building,
-        disabled: true,
-        permission: null,
     },
 ];
 
@@ -349,21 +354,30 @@ const logout = () => {
                     >
                         <div class="flex h-16 shrink-0 items-center">
                             <div class="flex items-center space-x-3">
+                                <!-- Company Logo if available -->
+                                <img
+                                    v-if="companyLogo"
+                                    :src="companyLogo"
+                                    :alt="companyName"
+                                    class="h-12 w-auto max-w-[180px] object-contain"
+                                />
+                                <!-- Fallback icon -->
                                 <div
-                                    class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-700 text-white"
+                                    v-else
+                                    class="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-700 text-white"
                                 >
-                                    <Building2 class="h-4 w-4" />
+                                    <Building2 class="h-5 w-5" />
                                 </div>
                                 <div>
                                     <h1
                                         class="text-sm font-semibold text-gray-900 dark:text-white"
                                     >
-                                        Gest-App
+                                        {{ companyName }}
                                     </h1>
                                     <p
                                         class="text-xs text-gray-600 dark:text-gray-400"
                                     >
-                                        Sistema Empresarial
+                                        Sistema Empresarial powered by Inovcorp
                                     </p>
                                 </div>
                             </div>
@@ -646,19 +660,28 @@ const logout = () => {
                         :href="route('dashboard')"
                         class="flex items-center space-x-3"
                     >
+                        <!-- Company Logo if available -->
+                        <img
+                            v-if="companyLogo"
+                            :src="companyLogo"
+                            :alt="companyName"
+                            class="h-12 w-auto max-w-[180px] object-contain"
+                        />
+                        <!-- Fallback icon -->
                         <div
-                            class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-sm"
+                            v-else
+                            class="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-sm"
                         >
-                            <Building2 class="h-4 w-4" />
+                            <Building2 class="h-5 w-5" />
                         </div>
                         <div>
                             <h1
                                 class="text-sm font-semibold text-gray-900 dark:text-white"
                             >
-                                Gest-App
+                                {{ companyName }}
                             </h1>
                             <p class="text-xs text-gray-600 dark:text-gray-400">
-                                Sistema Empresarial
+                                Sistema Empresarial powered by Inovcorp
                             </p>
                         </div>
                     </Link>

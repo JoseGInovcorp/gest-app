@@ -4,13 +4,14 @@
 
 ## 📊 Status do Projeto
 
-**Versão:** v0.8.5  
-**Progresso:** 50% (10 de 20 módulos)  
+**Versão:** v0.9.0  
+**Progresso:** 55% (11 de 20 módulos)  
 **Entrega:** 18 Nov 2025  
 **BD:** ✅ MySQL configurado e funcionando  
 **Welcome:** ✅ Navegação funcional  
 **Segurança:** ✅ Sistema de permissões com controlo de UI  
-**Logs:** ✅ Histórico de atividades completo
+**Logs:** ✅ Histórico de atividades completo  
+**Branding:** ✅ Logo personalizado integrado
 
 ## 🛠️ Tecnologias
 
@@ -103,7 +104,7 @@
 2. **Financeiro:** Taxas IVA
 3. **Operacional:** Calendário, Ordens de Trabalho, Arquivo Digital
 4. **Sistema:** Logs, Utilizadores, Grupos de Permissões
-5. **Configurações:** Países, Funções de Contactos
+5. **Configurações:** Empresa, Países, Funções de Contactos
 
 ### ✅ Módulo 8: Logs de Atividade
 
@@ -116,6 +117,23 @@
 -   **Módulos Monitorizados:** Login/Logout, Utilizadores, Permissões, Entidades
 -   **Package:** Spatie Laravel Activity Log v4.10.2
 -   **Mapeamentos:** Traduções PT para módulos e ações, badges coloridos por tipo
+
+### ✅ Módulo 9: Configurações - Empresa
+
+-   **Personalização Total:** Dados da empresa que aparecem em toda a aplicação
+-   **Campos Editáveis:** Logotipo, Nome, NIF, Morada, Código Postal, Localidade
+-   **Upload de Logo:** PNG, JPG, GIF até 2MB com preview em tempo real
+-   **Singleton Pattern:** Apenas 1 registo de empresa no sistema
+-   **Flash Messages:** Confirmação visual após guardar alterações
+-   **Integração Visual Completa:**
+    -   **Login Page:** Logo grande (160px) + nome da empresa
+    -   **Welcome Page:** Logo médio (80px) + nome + "Sistema Empresarial powered by Inovcorp"
+    -   **Sidebar:** Logo pequeno (48px) + nome + subtítulo (mobile + desktop)
+    -   **Fallback:** Ícone Building2 quando não há logo configurado
+-   **Utilização Futura:** Dados em PDFs, faturas e documentos oficiais
+-   **Permissões:** `company.read` (todos) e `company.update` (Admin apenas)
+-   **Acesso:** Menu → Configurações → Empresa
+-   **Storage:** Link simbólico criado para `storage/app/public/company/logos`
 
 ### ✅ Interface & UX
 
@@ -282,8 +300,7 @@ Resultado → Botões só existem se houver permissão
 
 ### Configurações Sistema
 
-### Configurações Sistema
-
+-   **Empresa**: Logotipo, nome, NIF, morada completa (dados para documentos)
 -   **Países**: 14 países pré-carregados, códigos ISO, VIES
 -   **Funções de Contacto**: 10 funções pré-definidas
 -   **Taxas de IVA**: 4 taxas configuráveis (0%, 6%, 13%, 23%)
