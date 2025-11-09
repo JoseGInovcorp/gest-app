@@ -4,14 +4,15 @@
 
 ## 📊 Status do Projeto
 
-**Versão:** v0.9.0  
+**Versão:** v0.9.1  
 **Progresso:** 55% (11 de 20 módulos)  
 **Entrega:** 18 Nov 2025  
 **BD:** ✅ MySQL configurado e funcionando  
 **Welcome:** ✅ Navegação funcional  
 **Segurança:** ✅ Sistema de permissões com controlo de UI  
 **Logs:** ✅ Histórico de atividades completo  
-**Branding:** ✅ Logo personalizado integrado
+**Branding:** ✅ Logo personalizado integrado  
+**UX:** ✅ Interface uniformizada em todos os módulos
 
 ## 🛠️ Tecnologias
 
@@ -135,7 +136,22 @@
 -   **Acesso:** Menu → Configurações → Empresa
 -   **Storage:** Link simbólico criado para `storage/app/public/company/logos`
 
-### ✅ Interface & UX
+### ✅ Interface & UX - Uniformização Completa
+
+-   **Headers Padronizados:** Todos os módulos com ícone colorido, título e subtítulo
+-   **Breadcrumbs de Navegação:** Caminho completo em todas as páginas (Dashboard / Categoria / Módulo)
+-   **Paleta de Cores por Módulo:** 
+    -   Clientes/Artigos/Empresa: Azul
+    -   Fornecedores/Taxas IVA: Verde
+    -   Contactos: Laranja
+    -   Países: Índigo
+    -   Funções/Logs: Roxo
+    -   Utilizadores: Âmbar
+    -   Grupos Permissões: Vermelho
+-   **Estrutura Consistente:** Layout uniformizado em 11 módulos
+-   **Código Limpo:** Remoção de templates antigos e divs desnecessárias
+
+### ✅ Páginas e Navegação
 
 -   Página Welcome com navegação funcional
 -   Menu lateral accordion expandível

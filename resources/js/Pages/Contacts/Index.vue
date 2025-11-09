@@ -1,75 +1,55 @@
 <template>
+    <Head title="Contactos" />
+
     <AuthenticatedLayout>
-        <template #header>
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <Users class="h-8 w-8 text-green-600" />
-                    <div>
-                        <h2
-                            class="text-xl font-semibold text-gray-900 dark:text-gray-100"
-                        >
-                            Contactos
-                        </h2>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">
-                            Gestão de contactos associados às entidades
-                        </p>
-                    </div>
+        <!-- Header -->
+        <div class="mb-6">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
+                    <Users class="h-6 w-6 text-green-600 dark:text-green-400" />
                 </div>
-                <div class="flex items-center space-x-2">
-                    <span class="text-sm text-gray-500">
-                        {{ contacts.total }}
-                        {{ contacts.total === 1 ? "contacto" : "contactos" }}
-                    </span>
-                </div>
-            </div>
-        </template>
-
-        <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <!-- Breadcrumbs -->
-                <nav class="flex mb-6" aria-label="Breadcrumb">
-                    <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                        <li class="inline-flex items-center">
-                            <Link
-                                :href="route('dashboard')"
-                                class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white"
-                            >
-                                <Home class="w-4 h-4 mr-2" />
-                                Dashboard
-                            </Link>
-                        </li>
-                        <li>
-                            <div class="flex items-center">
-                                <ChevronRight
-                                    class="w-4 h-4 text-gray-400 mx-1"
-                                />
-                                <span
-                                    class="ml-1 text-sm font-medium text-gray-500 dark:text-gray-400"
-                                >
-                                    Contactos
-                                </span>
-                            </div>
-                        </li>
-                    </ol>
-                </nav>
-
-                <!-- Data Table -->
-                <div
-                    class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg"
-                >
-                    <ContactsDataTable
-                        :contacts="contacts.data"
-                        :can-create="can.create"
-                        :can-view="can.view"
-                        :can-edit="can.edit"
-                        :can-delete="can.delete"
-                        @edit="handleEdit"
-                        @delete="handleDelete"
-                        @create="handleCreate"
-                    />
+                <div>
+                    <h1
+                        class="text-2xl font-bold text-gray-900 dark:text-white"
+                    >
+                        Contactos
+                    </h1>
+                    <p class="text-gray-500 dark:text-gray-400">
+                        Gerir contactos associados às entidades
+                    </p>
                 </div>
             </div>
         </div>
+
+        <!-- Breadcrumbs -->
+        <nav class="mb-6">
+            <ol
+                class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400"
+            >
+                <li>
+                    <Link
+                        :href="route('dashboard')"
+                        class="hover:text-gray-700 dark:hover:text-gray-200"
+                    >
+                        Dashboard
+                    </Link>
+                </li>
+                <li>/</li>
+                <li class="text-gray-900 dark:text-white">Contactos</li>
+            </ol>
+        </nav>
+
+        <!-- Data Table -->
+        <ContactsDataTable
+            :contacts="contacts.data"
+            :can-create="can.create"
+            :can-view="can.view"
+            :can-edit="can.edit"
+            :can-delete="can.delete"
+            @edit="handleEdit"
+            @delete="handleDelete"
+            @create="handleCreate"
+        />
 
         <!-- Delete Confirmation Modal -->
         <Modal :show="showDeleteModal" @close="closeDeleteModal">
@@ -121,12 +101,12 @@
 
 <script setup>
 import { ref } from "vue";
-import { Link, router } from "@inertiajs/vue3";
+import { Head, Link, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import ContactsDataTable from "@/Components/ContactsDataTableNew.vue";
 import Modal from "@/Components/Modal.vue";
 import Button from "@/Components/ui/Button.vue";
-import { Users, Home, ChevronRight, Trash2, Loader2 } from "lucide-vue-next";
+import { Users, Trash2, Loader2 } from "lucide-vue-next";
 
 const props = defineProps({
     contacts: {

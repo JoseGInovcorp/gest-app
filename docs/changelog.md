@@ -2,6 +2,90 @@
 
 ---
 
+## [0.9.1] — 2025-11-09
+
+### 🎨 Uniformização de Interface - Headers e Breadcrumbs
+
+**Padronização da Experiência do Utilizador em Todos os Módulos**
+
+#### 🎯 Objetivo
+
+Garantir consistência visual e de navegação em todas as páginas de índice dos módulos, facilitando a orientação do utilizador e melhorando a usabilidade geral da aplicação.
+
+#### ✨ Alterações Implementadas
+
+**Padrão de Header Uniformizado:**
+
+Todas as páginas de índice agora seguem o mesmo layout:
+
+1. **Cabeçalho com Ícone**
+   - Ícone temático dentro de círculo colorido (diferente por módulo)
+   - Título principal em H1
+   - Subtítulo descritivo
+
+2. **Breadcrumbs de Navegação**
+   - Caminho completo: Dashboard / [Categoria] / Módulo Atual
+   - Links clicáveis para navegação rápida
+   - Último elemento (página atual) sem link
+
+3. **Estrutura Simplificada**
+   - Removido template `#header` antigo
+   - Removidas divs wrapper desnecessárias (`py-12`, `max-w-7xl mx-auto`)
+   - Layout direto no `AuthenticatedLayout`
+
+#### 📂 Módulos Atualizados
+
+**11 Módulos Padronizados:**
+
+1. **Contactos** - Laranja (`bg-orange-100`, `text-orange-600`)
+   - Breadcrumb: Dashboard / Contactos
+   
+2. **Fornecedores** - Verde (`bg-green-100`, `text-green-600`)
+   - Breadcrumb: Dashboard / Fornecedores
+   
+3. **Artigos** - Azul (`bg-blue-100`, `text-blue-600`)
+   - Breadcrumb: Dashboard / Artigos
+   
+4. **Países** - Índigo (`bg-indigo-100`, `text-indigo-600`)
+   - Breadcrumb: Dashboard / Configurações / Países
+   
+5. **Funções de Contacto** - Roxo (`bg-purple-100`, `text-purple-600`)
+   - Breadcrumb: Dashboard / Configurações / Funções de Contactos
+   
+6. **Taxas IVA** - Verde (`bg-green-100`, `text-green-600`)
+   - Breadcrumb: Dashboard / Configurações / Taxas de IVA
+   
+7. **Utilizadores** - Âmbar (`bg-amber-100`, `text-amber-600`)
+   - Breadcrumb: Dashboard / Gestão de Acessos / Utilizadores
+   
+8. **Grupos de Permissões** - Vermelho (`bg-red-100`, `text-red-600`)
+   - Breadcrumb: Dashboard / Gestão de Acessos / Grupos de Permissões
+   
+9. **Logs de Atividade** - Roxo (`bg-purple-100`, `text-purple-600`)
+   - Breadcrumb: Dashboard / Gestão de Acessos / Logs de Atividade
+   
+10. **Empresa** - Azul (`bg-blue-100`, `text-blue-600`)
+    - Breadcrumb: Dashboard / Configurações / Empresa
+
+11. **Clientes** - Azul (já estava padronizado - serviu de referência)
+    - Breadcrumb: Dashboard / Clientes
+
+#### 💡 Benefícios
+
+- ✅ **Consistência Visual**: Mesma aparência em todos os módulos
+- ✅ **Navegação Melhorada**: Breadcrumbs facilitam orientação
+- ✅ **Identidade por Módulo**: Cores distintas ajudam identificação rápida
+- ✅ **Código Limpo**: Estrutura HTML mais simples e mantível
+- ✅ **Acessibilidade**: Hierarquia clara de headings e navegação
+
+#### 🔧 Correções Técnicas
+
+- Corrigida tag `<label` duplicada em `Company/Edit.vue`
+- Removidas divs extras em `Countries/Index.vue`
+- Ajustada indentação em todos os ficheiros modificados
+
+---
+
 ## [0.9.0] — 2025-11-09
 
 ### 🏢 Módulo Configurações - Empresa

@@ -58,37 +58,57 @@ const deleteCountry = (code) => {
     <Head title="Países" />
 
     <AuthenticatedLayout>
-        <template #header>
-            <div class="flex items-center gap-3">
-                <Globe class="h-8 w-8 text-primary" />
+        <!-- Header -->
+        <div class="mb-6">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-indigo-100 dark:bg-indigo-900/20 rounded-lg">
+                    <Globe class="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                </div>
                 <div>
-                    <h2
-                        class="text-2xl font-semibold leading-tight text-gray-800 dark:text-gray-200"
+                    <h1
+                        class="text-2xl font-bold text-gray-900 dark:text-white"
                     >
                         Países
-                    </h2>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    </h1>
+                    <p class="text-gray-500 dark:text-gray-400">
                         Gerir países do sistema
                     </p>
                 </div>
             </div>
-        </template>
+        </div>
 
-        <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div
-                    class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg"
-                >
-                    <div class="p-6">
-                        <!-- Header com Search e Botão Adicionar -->
-                        <div class="flex items-center justify-between mb-6">
-                            <div class="flex-1 max-w-md">
-                                <div class="relative">
-                                    <Search
-                                        class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"
-                                    />
-                                    <Input
-                                        v-model="searchQuery"
+        <!-- Breadcrumbs -->
+        <nav class="mb-6">
+            <ol
+                class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400"
+            >
+                <li>
+                    <Link
+                        :href="route('dashboard')"
+                        class="hover:text-gray-700 dark:hover:text-gray-200"
+                    >
+                        Dashboard
+                    </Link>
+                </li>
+                <li>/</li>
+                <li class="text-gray-900 dark:text-white">Países</li>
+            </ol>
+        </nav>
+
+        <!-- Main Card -->
+        <div
+            class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg"
+        >
+            <div class="p-6">
+                <!-- Header com Search e Botão Adicionar -->
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex-1 max-w-md">
+                        <div class="relative">
+                            <Search
+                                class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"
+                            />
+                            <Input
+                                v-model="searchQuery"
                                         placeholder="Pesquisar por código, nome ou prefixo telefone..."
                                         class="pl-10"
                                     />
@@ -244,7 +264,5 @@ const deleteCountry = (code) => {
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
     </AuthenticatedLayout>
 </template>
