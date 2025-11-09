@@ -11,6 +11,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\CustomerOrderController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -149,6 +150,31 @@ Route::middleware('auth')->group(function () {
     Route::middleware('permission:logs.read')->group(function () {
         Route::get('/logs', [LogController::class, 'index'])->name('logs.index');
     });
+
+    // Rotas de Encomendas de Clientes
+    Route::get('/customer-orders/create', [CustomerOrderController::class, 'create'])->name('customer-orders.create')->middleware('permission:customer-orders.create');
+    Route::middleware('permission:customer-orders.read')->group(function () {
+        Route::get('/customer-orders', [CustomerOrderController::class, 'index'])->name('customer-orders.index');
+        Route::get('/customer-orders/{customerOrder}', [CustomerOrderController::class, 'show'])->name('customer-orders.show');
+    });
+    Route::post('/customer-orders', [CustomerOrderController::class, 'store'])->name('customer-orders.store')->middleware('permission:customer-orders.create');
+    Route::get('/customer-orders/{customerOrder}/edit', [CustomerOrderController::class, 'edit'])->name('customer-orders.edit')->middleware('permission:customer-orders.update');
+    Route::patch('/customer-orders/{customerOrder}', [CustomerOrderController::class, 'update'])->name('customer-orders.update')->middleware('permission:customer-orders.update');
+    Route::delete('/customer-orders/{customerOrder}', [CustomerOrderController::class, 'destroy'])->name('customer-orders.destroy')->middleware('permission:customer-orders.delete');
+    Route::post('/customer-orders/{customerOrder}/convert-to-supplier-orders', [CustomerOrderController::class, 'convertToSupplierOrders'])->name('customer-orders.convert')->middleware('permission:customer-orders.update');
+    Route::get('/customer-orders/{customerOrder}/pdf', [CustomerOrderController::class, 'generatePDF'])->name('customer-orders.pdf')->middleware('permission:customer-orders.read');
+
+    // Rotas de Encomendas de Fornecedores
+    Route::get('/supplier-orders/create', [\App\Http\Controllers\SupplierOrderController::class, 'create'])->name('supplier-orders.create')->middleware('permission:supplier-orders.create');
+    Route::middleware('permission:supplier-orders.read')->group(function () {
+        Route::get('/supplier-orders', [\App\Http\Controllers\SupplierOrderController::class, 'index'])->name('supplier-orders.index');
+        Route::get('/supplier-orders/{supplierOrder}', [\App\Http\Controllers\SupplierOrderController::class, 'show'])->name('supplier-orders.show');
+    });
+    Route::post('/supplier-orders', [\App\Http\Controllers\SupplierOrderController::class, 'store'])->name('supplier-orders.store')->middleware('permission:supplier-orders.create');
+    Route::get('/supplier-orders/{supplierOrder}/edit', [\App\Http\Controllers\SupplierOrderController::class, 'edit'])->name('supplier-orders.edit')->middleware('permission:supplier-orders.update');
+    Route::patch('/supplier-orders/{supplierOrder}', [\App\Http\Controllers\SupplierOrderController::class, 'update'])->name('supplier-orders.update')->middleware('permission:supplier-orders.update');
+    Route::delete('/supplier-orders/{supplierOrder}', [\App\Http\Controllers\SupplierOrderController::class, 'destroy'])->name('supplier-orders.destroy')->middleware('permission:supplier-orders.delete');
+    Route::get('/supplier-orders/{supplierOrder}/pdf', [\App\Http\Controllers\SupplierOrderController::class, 'generatePDF'])->name('supplier-orders.pdf')->middleware('permission:supplier-orders.read');
 
     Route::get('/proposals', function () {
         return redirect()->route('dashboard')->with('info', 'Módulo Propostas em desenvolvimento');

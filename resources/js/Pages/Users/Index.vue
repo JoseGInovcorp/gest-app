@@ -119,134 +119,116 @@ const deleteUser = (id) => {
                         </div>
                     </div>
 
-                    <Link
-                        v-if="can.create"
-                        :href="route('users.create')"
-                    >
+                    <Link v-if="can.create" :href="route('users.create')">
                         <Button
-                                    class="ml-4 bg-blue-600 hover:bg-blue-700 text-white"
-                                >
-                                    <Plus class="h-4 w-4 mr-2" />
-                                    Adicionar Utilizador
-                                </Button>
-                            </Link>
-                        </div>
-
-                        <!-- Table -->
-                        <div class="rounded-md border">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Nome</TableHead>
-                                        <TableHead>Email</TableHead>
-                                        <TableHead>Telemóvel</TableHead>
-                                        <TableHead>Grupo</TableHead>
-                                        <TableHead>Estado</TableHead>
-                                        <TableHead class="text-right"
-                                            >Ações</TableHead
-                                        >
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    <TableRow v-if="filteredUsers.length === 0">
-                                        <TableCell
-                                            colspan="6"
-                                            class="text-center py-8 text-gray-500"
-                                        >
-                                            Nenhum utilizador encontrado
-                                        </TableCell>
-                                    </TableRow>
-                                    <TableRow
-                                        v-for="user in filteredUsers"
-                                        :key="user.id"
-                                    >
-                                        <TableCell class="font-medium">
-                                            {{ user.name }}
-                                        </TableCell>
-                                        <TableCell>
-                                            <span
-                                                class="text-sm text-gray-600 dark:text-gray-400"
-                                            >
-                                                {{ user.email }}
-                                            </span>
-                                        </TableCell>
-                                        <TableCell>
-                                            <span
-                                                class="text-sm text-gray-600 dark:text-gray-400"
-                                            >
-                                                {{ user.mobile || "—" }}
-                                            </span>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge variant="default">
-                                                {{ user.role || "Sem grupo" }}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge
-                                                :variant="
-                                                    user.active
-                                                        ? 'default'
-                                                        : 'destructive'
-                                                "
-                                            >
-                                                {{
-                                                    user.active
-                                                        ? "Ativo"
-                                                        : "Inativo"
-                                                }}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell class="text-right">
-                                            <div
-                                                class="flex items-center justify-end gap-2"
-                                            >
-                                                <Link
-                                                    v-if="can.edit"
-                                                    :href="
-                                                        route(
-                                                            'users.edit',
-                                                            user.id
-                                                        )
-                                                    "
-                                                >
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        class="h-8 w-8 p-0"
-                                                    >
-                                                        <Pencil
-                                                            class="h-4 w-4"
-                                                        />
-                                                    </Button>
-                                                </Link>
-                                                <Button
-                                                    v-if="can.delete"
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    class="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                    @click="deleteUser(user.id)"
-                                                >
-                                                    <Trash2 class="h-4 w-4" />
-                                                </Button>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                </TableBody>
-                            </Table>
-                        </div>
-
-                        <!-- Info -->
-                        <div
-                            class="mt-4 text-sm text-gray-600 dark:text-gray-400"
+                            class="ml-4 bg-blue-600 hover:bg-blue-700 text-white"
                         >
-                            <p>
-                                Total:
-                                <strong>{{ filteredUsers.length }}</strong>
-                                utilizador(es)
-                            </p>
-                        </div>
-                    </div>
+                            <Plus class="h-4 w-4 mr-2" />
+                            Adicionar Utilizador
+                        </Button>
+                    </Link>
                 </div>
+
+                <!-- Table -->
+                <div class="rounded-md border">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Nome</TableHead>
+                                <TableHead>Email</TableHead>
+                                <TableHead>Telemóvel</TableHead>
+                                <TableHead>Grupo</TableHead>
+                                <TableHead>Estado</TableHead>
+                                <TableHead class="text-right">Ações</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            <TableRow v-if="filteredUsers.length === 0">
+                                <TableCell
+                                    colspan="6"
+                                    class="text-center py-8 text-gray-500"
+                                >
+                                    Nenhum utilizador encontrado
+                                </TableCell>
+                            </TableRow>
+                            <TableRow
+                                v-for="user in filteredUsers"
+                                :key="user.id"
+                            >
+                                <TableCell class="font-medium">
+                                    {{ user.name }}
+                                </TableCell>
+                                <TableCell>
+                                    <span
+                                        class="text-sm text-gray-600 dark:text-gray-400"
+                                    >
+                                        {{ user.email }}
+                                    </span>
+                                </TableCell>
+                                <TableCell>
+                                    <span
+                                        class="text-sm text-gray-600 dark:text-gray-400"
+                                    >
+                                        {{ user.mobile || "—" }}
+                                    </span>
+                                </TableCell>
+                                <TableCell>
+                                    <Badge variant="default">
+                                        {{ user.role || "Sem grupo" }}
+                                    </Badge>
+                                </TableCell>
+                                <TableCell>
+                                    <Badge
+                                        :variant="
+                                            user.active
+                                                ? 'default'
+                                                : 'destructive'
+                                        "
+                                    >
+                                        {{ user.active ? "Ativo" : "Inativo" }}
+                                    </Badge>
+                                </TableCell>
+                                <TableCell class="text-right">
+                                    <div
+                                        class="flex items-center justify-end gap-2"
+                                    >
+                                        <Link
+                                            v-if="can.edit"
+                                            :href="route('users.edit', user.id)"
+                                        >
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                class="h-8 w-8 p-0"
+                                            >
+                                                <Pencil class="h-4 w-4" />
+                                            </Button>
+                                        </Link>
+                                        <Button
+                                            v-if="can.delete"
+                                            variant="ghost"
+                                            size="sm"
+                                            class="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                            @click="deleteUser(user.id)"
+                                        >
+                                            <Trash2 class="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        </TableBody>
+                    </Table>
+                </div>
+
+                <!-- Info -->
+                <div class="mt-4 text-sm text-gray-600 dark:text-gray-400">
+                    <p>
+                        Total:
+                        <strong>{{ filteredUsers.length }}</strong>
+                        utilizador(es)
+                    </p>
+                </div>
+            </div>
+        </div>
     </AuthenticatedLayout>
 </template>

@@ -140,7 +140,7 @@
 
 -   **Headers Padronizados:** Todos os módulos com ícone colorido, título e subtítulo
 -   **Breadcrumbs de Navegação:** Caminho completo em todas as páginas (Dashboard / Categoria / Módulo)
--   **Paleta de Cores por Módulo:** 
+-   **Paleta de Cores por Módulo:**
     -   Clientes/Artigos/Empresa: Azul
     -   Fornecedores/Taxas IVA: Verde
     -   Contactos: Laranja

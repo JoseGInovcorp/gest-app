@@ -114,7 +114,9 @@ const getDeviceInfo = (userAgent) => {
         <div class="mb-6">
             <div class="flex items-center space-x-3">
                 <div class="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
-                    <FileText class="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                    <FileText
+                        class="h-6 w-6 text-purple-600 dark:text-purple-400"
+                    />
                 </div>
                 <div>
                     <h1

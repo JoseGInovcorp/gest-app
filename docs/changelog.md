@@ -2,6 +2,153 @@
 
 ---
 
+## [0.10.0] — 2025-11-09
+
+### 📦 Módulo de Encomendas (Clientes e Fornecedores)
+
+**Sistema Completo de Gestão de Encomendas com Conversão Automática**
+
+#### 🎯 Funcionalidades Principais
+
+**Encomendas - Clientes:**
+- CRUD completo de encomendas de clientes
+- Numeração automática: EC-YYYY-#### (Ex: EC-2025-0001)
+- Gestão de artigos por encomenda com fornecedores associados
+- Estados: Rascunho, Fechado
+- Conversão automática para encomendas de fornecedores
+- Cálculo automático de totais
+
+**Encomendas - Fornecedores:**
+- CRUD completo de encomendas a fornecedores
+- Numeração automática: EF-YYYY-#### (Ex: EF-2025-0001)
+- Estados: Rascunho, Enviado, Confirmado, Recebido, Cancelado
+- Rastreamento de origem (customer_order_id)
+- Gestão de artigos e quantidades
+- Paginação (15 registos por página)
+
+#### ✨ Conversão Inteligente
+
+**Processo de Conversão:**
+- Botão "Converter para Encomendas Fornecedor" (apenas quando status = fechado)
+- Agrupa itens por fornecedor automaticamente
+- Cria uma encomenda separada para cada fornecedor
+- Mantém rastreabilidade com encomenda de origem
+- Mensagem de sucesso com números criados
+
+#### 🗃️ Base de Dados
+
+**Tabelas Criadas:**
+- `customer_orders` - Encomendas de clientes
+- `customer_order_items` - Itens das encomendas de clientes
+- `supplier_orders` - Encomendas a fornecedores
+- `supplier_order_items` - Itens das encomendas a fornecedores
+
+**Funcionalidades:**
+- Soft deletes em todas as tabelas
+- Auto-cálculo de totais via events
+- Numeração única com prevenção de duplicados (withTrashed)
+- Relações completas entre entidades
+
+#### 🔐 Permissões
+
+**Novas Permissões:**
+- `customer-orders.create|read|update|delete`
+- `supplier-orders.create|update|update|delete`
+
+**Auto-atribuição:**
+- Todos os roles com `orders.*` recebem automaticamente ambos os conjuntos
+- 5 roles configurados: Super Admin, Administrador, Gestor Comercial, Gestor Financeiro, Visualizador
+
+#### 🎨 Interface (Vue 3 + Inertia.js)
+
+**Encomendas - Clientes:**
+- Ícone: ShoppingCart (azul)
+- Listagem com filtros de pesquisa e estado
+- Formulários de criação/edição com validação
+- Auto-preenchimento de preços ao selecionar artigo
+- Quantidade: incremento de 1 em 1
+- Botão de conversão em encomendas fechadas
+
+**Encomendas - Fornecedores:**
+- Ícone: Truck (verde)
+- Paginação com tratamento null-safe de links
+- Badges coloridos por estado
+- Filtros de pesquisa e estado
+- Formulários completos de gestão
+
+#### 🐛 Correções Implementadas
+
+1. **Numeração Duplicada**
+   - Adicionado `withTrashed()` aos métodos `generateNumber()`
+   - Previne duplicados mesmo com soft deletes
+
+2. **Queries de Entities**
+   - Corrigido uso de `is_customer`/`is_supplier` para `type` enum
+   - Queries: `whereIn('type', ['client', 'both'])` e `whereIn('type', ['supplier', 'both'])`
+
+3. **Colunas de Articles**
+   - Mapeamento de colunas portuguesas: `nome as name`, `preco as unit_price`, `referencia as reference`
+   - Uso do scope `ativos()` para artigos ativos
+
+4. **Validação de Quantidade**
+   - Backend: `min:1` (inteiros)
+   - Frontend: `step="1" min="1"`
+
+5. **Paginação Null-Safe**
+   - Tratamento de links com `href=null` (Previous/Next desabilitados)
+   - Conditional rendering: `<Link v-if="link.url">` / `<span v-else>`
+
+#### 📋 Rotas Adicionadas
+
+```php
+// Encomendas - Clientes
+/customer-orders (index, create, store, edit, update, destroy)
+/customer-orders/{id}/convert-to-supplier-orders (convert)
+/customer-orders/{id}/pdf (generatePDF - TODO)
+
+// Encomendas - Fornecedores
+/supplier-orders (index, create, store, edit, update, destroy)
+/supplier-orders/{id}/pdf (generatePDF - TODO)
+```
+
+#### 🧪 Seeders
+
+- `CustomerOrdersPermissionsSeeder` - Cria e atribui permissões
+- `SupplierOrdersPermissionsSeeder` - Cria e atribui permissões
+
+#### 📚 Documentação
+
+- Criado `docs/orders-module.md` com documentação completa:
+  - Estrutura de base de dados
+  - Models e relações
+  - Controllers e métodos
+  - Rotas e permissões
+  - Fluxo de conversão
+  - Correções implementadas
+  - Melhorias futuras
+
+#### 🔄 Menu Sidebar
+
+**Adicionado em "Gestão de Vendas":**
+- Encomendas - Clientes (ShoppingCart, azul)
+- Encomendas - Fornecedores (Truck, verde)
+- Ordens de Trabalho (Briefcase, desabilitado)
+
+#### ⚙️ Configurações
+
+**Validações:**
+- Cliente/Fornecedor obrigatório
+- Mínimo 1 item por encomenda
+- Quantidade mínima: 1
+- Preço unitário obrigatório
+
+**Auto-preenchimento:**
+- Preço unitário ao selecionar artigo
+- Total da linha ao alterar quantidade/preço
+- Total geral da encomenda
+
+---
+
 ## [0.9.1] — 2025-11-09
 
 ### 🎨 Uniformização de Interface - Headers e Breadcrumbs
@@ -19,52 +166,46 @@ Garantir consistência visual e de navegação em todas as páginas de índice d
 Todas as páginas de índice agora seguem o mesmo layout:
 
 1. **Cabeçalho com Ícone**
-   - Ícone temático dentro de círculo colorido (diferente por módulo)
-   - Título principal em H1
-   - Subtítulo descritivo
+
+    - Ícone temático dentro de círculo colorido (diferente por módulo)
+    - Título principal em H1
+    - Subtítulo descritivo
 
 2. **Breadcrumbs de Navegação**
-   - Caminho completo: Dashboard / [Categoria] / Módulo Atual
-   - Links clicáveis para navegação rápida
-   - Último elemento (página atual) sem link
+
+    - Caminho completo: Dashboard / [Categoria] / Módulo Atual
+    - Links clicáveis para navegação rápida
+    - Último elemento (página atual) sem link
 
 3. **Estrutura Simplificada**
-   - Removido template `#header` antigo
-   - Removidas divs wrapper desnecessárias (`py-12`, `max-w-7xl mx-auto`)
-   - Layout direto no `AuthenticatedLayout`
+    - Removido template `#header` antigo
+    - Removidas divs wrapper desnecessárias (`py-12`, `max-w-7xl mx-auto`)
+    - Layout direto no `AuthenticatedLayout`
 
 #### 📂 Módulos Atualizados
 
 **11 Módulos Padronizados:**
 
 1. **Contactos** - Laranja (`bg-orange-100`, `text-orange-600`)
-   - Breadcrumb: Dashboard / Contactos
-   
+    - Breadcrumb: Dashboard / Contactos
 2. **Fornecedores** - Verde (`bg-green-100`, `text-green-600`)
-   - Breadcrumb: Dashboard / Fornecedores
-   
+    - Breadcrumb: Dashboard / Fornecedores
 3. **Artigos** - Azul (`bg-blue-100`, `text-blue-600`)
-   - Breadcrumb: Dashboard / Artigos
-   
+    - Breadcrumb: Dashboard / Artigos
 4. **Países** - Índigo (`bg-indigo-100`, `text-indigo-600`)
-   - Breadcrumb: Dashboard / Configurações / Países
-   
+    - Breadcrumb: Dashboard / Configurações / Países
 5. **Funções de Contacto** - Roxo (`bg-purple-100`, `text-purple-600`)
-   - Breadcrumb: Dashboard / Configurações / Funções de Contactos
-   
+    - Breadcrumb: Dashboard / Configurações / Funções de Contactos
 6. **Taxas IVA** - Verde (`bg-green-100`, `text-green-600`)
-   - Breadcrumb: Dashboard / Configurações / Taxas de IVA
-   
+    - Breadcrumb: Dashboard / Configurações / Taxas de IVA
 7. **Utilizadores** - Âmbar (`bg-amber-100`, `text-amber-600`)
-   - Breadcrumb: Dashboard / Gestão de Acessos / Utilizadores
-   
+    - Breadcrumb: Dashboard / Gestão de Acessos / Utilizadores
 8. **Grupos de Permissões** - Vermelho (`bg-red-100`, `text-red-600`)
-   - Breadcrumb: Dashboard / Gestão de Acessos / Grupos de Permissões
-   
+    - Breadcrumb: Dashboard / Gestão de Acessos / Grupos de Permissões
 9. **Logs de Atividade** - Roxo (`bg-purple-100`, `text-purple-600`)
-   - Breadcrumb: Dashboard / Gestão de Acessos / Logs de Atividade
-   
+    - Breadcrumb: Dashboard / Gestão de Acessos / Logs de Atividade
 10. **Empresa** - Azul (`bg-blue-100`, `text-blue-600`)
+
     - Breadcrumb: Dashboard / Configurações / Empresa
 
 11. **Clientes** - Azul (já estava padronizado - serviu de referência)
@@ -72,17 +213,17 @@ Todas as páginas de índice agora seguem o mesmo layout:
 
 #### 💡 Benefícios
 
-- ✅ **Consistência Visual**: Mesma aparência em todos os módulos
-- ✅ **Navegação Melhorada**: Breadcrumbs facilitam orientação
-- ✅ **Identidade por Módulo**: Cores distintas ajudam identificação rápida
-- ✅ **Código Limpo**: Estrutura HTML mais simples e mantível
-- ✅ **Acessibilidade**: Hierarquia clara de headings e navegação
+-   ✅ **Consistência Visual**: Mesma aparência em todos os módulos
+-   ✅ **Navegação Melhorada**: Breadcrumbs facilitam orientação
+-   ✅ **Identidade por Módulo**: Cores distintas ajudam identificação rápida
+-   ✅ **Código Limpo**: Estrutura HTML mais simples e mantível
+-   ✅ **Acessibilidade**: Hierarquia clara de headings e navegação
 
 #### 🔧 Correções Técnicas
 
-- Corrigida tag `<label` duplicada em `Company/Edit.vue`
-- Removidas divs extras em `Countries/Index.vue`
-- Ajustada indentação em todos os ficheiros modificados
+-   Corrigida tag `<label` duplicada em `Company/Edit.vue`
+-   Removidas divs extras em `Countries/Index.vue`
+-   Ajustada indentação em todos os ficheiros modificados
 
 ---
 

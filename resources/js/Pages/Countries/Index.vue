@@ -62,7 +62,9 @@ const deleteCountry = (code) => {
         <div class="mb-6">
             <div class="flex items-center space-x-3">
                 <div class="p-2 bg-indigo-100 dark:bg-indigo-900/20 rounded-lg">
-                    <Globe class="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                    <Globe
+                        class="h-6 w-6 text-indigo-600 dark:text-indigo-400"
+                    />
                 </div>
                 <div>
                     <h1
@@ -109,160 +111,138 @@ const deleteCountry = (code) => {
                             />
                             <Input
                                 v-model="searchQuery"
-                                        placeholder="Pesquisar por código, nome ou prefixo telefone..."
-                                        class="pl-10"
-                                    />
-                                </div>
-                            </div>
-
-                            <Link
-                                v-if="can.create"
-                                :href="route('countries.create')"
-                            >
-                                <Button
-                                    class="ml-4 bg-blue-600 hover:bg-blue-700 text-white"
-                                >
-                                    <Plus class="h-4 w-4 mr-2" />
-                                    Adicionar País
-                                </Button>
-                            </Link>
-                        </div>
-
-                        <!-- Table -->
-                        <div class="rounded-md border">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Código</TableHead>
-                                        <TableHead>Nome</TableHead>
-                                        <TableHead>Nome (EN)</TableHead>
-                                        <TableHead>ISO3</TableHead>
-                                        <TableHead>Prefixo Tel.</TableHead>
-                                        <TableHead>VIES</TableHead>
-                                        <TableHead>Moeda</TableHead>
-                                        <TableHead>Estado</TableHead>
-                                        <TableHead class="text-right"
-                                            >Ações</TableHead
-                                        >
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    <TableRow
-                                        v-if="filteredCountries.length === 0"
-                                    >
-                                        <TableCell
-                                            colspan="9"
-                                            class="text-center py-8 text-gray-500"
-                                        >
-                                            Nenhum país encontrado
-                                        </TableCell>
-                                    </TableRow>
-                                    <TableRow
-                                        v-for="country in filteredCountries"
-                                        :key="country.code"
-                                    >
-                                        <TableCell class="font-medium">
-                                            {{ country.code }}
-                                        </TableCell>
-                                        <TableCell>
-                                            {{ country.name }}
-                                        </TableCell>
-                                        <TableCell>
-                                            {{ country.name_en || "-" }}
-                                        </TableCell>
-                                        <TableCell>
-                                            {{ country.iso3 || "-" }}
-                                        </TableCell>
-                                        <TableCell>
-                                            {{
-                                                country.phone_prefix
-                                                    ? `+${country.phone_prefix}`
-                                                    : "-"
-                                            }}
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge
-                                                :variant="
-                                                    country.vies_enabled
-                                                        ? 'default'
-                                                        : 'secondary'
-                                                "
-                                            >
-                                                {{
-                                                    country.vies_enabled
-                                                        ? "Sim"
-                                                        : "Não"
-                                                }}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell>
-                                            {{ country.currency_code || "-" }}
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge
-                                                :variant="
-                                                    country.active
-                                                        ? 'default'
-                                                        : 'destructive'
-                                                "
-                                            >
-                                                {{
-                                                    country.active
-                                                        ? "Ativo"
-                                                        : "Inativo"
-                                                }}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell class="text-right">
-                                            <div
-                                                class="flex items-center justify-end gap-2"
-                                            >
-                                                <Link
-                                                    v-if="can.edit"
-                                                    :href="
-                                                        route(
-                                                            'countries.edit',
-                                                            country.code
-                                                        )
-                                                    "
-                                                >
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                    >
-                                                        <Pencil
-                                                            class="h-4 w-4"
-                                                        />
-                                                    </Button>
-                                                </Link>
-                                                <Button
-                                                    v-if="can.delete"
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    @click="
-                                                        deleteCountry(
-                                                            country.code
-                                                        )
-                                                    "
-                                                >
-                                                    <Trash2
-                                                        class="h-4 w-4 text-destructive"
-                                                    />
-                                                </Button>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                </TableBody>
-                            </Table>
-                        </div>
-
-                        <!-- Stats -->
-                        <div
-                            class="mt-6 text-sm text-gray-600 dark:text-gray-400"
-                        >
-                            Total: {{ filteredCountries.length }} país(es)
+                                placeholder="Pesquisar por código, nome ou prefixo telefone..."
+                                class="pl-10"
+                            />
                         </div>
                     </div>
+
+                    <Link v-if="can.create" :href="route('countries.create')">
+                        <Button
+                            class="ml-4 bg-blue-600 hover:bg-blue-700 text-white"
+                        >
+                            <Plus class="h-4 w-4 mr-2" />
+                            Adicionar País
+                        </Button>
+                    </Link>
                 </div>
+
+                <!-- Table -->
+                <div class="rounded-md border">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Código</TableHead>
+                                <TableHead>Nome</TableHead>
+                                <TableHead>Nome (EN)</TableHead>
+                                <TableHead>ISO3</TableHead>
+                                <TableHead>Prefixo Tel.</TableHead>
+                                <TableHead>VIES</TableHead>
+                                <TableHead>Moeda</TableHead>
+                                <TableHead>Estado</TableHead>
+                                <TableHead class="text-right">Ações</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            <TableRow v-if="filteredCountries.length === 0">
+                                <TableCell
+                                    colspan="9"
+                                    class="text-center py-8 text-gray-500"
+                                >
+                                    Nenhum país encontrado
+                                </TableCell>
+                            </TableRow>
+                            <TableRow
+                                v-for="country in filteredCountries"
+                                :key="country.code"
+                            >
+                                <TableCell class="font-medium">
+                                    {{ country.code }}
+                                </TableCell>
+                                <TableCell>
+                                    {{ country.name }}
+                                </TableCell>
+                                <TableCell>
+                                    {{ country.name_en || "-" }}
+                                </TableCell>
+                                <TableCell>
+                                    {{ country.iso3 || "-" }}
+                                </TableCell>
+                                <TableCell>
+                                    {{
+                                        country.phone_prefix
+                                            ? `+${country.phone_prefix}`
+                                            : "-"
+                                    }}
+                                </TableCell>
+                                <TableCell>
+                                    <Badge
+                                        :variant="
+                                            country.vies_enabled
+                                                ? 'default'
+                                                : 'secondary'
+                                        "
+                                    >
+                                        {{
+                                            country.vies_enabled ? "Sim" : "Não"
+                                        }}
+                                    </Badge>
+                                </TableCell>
+                                <TableCell>
+                                    {{ country.currency_code || "-" }}
+                                </TableCell>
+                                <TableCell>
+                                    <Badge
+                                        :variant="
+                                            country.active
+                                                ? 'default'
+                                                : 'destructive'
+                                        "
+                                    >
+                                        {{
+                                            country.active ? "Ativo" : "Inativo"
+                                        }}
+                                    </Badge>
+                                </TableCell>
+                                <TableCell class="text-right">
+                                    <div
+                                        class="flex items-center justify-end gap-2"
+                                    >
+                                        <Link
+                                            v-if="can.edit"
+                                            :href="
+                                                route(
+                                                    'countries.edit',
+                                                    country.code
+                                                )
+                                            "
+                                        >
+                                            <Button variant="ghost" size="sm">
+                                                <Pencil class="h-4 w-4" />
+                                            </Button>
+                                        </Link>
+                                        <Button
+                                            v-if="can.delete"
+                                            variant="ghost"
+                                            size="sm"
+                                            @click="deleteCountry(country.code)"
+                                        >
+                                            <Trash2
+                                                class="h-4 w-4 text-destructive"
+                                            />
+                                        </Button>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        </TableBody>
+                    </Table>
+                </div>
+
+                <!-- Stats -->
+                <div class="mt-6 text-sm text-gray-600 dark:text-gray-400">
+                    Total: {{ filteredCountries.length }} país(es)
+                </div>
+            </div>
+        </div>
     </AuthenticatedLayout>
 </template>

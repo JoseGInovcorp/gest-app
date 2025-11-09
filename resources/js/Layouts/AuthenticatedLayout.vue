@@ -137,24 +137,22 @@ const mainNavigationItems = computed(() => {
 const allOrdersNavigationItems = [
     {
         name: "Encomendas - Clientes",
-        href: "dashboard", // Temporário até implementar
+        href: "customer-orders.index",
         icon: ShoppingCart,
-        disabled: true,
-        permission: "orders",
+        permission: "customer-orders",
     },
     {
         name: "Encomendas - Fornecedores",
-        href: "dashboard", // Temporário até implementar
+        href: "supplier-orders.index",
         icon: Truck,
-        disabled: true,
-        permission: "orders",
+        permission: "supplier-orders",
     },
     {
         name: "Ordens de Trabalho",
         href: "dashboard", // Temporário até implementar
         icon: Briefcase,
         disabled: true,
-        permission: "orders",
+        permission: "work-orders",
     },
 ];
 

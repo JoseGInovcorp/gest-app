@@ -59,7 +59,9 @@ const deleteVatRate = (id) => {
         <div class="mb-6">
             <div class="flex items-center space-x-3">
                 <div class="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
-                    <Percent class="h-6 w-6 text-green-600 dark:text-green-400" />
+                    <Percent
+                        class="h-6 w-6 text-green-600 dark:text-green-400"
+                    />
                 </div>
                 <div>
                     <h1
@@ -118,139 +120,117 @@ const deleteVatRate = (id) => {
                         </div>
                     </div>
 
-                    <Link
-                        v-if="can.create"
-                        :href="route('vat-rates.create')"
-                    >
+                    <Link v-if="can.create" :href="route('vat-rates.create')">
                         <Button
                             class="bg-blue-600 hover:bg-blue-700 text-white"
-                                >
-                                    <Plus class="h-4 w-4 mr-2" />
-                                    Adicionar Taxa IVA
-                                </Button>
-                            </Link>
-                        </div>
-
-                        <!-- Table -->
-                        <div class="rounded-md border">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Nome</TableHead>
-                                        <TableHead>Taxa (%)</TableHead>
-                                        <TableHead>Padrão</TableHead>
-                                        <TableHead>Estado</TableHead>
-                                        <TableHead class="text-right"
-                                            >Ações</TableHead
-                                        >
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    <TableRow
-                                        v-if="filteredVatRates.length === 0"
-                                    >
-                                        <TableCell
-                                            colspan="5"
-                                            class="text-center py-8 text-gray-500"
-                                        >
-                                            Nenhuma taxa de IVA encontrada
-                                        </TableCell>
-                                    </TableRow>
-                                    <TableRow
-                                        v-for="rate in filteredVatRates"
-                                        :key="rate.id"
-                                    >
-                                        <TableCell class="font-medium">
-                                            {{ rate.name }}
-                                        </TableCell>
-                                        <TableCell>
-                                            <span
-                                                class="text-lg font-semibold text-blue-600 dark:text-blue-400"
-                                            >
-                                                {{ rate.rate }}%
-                                            </span>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge
-                                                v-if="rate.is_default"
-                                                variant="default"
-                                                class="bg-green-600"
-                                            >
-                                                Padrão
-                                            </Badge>
-                                            <span
-                                                v-else
-                                                class="text-gray-400 text-sm"
-                                                >—</span
-                                            >
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge
-                                                :variant="
-                                                    rate.active
-                                                        ? 'default'
-                                                        : 'destructive'
-                                                "
-                                            >
-                                                {{
-                                                    rate.active
-                                                        ? "Ativo"
-                                                        : "Inativo"
-                                                }}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell class="text-right">
-                                            <div
-                                                class="flex items-center justify-end gap-2"
-                                            >
-                                                <Link
-                                                    v-if="can.edit"
-                                                    :href="
-                                                        route(
-                                                            'vat-rates.edit',
-                                                            rate.id
-                                                        )
-                                                    "
-                                                >
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        class="h-8 w-8 p-0"
-                                                    >
-                                                        <Pencil
-                                                            class="h-4 w-4"
-                                                        />
-                                                    </Button>
-                                                </Link>
-                                                <Button
-                                                    v-if="can.delete"
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    class="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                    @click="
-                                                        deleteVatRate(rate.id)
-                                                    "
-                                                >
-                                                    <Trash2 class="h-4 w-4" />
-                                                </Button>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                </TableBody>
-                            </Table>
-                        </div>
-
-                        <!-- Info -->
-                        <div
-                            class="mt-4 text-sm text-gray-600 dark:text-gray-400"
                         >
-                            <p>
-                                Total:
-                                <strong>{{ filteredVatRates.length }}</strong>
-                                taxa(s) de IVA
-                            </p>
-                        </div>
-                    </div>
+                            <Plus class="h-4 w-4 mr-2" />
+                            Adicionar Taxa IVA
+                        </Button>
+                    </Link>
                 </div>
+
+                <!-- Table -->
+                <div class="rounded-md border">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Nome</TableHead>
+                                <TableHead>Taxa (%)</TableHead>
+                                <TableHead>Padrão</TableHead>
+                                <TableHead>Estado</TableHead>
+                                <TableHead class="text-right">Ações</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            <TableRow v-if="filteredVatRates.length === 0">
+                                <TableCell
+                                    colspan="5"
+                                    class="text-center py-8 text-gray-500"
+                                >
+                                    Nenhuma taxa de IVA encontrada
+                                </TableCell>
+                            </TableRow>
+                            <TableRow
+                                v-for="rate in filteredVatRates"
+                                :key="rate.id"
+                            >
+                                <TableCell class="font-medium">
+                                    {{ rate.name }}
+                                </TableCell>
+                                <TableCell>
+                                    <span
+                                        class="text-lg font-semibold text-blue-600 dark:text-blue-400"
+                                    >
+                                        {{ rate.rate }}%
+                                    </span>
+                                </TableCell>
+                                <TableCell>
+                                    <Badge
+                                        v-if="rate.is_default"
+                                        variant="default"
+                                        class="bg-green-600"
+                                    >
+                                        Padrão
+                                    </Badge>
+                                    <span v-else class="text-gray-400 text-sm"
+                                        >—</span
+                                    >
+                                </TableCell>
+                                <TableCell>
+                                    <Badge
+                                        :variant="
+                                            rate.active
+                                                ? 'default'
+                                                : 'destructive'
+                                        "
+                                    >
+                                        {{ rate.active ? "Ativo" : "Inativo" }}
+                                    </Badge>
+                                </TableCell>
+                                <TableCell class="text-right">
+                                    <div
+                                        class="flex items-center justify-end gap-2"
+                                    >
+                                        <Link
+                                            v-if="can.edit"
+                                            :href="
+                                                route('vat-rates.edit', rate.id)
+                                            "
+                                        >
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                class="h-8 w-8 p-0"
+                                            >
+                                                <Pencil class="h-4 w-4" />
+                                            </Button>
+                                        </Link>
+                                        <Button
+                                            v-if="can.delete"
+                                            variant="ghost"
+                                            size="sm"
+                                            class="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                            @click="deleteVatRate(rate.id)"
+                                        >
+                                            <Trash2 class="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        </TableBody>
+                    </Table>
+                </div>
+
+                <!-- Info -->
+                <div class="mt-4 text-sm text-gray-600 dark:text-gray-400">
+                    <p>
+                        Total:
+                        <strong>{{ filteredVatRates.length }}</strong>
+                        taxa(s) de IVA
+                    </p>
+                </div>
+            </div>
+        </div>
     </AuthenticatedLayout>
 </template>

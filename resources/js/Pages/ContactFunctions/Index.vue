@@ -59,7 +59,9 @@ const deleteFunction = (id) => {
         <div class="mb-6">
             <div class="flex items-center space-x-3">
                 <div class="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
-                    <UserCog class="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                    <UserCog
+                        class="h-6 w-6 text-purple-600 dark:text-purple-400"
+                    />
                 </div>
                 <div>
                     <h1
@@ -94,7 +96,9 @@ const deleteFunction = (id) => {
                     </span>
                 </li>
                 <li>/</li>
-                <li class="text-gray-900 dark:text-white">Funções de Contactos</li>
+                <li class="text-gray-900 dark:text-white">
+                    Funções de Contactos
+                </li>
             </ol>
         </nav>
 
@@ -124,117 +128,99 @@ const deleteFunction = (id) => {
                     >
                         <Button
                             class="bg-blue-600 hover:bg-blue-700 text-white"
-                                >
-                                    <Plus class="h-4 w-4 mr-2" />
-                                    Adicionar Função
-                                </Button>
-                            </Link>
-                        </div>
-
-                        <!-- Table -->
-                        <div class="rounded-md border">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Nome</TableHead>
-                                        <TableHead>Descrição</TableHead>
-                                        <TableHead>Estado</TableHead>
-                                        <TableHead class="text-right"
-                                            >Ações</TableHead
-                                        >
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    <TableRow
-                                        v-if="filteredFunctions.length === 0"
-                                    >
-                                        <TableCell
-                                            colspan="4"
-                                            class="text-center py-8 text-gray-500"
-                                        >
-                                            Nenhuma função encontrada
-                                        </TableCell>
-                                    </TableRow>
-                                    <TableRow
-                                        v-for="func in filteredFunctions"
-                                        :key="func.id"
-                                    >
-                                        <TableCell class="font-medium">
-                                            {{ func.name }}
-                                        </TableCell>
-                                        <TableCell>
-                                            <span
-                                                class="text-sm text-gray-600 dark:text-gray-400"
-                                            >
-                                                {{
-                                                    func.description ||
-                                                    "Sem descrição"
-                                                }}
-                                            </span>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge
-                                                :variant="
-                                                    func.active
-                                                        ? 'default'
-                                                        : 'destructive'
-                                                "
-                                            >
-                                                {{
-                                                    func.active
-                                                        ? "Ativo"
-                                                        : "Inativo"
-                                                }}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell class="text-right">
-                                            <div
-                                                class="flex items-center justify-end gap-2"
-                                            >
-                                                <Link
-                                                    v-if="can.edit"
-                                                    :href="
-                                                        route(
-                                                            'contact-functions.edit',
-                                                            func.id
-                                                        )
-                                                    "
-                                                >
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                    >
-                                                        <Pencil
-                                                            class="h-4 w-4"
-                                                        />
-                                                    </Button>
-                                                </Link>
-                                                <Button
-                                                    v-if="can.delete"
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    @click="
-                                                        deleteFunction(func.id)
-                                                    "
-                                                >
-                                                    <Trash2
-                                                        class="h-4 w-4 text-destructive"
-                                                    />
-                                                </Button>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                </TableBody>
-                            </Table>
-                        </div>
-
-                        <!-- Stats -->
-                        <div
-                            class="mt-6 text-sm text-gray-600 dark:text-gray-400"
                         >
-                            Total: {{ filteredFunctions.length }} função(ões)
-                        </div>
-                    </div>
+                            <Plus class="h-4 w-4 mr-2" />
+                            Adicionar Função
+                        </Button>
+                    </Link>
                 </div>
+
+                <!-- Table -->
+                <div class="rounded-md border">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Nome</TableHead>
+                                <TableHead>Descrição</TableHead>
+                                <TableHead>Estado</TableHead>
+                                <TableHead class="text-right">Ações</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            <TableRow v-if="filteredFunctions.length === 0">
+                                <TableCell
+                                    colspan="4"
+                                    class="text-center py-8 text-gray-500"
+                                >
+                                    Nenhuma função encontrada
+                                </TableCell>
+                            </TableRow>
+                            <TableRow
+                                v-for="func in filteredFunctions"
+                                :key="func.id"
+                            >
+                                <TableCell class="font-medium">
+                                    {{ func.name }}
+                                </TableCell>
+                                <TableCell>
+                                    <span
+                                        class="text-sm text-gray-600 dark:text-gray-400"
+                                    >
+                                        {{
+                                            func.description || "Sem descrição"
+                                        }}
+                                    </span>
+                                </TableCell>
+                                <TableCell>
+                                    <Badge
+                                        :variant="
+                                            func.active
+                                                ? 'default'
+                                                : 'destructive'
+                                        "
+                                    >
+                                        {{ func.active ? "Ativo" : "Inativo" }}
+                                    </Badge>
+                                </TableCell>
+                                <TableCell class="text-right">
+                                    <div
+                                        class="flex items-center justify-end gap-2"
+                                    >
+                                        <Link
+                                            v-if="can.edit"
+                                            :href="
+                                                route(
+                                                    'contact-functions.edit',
+                                                    func.id
+                                                )
+                                            "
+                                        >
+                                            <Button variant="ghost" size="sm">
+                                                <Pencil class="h-4 w-4" />
+                                            </Button>
+                                        </Link>
+                                        <Button
+                                            v-if="can.delete"
+                                            variant="ghost"
+                                            size="sm"
+                                            @click="deleteFunction(func.id)"
+                                        >
+                                            <Trash2
+                                                class="h-4 w-4 text-destructive"
+                                            />
+                                        </Button>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        </TableBody>
+                    </Table>
+                </div>
+
+                <!-- Stats -->
+                <div class="mt-6 text-sm text-gray-600 dark:text-gray-400">
+                    Total: {{ filteredFunctions.length }} função(ões)
+                </div>
+            </div>
+        </div>
     </AuthenticatedLayout>
 </template>

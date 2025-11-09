@@ -73,7 +73,9 @@ const handleSubmit = () => {
         <div class="mb-6">
             <div class="flex items-center space-x-3">
                 <div class="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-                    <Building class="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                    <Building
+                        class="h-6 w-6 text-blue-600 dark:text-blue-400"
+                    />
                 </div>
                 <div>
                     <h1
@@ -82,7 +84,8 @@ const handleSubmit = () => {
                         Configurações da Empresa
                     </h1>
                     <p class="text-gray-500 dark:text-gray-400">
-                        Personalize os dados que surgem na aplicação e documentos
+                        Personalize os dados que surgem na aplicação e
+                        documentos
                     </p>
                 </div>
             </div>
@@ -153,10 +156,7 @@ const handleSubmit = () => {
                                 alt="Logo Preview"
                                 class="max-w-full max-h-full object-contain rounded-lg"
                             />
-                            <Building
-                                v-else
-                                class="h-12 w-12 text-gray-400"
-                            />
+                            <Building v-else class="h-12 w-12 text-gray-400" />
                         </div>
 
                         <!-- Upload Button -->
@@ -180,9 +180,8 @@ const handleSubmit = () => {
                             <p
                                 class="mt-2 text-xs text-gray-600 dark:text-gray-400"
                             >
-                                PNG, JPG, GIF até 2MB. Este logotipo
-                                aparece no login, página inicial e
-                                documentos PDF.
+                                PNG, JPG, GIF até 2MB. Este logotipo aparece no
+                                login, página inicial e documentos PDF.
                             </p>
                             <p
                                 v-if="form.errors.logo"
@@ -287,10 +286,7 @@ const handleSubmit = () => {
                                 : "Guardar Alterações"
                         }}
                     </Button>
-                    <p
-                        v-else
-                        class="text-sm text-gray-600 dark:text-gray-400"
-                    >
+                    <p v-else class="text-sm text-gray-600 dark:text-gray-400">
                         Não tem permissão para editar dados da empresa
                     </p>
                 </div>
@@ -310,16 +306,16 @@ const handleSubmit = () => {
                 class="text-sm text-blue-800 dark:text-blue-400 space-y-1 list-disc list-inside"
             >
                 <li>
-                    <strong>Logotipo:</strong> Página de login,
-                    cabeçalho da aplicação e documentos PDF
+                    <strong>Logotipo:</strong> Página de login, cabeçalho da
+                    aplicação e documentos PDF
                 </li>
                 <li>
-                    <strong>Nome e NIF:</strong> Faturas, propostas,
-                    orçamentos e outros documentos
+                    <strong>Nome e NIF:</strong> Faturas, propostas, orçamentos
+                    e outros documentos
                 </li>
                 <li>
-                    <strong>Morada completa:</strong> Rodapé de
-                    documentos oficiais e relatórios
+                    <strong>Morada completa:</strong> Rodapé de documentos
+                    oficiais e relatórios
                 </li>
             </ul>
         </div>
