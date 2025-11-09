@@ -3,8 +3,9 @@
 ## Visão Geral
 
 O módulo de Encomendas é composto por dois submódulos interligados:
-- **Encomendas - Clientes**: Gestão de encomendas recebidas de clientes
-- **Encomendas - Fornecedores**: Gestão de encomendas enviadas a fornecedores
+
+-   **Encomendas - Clientes**: Gestão de encomendas recebidas de clientes
+-   **Encomendas - Fornecedores**: Gestão de encomendas enviadas a fornecedores
 
 Estes módulos permitem converter automaticamente encomendas de clientes em encomendas de fornecedores, agrupando itens por fornecedor.
 
@@ -48,12 +49,14 @@ Estes módulos permitem converter automaticamente encomendas de clientes em enco
 #### `CustomerOrder`
 
 **Fillable:**
+
 ```php
-'number', 'proposal_date', 'validity_date', 'customer_id', 
+'number', 'proposal_date', 'validity_date', 'customer_id',
 'status', 'total_value', 'notes'
 ```
 
 **Casts:**
+
 ```php
 'proposal_date' => 'date',
 'validity_date' => 'date',
@@ -61,25 +64,30 @@ Estes módulos permitem converter automaticamente encomendas de clientes em enco
 ```
 
 **Relações:**
-- `customer()` - BelongsTo Entity
-- `items()` - HasMany CustomerOrderItem
+
+-   `customer()` - BelongsTo Entity
+-   `items()` - HasMany CustomerOrderItem
 
 **Métodos:**
-- `generateNumber()` - Gera número sequencial EC-YYYY-####
-- `calculateTotal()` - Calcula soma dos totais dos itens
+
+-   `generateNumber()` - Gera número sequencial EC-YYYY-####
+-   `calculateTotal()` - Calcula soma dos totais dos itens
 
 **Boot Events:**
-- `creating` - Gera número automaticamente se não fornecido
+
+-   `creating` - Gera número automaticamente se não fornecido
 
 #### `CustomerOrderItem`
 
 **Fillable:**
+
 ```php
-'customer_order_id', 'article_id', 'supplier_id', 
+'customer_order_id', 'article_id', 'supplier_id',
 'quantity', 'unit_price', 'total', 'notes'
 ```
 
 **Casts:**
+
 ```php
 'quantity' => 'decimal:2',
 'unit_price' => 'decimal:2',
@@ -87,14 +95,16 @@ Estes módulos permitem converter automaticamente encomendas de clientes em enco
 ```
 
 **Relações:**
-- `customerOrder()` - BelongsTo CustomerOrder
-- `article()` - BelongsTo Article
-- `supplier()` - BelongsTo Entity
+
+-   `customerOrder()` - BelongsTo CustomerOrder
+-   `article()` - BelongsTo Article
+-   `supplier()` - BelongsTo Entity
 
 **Boot Events:**
-- `saving` - Calcula total (quantity × unit_price)
-- `saved` - Recalcula total da encomenda
-- `deleted` - Recalcula total da encomenda
+
+-   `saving` - Calcula total (quantity × unit_price)
+-   `saved` - Recalcula total da encomenda
+-   `deleted` - Recalcula total da encomenda
 
 ### 1.3 Controller: `CustomerOrderController`
 
@@ -186,42 +196,46 @@ Route::get('/customer-orders/{customerOrder}/pdf')
 ```
 
 **Roles com acesso:**
-- Super Admin
-- Administrador
-- Gestor Comercial
-- Gestor Financeiro
-- Visualizador
+
+-   Super Admin
+-   Administrador
+-   Gestor Comercial
+-   Gestor Financeiro
+-   Visualizador
 
 ### 1.6 Frontend (Vue 3 + Inertia.js)
 
 #### `Index.vue`
-- Header com ícone ShoppingCart (azul)
-- Breadcrumbs: Dashboard / Encomendas
-- Filtros: Search (número/cliente), Status
-- Botão "Nova Encomenda"
-- Tabela sem paginação (todas as encomendas)
-- Colunas: Data, Número, Validade, Cliente, Valor Total, Estado, Ações
-- Badges coloridos para estados
+
+-   Header com ícone ShoppingCart (azul)
+-   Breadcrumbs: Dashboard / Encomendas
+-   Filtros: Search (número/cliente), Status
+-   Botão "Nova Encomenda"
+-   Tabela sem paginação (todas as encomendas)
+-   Colunas: Data, Número, Validade, Cliente, Valor Total, Estado, Ações
+-   Badges coloridos para estados
 
 #### `Create.vue`
-- Informação do próximo número (auto-gerado)
-- Campos: Cliente*, Data de Criação, Validade, Estado*, Notas
-- Seção de artigos dinâmica
-- Por artigo: Artigo*, Fornecedor, Quantidade*, Preço Unit.*
-- Botão "Adicionar Artigo"
-- Preço automático ao selecionar artigo
-- Total calculado em tempo real
-- Quantidade: incremento de 1 em 1 (min: 1)
+
+-   Informação do próximo número (auto-gerado)
+-   Campos: Cliente*, Data de Criação, Validade, Estado*, Notas
+-   Seção de artigos dinâmica
+-   Por artigo: Artigo*, Fornecedor, Quantidade*, Preço Unit.\*
+-   Botão "Adicionar Artigo"
+-   Preço automático ao selecionar artigo
+-   Total calculado em tempo real
+-   Quantidade: incremento de 1 em 1 (min: 1)
 
 #### `Edit.vue`
-- Mesma estrutura do Create
-- Campo número readonly
-- Dados pré-preenchidos
-- Itens carregados da encomenda
-- **Botão "Converter para Encomendas Fornecedor"** (apenas se status = 'closed')
-  - Cor verde com ícone Truck
-  - Confirmação antes de converter
-  - Redireciona para customer-orders.index após conversão
+
+-   Mesma estrutura do Create
+-   Campo número readonly
+-   Dados pré-preenchidos
+-   Itens carregados da encomenda
+-   **Botão "Converter para Encomendas Fornecedor"** (apenas se status = 'closed')
+    -   Cor verde com ícone Truck
+    -   Confirmação antes de converter
+    -   Redireciona para customer-orders.index após conversão
 
 ---
 
@@ -263,12 +277,14 @@ Route::get('/customer-orders/{customerOrder}/pdf')
 #### `SupplierOrder`
 
 **Fillable:**
+
 ```php
-'number', 'order_date', 'delivery_date', 'supplier_id', 
+'number', 'order_date', 'delivery_date', 'supplier_id',
 'customer_order_id', 'status', 'total_value', 'notes'
 ```
 
 **Casts:**
+
 ```php
 'order_date' => 'date',
 'delivery_date' => 'date',
@@ -276,23 +292,27 @@ Route::get('/customer-orders/{customerOrder}/pdf')
 ```
 
 **Relações:**
-- `supplier()` - BelongsTo Entity
-- `customerOrder()` - BelongsTo CustomerOrder (encomenda origem)
-- `items()` - HasMany SupplierOrderItem
+
+-   `supplier()` - BelongsTo Entity
+-   `customerOrder()` - BelongsTo CustomerOrder (encomenda origem)
+-   `items()` - HasMany SupplierOrderItem
 
 **Métodos:**
-- `generateNumber()` - Gera EF-YYYY-####
-- `calculateTotal()` - Soma totais dos itens
+
+-   `generateNumber()` - Gera EF-YYYY-####
+-   `calculateTotal()` - Soma totais dos itens
 
 #### `SupplierOrderItem`
 
 **Fillable:**
+
 ```php
-'supplier_order_id', 'article_id', 'quantity', 
+'supplier_order_id', 'article_id', 'quantity',
 'unit_price', 'total', 'notes'
 ```
 
 **Casts:**
+
 ```php
 'quantity' => 'decimal:2',
 'unit_price' => 'decimal:2',
@@ -300,12 +320,14 @@ Route::get('/customer-orders/{customerOrder}/pdf')
 ```
 
 **Relações:**
-- `supplierOrder()` - BelongsTo SupplierOrder
-- `article()` - BelongsTo Article
+
+-   `supplierOrder()` - BelongsTo SupplierOrder
+-   `article()` - BelongsTo Article
 
 **Boot Events:**
-- `saving` - Calcula total
-- `saved/deleted` - Recalcula total da encomenda
+
+-   `saving` - Calcula total
+-   `saved/deleted` - Recalcula total da encomenda
 
 ### 2.3 Controller: `SupplierOrderController`
 
@@ -383,20 +405,23 @@ Route::get('/supplier-orders/{supplierOrder}/pdf')
 ### 2.6 Frontend
 
 #### `Index.vue`
-- Header verde (Package icon)
-- Filtros: Search, Status
-- Paginação corrigida (links null tratados)
-- Estados: Rascunho, Enviado, Confirmado, Recebido, Cancelado
+
+-   Header verde (Package icon)
+-   Filtros: Search, Status
+-   Paginação corrigida (links null tratados)
+-   Estados: Rascunho, Enviado, Confirmado, Recebido, Cancelado
 
 #### `Create.vue`
-- Campos: Fornecedor*, Data Encomenda, Data Entrega, Estado*, Notas
-- Artigos dinâmicos
-- Preço automático
-- Total calculado
+
+-   Campos: Fornecedor*, Data Encomenda, Data Entrega, Estado*, Notas
+-   Artigos dinâmicos
+-   Preço automático
+-   Total calculado
 
 #### `Edit.vue`
-- Edição completa
-- Mesmas funcionalidades do Create
+
+-   Edição completa
+-   Mesmas funcionalidades do Create
 
 ---
 
@@ -405,42 +430,45 @@ Route::get('/supplier-orders/{supplierOrder}/pdf')
 ### 3.1 Processo
 
 1. **Criar Encomenda Cliente**
-   - Adicionar artigos
-   - Associar fornecedores aos artigos (opcional)
-   - Guardar como "Rascunho"
+
+    - Adicionar artigos
+    - Associar fornecedores aos artigos (opcional)
+    - Guardar como "Rascunho"
 
 2. **Fechar Encomenda**
-   - Editar encomenda
-   - Alterar estado para "Fechado"
-   - Guardar
+
+    - Editar encomenda
+    - Alterar estado para "Fechado"
+    - Guardar
 
 3. **Converter**
-   - Botão verde aparece no topo da página de edição
-   - Clicar "Converter para Encomendas Fornecedor"
-   - Confirmar ação
+
+    - Botão verde aparece no topo da página de edição
+    - Clicar "Converter para Encomendas Fornecedor"
+    - Confirmar ação
 
 4. **Resultado**
-   - Sistema agrupa itens por `supplier_id`
-   - Cria uma `SupplierOrder` para cada fornecedor
-   - Cada encomenda:
-     - Status: draft
-     - order_date: now()
-     - customer_order_id: referência à origem
-     - notes: "Gerada a partir da encomenda de cliente EC-YYYY-####"
-   - Redireciona para customer-orders.index
-   - Mensagem de sucesso lista números criados
+    - Sistema agrupa itens por `supplier_id`
+    - Cria uma `SupplierOrder` para cada fornecedor
+    - Cada encomenda:
+        - Status: draft
+        - order_date: now()
+        - customer_order_id: referência à origem
+        - notes: "Gerada a partir da encomenda de cliente EC-YYYY-####"
+    - Redireciona para customer-orders.index
+    - Mensagem de sucesso lista números criados
 
 ### 3.2 Validações
 
-- Apenas encomendas com `status = 'closed'` podem ser convertidas
-- Apenas itens com `supplier_id != null` são incluídos
-- Se não houver itens com fornecedor, retorna erro
+-   Apenas encomendas com `status = 'closed'` podem ser convertidas
+-   Apenas itens com `supplier_id != null` são incluídos
+-   Se não houver itens com fornecedor, retorna erro
 
 ### 3.3 Rastreabilidade
 
-- Campo `customer_order_id` em `supplier_orders` mantém link
-- Relação `customerOrder()` permite navegar de volta
-- Notas automáticas identificam origem
+-   Campo `customer_order_id` em `supplier_orders` mantém link
+-   Relação `customerOrder()` permite navegar de volta
+-   Notas automáticas identificam origem
 
 ---
 
@@ -474,6 +502,7 @@ supplier-orders.delete
 ```
 
 **Execução:**
+
 ```bash
 php artisan db:seed --class=CustomerOrdersPermissionsSeeder
 php artisan db:seed --class=SupplierOrdersPermissionsSeeder
@@ -486,28 +515,13 @@ php artisan db:seed --class=SupplierOrdersPermissionsSeeder
 ### Configuração
 
 ```vue
-// AuthenticatedLayout.vue
-const allOrdersNavigationItems = [
-    {
-        name: "Encomendas - Clientes",
-        href: "customer-orders.index",
-        icon: ShoppingCart,
-        permission: "customer-orders", // Verifica customer-orders.*
-    },
-    {
-        name: "Encomendas - Fornecedores",
-        href: "supplier-orders.index",
-        icon: Truck,
-        permission: "supplier-orders", // Verifica supplier-orders.*
-    },
-    {
-        name: "Ordens de Trabalho",
-        href: "dashboard",
-        icon: Briefcase,
-        disabled: true,
-        permission: "work-orders",
-    },
-];
+// AuthenticatedLayout.vue const allOrdersNavigationItems = [ { name:
+"Encomendas - Clientes", href: "customer-orders.index", icon: ShoppingCart,
+permission: "customer-orders", // Verifica customer-orders.* }, { name:
+"Encomendas - Fornecedores", href: "supplier-orders.index", icon: Truck,
+permission: "supplier-orders", // Verifica supplier-orders.* }, { name: "Ordens
+de Trabalho", href: "dashboard", icon: Briefcase, disabled: true, permission:
+"work-orders", }, ];
 ```
 
 ---
@@ -519,6 +533,7 @@ const allOrdersNavigationItems = [
 **Problema:** Números duplicados por não verificar soft deletes
 
 **Solução:**
+
 ```php
 $lastOrder = static::withTrashed()
     ->where('number', 'like', $prefix . '%')
@@ -531,6 +546,7 @@ $lastOrder = static::withTrashed()
 **Problema:** Uso de colunas `is_customer`/`is_supplier` inexistentes
 
 **Solução:**
+
 ```php
 // Clientes
 Entity::whereIn('type', ['client', 'both'])
@@ -546,6 +562,7 @@ Entity::whereIn('type', ['supplier', 'both'])
 **Problema:** Tentativa de usar colunas em inglês (`name`, `unit_price`, `reference`)
 
 **Solução:**
+
 ```php
 Article::ativos()
     ->orderBy('nome')
@@ -557,6 +574,7 @@ Article::ativos()
 **Problema:** Backend aceitava `min:0.01` mas frontend usava `step="1" min="1"`
 
 **Solução:**
+
 ```php
 // Backend
 'items.*.quantity' => 'required|numeric|min:1'
@@ -570,10 +588,12 @@ step="1" min="1"
 **Problema:** Inertia Link não aceita `href=null`
 
 **Solução:**
+
 ```vue
 <template v-for="link in orders.links" :key="link.label">
     <Link v-if="link.url" :href="link.url" ... />
-    <span v-else ... /> <!-- Desabilitado -->
+    <span v-else ... />
+    <!-- Desabilitado -->
 </template>
 ```
 
@@ -583,31 +603,31 @@ step="1" min="1"
 
 ### 7.1 Funcionalidades Pendentes
 
-- [ ] Geração de PDF para encomendas (clientes e fornecedores)
-- [ ] Página de visualização (show) com mais detalhes
-- [ ] Histórico de alterações de estado
-- [ ] Notificações por email ao criar/enviar encomendas
-- [ ] Dashboard com estatísticas de encomendas
-- [ ] Exportação para Excel/CSV
-- [ ] Duplicar encomenda
-- [ ] Cancelamento com motivo
-- [ ] Anexos (ficheiros PDF, imagens)
+-   [ ] Geração de PDF para encomendas (clientes e fornecedores)
+-   [ ] Página de visualização (show) com mais detalhes
+-   [ ] Histórico de alterações de estado
+-   [ ] Notificações por email ao criar/enviar encomendas
+-   [ ] Dashboard com estatísticas de encomendas
+-   [ ] Exportação para Excel/CSV
+-   [ ] Duplicar encomenda
+-   [ ] Cancelamento com motivo
+-   [ ] Anexos (ficheiros PDF, imagens)
 
 ### 7.2 Otimizações
 
-- [ ] Cache de listas de clientes/fornecedores/artigos
-- [ ] Autocomplete para artigos (muitos registos)
-- [ ] Lazy loading de itens (para encomendas grandes)
-- [ ] Validação em tempo real no frontend
-- [ ] Testes unitários e feature tests
+-   [ ] Cache de listas de clientes/fornecedores/artigos
+-   [ ] Autocomplete para artigos (muitos registos)
+-   [ ] Lazy loading de itens (para encomendas grandes)
+-   [ ] Validação em tempo real no frontend
+-   [ ] Testes unitários e feature tests
 
 ### 7.3 UX
 
-- [ ] Atalhos de teclado
-- [ ] Calculadora de totais com IVA
-- [ ] Sugestões de fornecedores baseadas em histórico
-- [ ] Timeline visual do processo
-- [ ] Impressão otimizada
+-   [ ] Atalhos de teclado
+-   [ ] Calculadora de totais com IVA
+-   [ ] Sugestões de fornecedores baseadas em histórico
+-   [ ] Timeline visual do processo
+-   [ ] Impressão otimizada
 
 ---
 
@@ -639,19 +659,22 @@ php artisan test --filter SupplierOrder
 ## 9. Dependências
 
 ### Backend
-- Laravel 12.36.1
-- Spatie Laravel-Permission
-- Inertia.js Laravel Adapter
+
+-   Laravel 12.36.1
+-   Spatie Laravel-Permission
+-   Inertia.js Laravel Adapter
 
 ### Frontend
-- Vue 3
-- Inertia.js
-- Lucide Vue Next (ícones)
-- Vite 7.1.12
+
+-   Vue 3
+-   Inertia.js
+-   Lucide Vue Next (ícones)
+-   Vite 7.1.12
 
 ### Base de Dados
-- MySQL
-- Tabelas relacionadas: `entities`, `articles`, `customer_orders`, `customer_order_items`, `supplier_orders`, `supplier_order_items`
+
+-   MySQL
+-   Tabelas relacionadas: `entities`, `articles`, `customer_orders`, `customer_order_items`, `supplier_orders`, `supplier_order_items`
 
 ---
 

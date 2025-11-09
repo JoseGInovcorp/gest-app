@@ -50,7 +50,7 @@ class CustomerOrderController extends Controller
 
         $articles = Article::ativos()
             ->orderBy('nome')
-            ->get(['id', 'nome as name', 'preco as unit_price', 'referencia as reference']);
+            ->get(['id', 'nome as name', 'preco_com_iva as unit_price', 'referencia as reference']);
 
         $suppliers = Entity::whereIn('type', ['supplier', 'both'])
             ->where('active', true)
@@ -142,7 +142,7 @@ class CustomerOrderController extends Controller
 
         $articles = Article::ativos()
             ->orderBy('nome')
-            ->get(['id', 'nome as name', 'preco as unit_price', 'referencia as reference']);
+            ->get(['id', 'nome as name', 'preco_com_iva as unit_price', 'referencia as reference']);
 
         $suppliers = Entity::whereIn('type', ['supplier', 'both'])
             ->where('active', true)

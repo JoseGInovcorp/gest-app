@@ -2,6 +2,83 @@
 
 ---
 
+## [0.10.1] — 2025-11-09
+
+### 💰 Cálculo Automático de Preço com IVA nos Artigos
+
+**Melhoria no Módulo de Artigos para Preço Final com IVA**
+
+#### 🎯 Funcionalidade Implementada
+
+**Campo Preço com IVA:**
+
+-   Novo campo `preco_com_iva` na tabela `articles`
+-   Cálculo automático: `preço base × (1 + IVA%/100)`
+-   Atualização via model event (boot/saving)
+-   Exibição em tempo real nos formulários
+
+#### 🎨 Interface de Artigos
+
+**Formulários (Create e Edit):**
+
+-   Campo "Preço Final (com IVA)" readonly
+-   Cálculo dinâmico ao alterar preço base ou taxa IVA
+-   Visual destacado (background cinza, valor em negrito)
+-   Formato: `12.30€`
+
+#### 🔄 Integração com Encomendas
+
+**Uso nas Encomendas de Clientes:**
+
+-   Ao selecionar artigo, usa `preco_com_iva` em vez de `preco`
+-   Preço unitário já inclui IVA aplicado
+-   CustomerOrderController atualizado (create e edit)
+-   Query alterada: `'preco_com_iva as unit_price'`
+
+#### 🗃️ Base de Dados
+
+**Migration:**
+
+-   `add_preco_com_iva_to_articles_table`
+-   Campo: `decimal(10,2)` após `iva_percentagem`
+-   Nullable para retrocompatibilidade
+
+**Model Article:**
+
+-   Adicionado ao `$fillable` e `$casts`
+-   Boot event para cálculo automático no save
+-   Accessor `getPrecoComIvaFormatadoAttribute()`
+
+#### 📊 Migração de Dados
+
+**Seeder:**
+
+-   `UpdateArticlesPriceSeeder` - Atualiza artigos existentes
+-   Executa `save()` em todos os artigos (trigger boot event)
+-   7 artigos atualizados com sucesso
+
+#### 🔧 Alterações Técnicas
+
+**Ficheiros Modificados:**
+
+-   `database/migrations/2025_11_09_203614_add_preco_com_iva_to_articles_table.php`
+-   `app/Models/Article.php` - Boot event e accessor
+-   `app/Http/Controllers/CustomerOrderController.php` - Queries nos métodos create() e edit()
+-   `resources/js/Pages/Articles/Create.vue` - Campo calculado
+-   `resources/js/Pages/Articles/Edit.vue` - Campo calculado
+
+**Computed Property (Vue):**
+
+```javascript
+const precoComIva = computed(() => {
+    const preco = parseFloat(form.preco) || 0;
+    const iva = parseFloat(form.iva_percentagem) || 0;
+    return preco * (1 + iva / 100);
+});
+```
+
+---
+
 ## [0.10.0] — 2025-11-09
 
 ### 📦 Módulo de Encomendas (Clientes e Fornecedores)
@@ -11,92 +88,105 @@
 #### 🎯 Funcionalidades Principais
 
 **Encomendas - Clientes:**
-- CRUD completo de encomendas de clientes
-- Numeração automática: EC-YYYY-#### (Ex: EC-2025-0001)
-- Gestão de artigos por encomenda com fornecedores associados
-- Estados: Rascunho, Fechado
-- Conversão automática para encomendas de fornecedores
-- Cálculo automático de totais
+
+-   CRUD completo de encomendas de clientes
+-   Numeração automática: EC-YYYY-#### (Ex: EC-2025-0001)
+-   Gestão de artigos por encomenda com fornecedores associados
+-   Estados: Rascunho, Fechado
+-   Conversão automática para encomendas de fornecedores
+-   Cálculo automático de totais
 
 **Encomendas - Fornecedores:**
-- CRUD completo de encomendas a fornecedores
-- Numeração automática: EF-YYYY-#### (Ex: EF-2025-0001)
-- Estados: Rascunho, Enviado, Confirmado, Recebido, Cancelado
-- Rastreamento de origem (customer_order_id)
-- Gestão de artigos e quantidades
-- Paginação (15 registos por página)
+
+-   CRUD completo de encomendas a fornecedores
+-   Numeração automática: EF-YYYY-#### (Ex: EF-2025-0001)
+-   Estados: Rascunho, Enviado, Confirmado, Recebido, Cancelado
+-   Rastreamento de origem (customer_order_id)
+-   Gestão de artigos e quantidades
+-   Paginação (15 registos por página)
 
 #### ✨ Conversão Inteligente
 
 **Processo de Conversão:**
-- Botão "Converter para Encomendas Fornecedor" (apenas quando status = fechado)
-- Agrupa itens por fornecedor automaticamente
-- Cria uma encomenda separada para cada fornecedor
-- Mantém rastreabilidade com encomenda de origem
-- Mensagem de sucesso com números criados
+
+-   Botão "Converter para Encomendas Fornecedor" (apenas quando status = fechado)
+-   Agrupa itens por fornecedor automaticamente
+-   Cria uma encomenda separada para cada fornecedor
+-   Mantém rastreabilidade com encomenda de origem
+-   Mensagem de sucesso com números criados
 
 #### 🗃️ Base de Dados
 
 **Tabelas Criadas:**
-- `customer_orders` - Encomendas de clientes
-- `customer_order_items` - Itens das encomendas de clientes
-- `supplier_orders` - Encomendas a fornecedores
-- `supplier_order_items` - Itens das encomendas a fornecedores
+
+-   `customer_orders` - Encomendas de clientes
+-   `customer_order_items` - Itens das encomendas de clientes
+-   `supplier_orders` - Encomendas a fornecedores
+-   `supplier_order_items` - Itens das encomendas a fornecedores
 
 **Funcionalidades:**
-- Soft deletes em todas as tabelas
-- Auto-cálculo de totais via events
-- Numeração única com prevenção de duplicados (withTrashed)
-- Relações completas entre entidades
+
+-   Soft deletes em todas as tabelas
+-   Auto-cálculo de totais via events
+-   Numeração única com prevenção de duplicados (withTrashed)
+-   Relações completas entre entidades
 
 #### 🔐 Permissões
 
 **Novas Permissões:**
-- `customer-orders.create|read|update|delete`
-- `supplier-orders.create|update|update|delete`
+
+-   `customer-orders.create|read|update|delete`
+-   `supplier-orders.create|update|update|delete`
 
 **Auto-atribuição:**
-- Todos os roles com `orders.*` recebem automaticamente ambos os conjuntos
-- 5 roles configurados: Super Admin, Administrador, Gestor Comercial, Gestor Financeiro, Visualizador
+
+-   Todos os roles com `orders.*` recebem automaticamente ambos os conjuntos
+-   5 roles configurados: Super Admin, Administrador, Gestor Comercial, Gestor Financeiro, Visualizador
 
 #### 🎨 Interface (Vue 3 + Inertia.js)
 
 **Encomendas - Clientes:**
-- Ícone: ShoppingCart (azul)
-- Listagem com filtros de pesquisa e estado
-- Formulários de criação/edição com validação
-- Auto-preenchimento de preços ao selecionar artigo
-- Quantidade: incremento de 1 em 1
-- Botão de conversão em encomendas fechadas
+
+-   Ícone: ShoppingCart (azul)
+-   Listagem com filtros de pesquisa e estado
+-   Formulários de criação/edição com validação
+-   Auto-preenchimento de preços ao selecionar artigo
+-   Quantidade: incremento de 1 em 1
+-   Botão de conversão em encomendas fechadas
 
 **Encomendas - Fornecedores:**
-- Ícone: Truck (verde)
-- Paginação com tratamento null-safe de links
-- Badges coloridos por estado
-- Filtros de pesquisa e estado
-- Formulários completos de gestão
+
+-   Ícone: Truck (verde)
+-   Paginação com tratamento null-safe de links
+-   Badges coloridos por estado
+-   Filtros de pesquisa e estado
+-   Formulários completos de gestão
 
 #### 🐛 Correções Implementadas
 
 1. **Numeração Duplicada**
-   - Adicionado `withTrashed()` aos métodos `generateNumber()`
-   - Previne duplicados mesmo com soft deletes
+
+    - Adicionado `withTrashed()` aos métodos `generateNumber()`
+    - Previne duplicados mesmo com soft deletes
 
 2. **Queries de Entities**
-   - Corrigido uso de `is_customer`/`is_supplier` para `type` enum
-   - Queries: `whereIn('type', ['client', 'both'])` e `whereIn('type', ['supplier', 'both'])`
+
+    - Corrigido uso de `is_customer`/`is_supplier` para `type` enum
+    - Queries: `whereIn('type', ['client', 'both'])` e `whereIn('type', ['supplier', 'both'])`
 
 3. **Colunas de Articles**
-   - Mapeamento de colunas portuguesas: `nome as name`, `preco as unit_price`, `referencia as reference`
-   - Uso do scope `ativos()` para artigos ativos
+
+    - Mapeamento de colunas portuguesas: `nome as name`, `preco as unit_price`, `referencia as reference`
+    - Uso do scope `ativos()` para artigos ativos
 
 4. **Validação de Quantidade**
-   - Backend: `min:1` (inteiros)
-   - Frontend: `step="1" min="1"`
+
+    - Backend: `min:1` (inteiros)
+    - Frontend: `step="1" min="1"`
 
 5. **Paginação Null-Safe**
-   - Tratamento de links com `href=null` (Previous/Next desabilitados)
-   - Conditional rendering: `<Link v-if="link.url">` / `<span v-else>`
+    - Tratamento de links com `href=null` (Previous/Next desabilitados)
+    - Conditional rendering: `<Link v-if="link.url">` / `<span v-else>`
 
 #### 📋 Rotas Adicionadas
 
@@ -113,39 +203,42 @@
 
 #### 🧪 Seeders
 
-- `CustomerOrdersPermissionsSeeder` - Cria e atribui permissões
-- `SupplierOrdersPermissionsSeeder` - Cria e atribui permissões
+-   `CustomerOrdersPermissionsSeeder` - Cria e atribui permissões
+-   `SupplierOrdersPermissionsSeeder` - Cria e atribui permissões
 
 #### 📚 Documentação
 
-- Criado `docs/orders-module.md` com documentação completa:
-  - Estrutura de base de dados
-  - Models e relações
-  - Controllers e métodos
-  - Rotas e permissões
-  - Fluxo de conversão
-  - Correções implementadas
-  - Melhorias futuras
+-   Criado `docs/orders-module.md` com documentação completa:
+    -   Estrutura de base de dados
+    -   Models e relações
+    -   Controllers e métodos
+    -   Rotas e permissões
+    -   Fluxo de conversão
+    -   Correções implementadas
+    -   Melhorias futuras
 
 #### 🔄 Menu Sidebar
 
 **Adicionado em "Gestão de Vendas":**
-- Encomendas - Clientes (ShoppingCart, azul)
-- Encomendas - Fornecedores (Truck, verde)
-- Ordens de Trabalho (Briefcase, desabilitado)
+
+-   Encomendas - Clientes (ShoppingCart, azul)
+-   Encomendas - Fornecedores (Truck, verde)
+-   Ordens de Trabalho (Briefcase, desabilitado)
 
 #### ⚙️ Configurações
 
 **Validações:**
-- Cliente/Fornecedor obrigatório
-- Mínimo 1 item por encomenda
-- Quantidade mínima: 1
-- Preço unitário obrigatório
+
+-   Cliente/Fornecedor obrigatório
+-   Mínimo 1 item por encomenda
+-   Quantidade mínima: 1
+-   Preço unitário obrigatório
 
 **Auto-preenchimento:**
-- Preço unitário ao selecionar artigo
-- Total da linha ao alterar quantidade/preço
-- Total geral da encomenda
+
+-   Preço unitário ao selecionar artigo
+-   Total da linha ao alterar quantidade/preço
+-   Total geral da encomenda
 
 ---
 

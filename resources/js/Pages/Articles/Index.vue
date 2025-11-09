@@ -120,10 +120,29 @@
                                 >
                                     {{ article.descricao || "Sem descrição" }}
                                 </p>
-                                <p class="text-sm font-medium mt-1">
-                                    {{ article.preco }}€ (IVA:
-                                    {{ article.iva_percentagem }}%)
-                                </p>
+                                <div class="mt-1 space-y-0.5">
+                                    <p class="text-sm">
+                                        <span
+                                            class="text-gray-600 dark:text-gray-400"
+                                            >Preço s/ IVA:</span
+                                        >
+                                        <span class="font-medium ml-1"
+                                            >{{ article.preco }}€</span
+                                        >
+                                    </p>
+                                    <p class="text-sm">
+                                        <span
+                                            class="text-gray-600 dark:text-gray-400"
+                                            >Preço c/ IVA ({{
+                                                article.iva_percentagem
+                                            }}%):</span
+                                        >
+                                        <span
+                                            class="font-semibold text-green-600 dark:text-green-400 ml-1"
+                                            >{{ article.preco_com_iva }}€</span
+                                        >
+                                    </p>
+                                </div>
                             </div>
                             <div class="flex items-center gap-2 ml-4">
                                 <Link

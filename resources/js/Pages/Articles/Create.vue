@@ -33,6 +33,12 @@ const isFormValid = computed(() => {
     return form.nome && form.preco > 0 && form.iva_percentagem && form.estado;
 });
 
+const precoComIva = computed(() => {
+    const preco = parseFloat(form.preco) || 0;
+    const iva = parseFloat(form.iva_percentagem) || 0;
+    return preco * (1 + iva / 100);
+});
+
 const handleSubmit = () => {
     form.post(route("articles.store"), {
         forceFormData: true,
@@ -200,6 +206,20 @@ const removeImage = () => {
                                     {{ opcao.label }}
                                 </option>
                             </Select>
+                        </FormField>
+
+                        <FormField
+                            id="preco_com_iva"
+                            label="Preço Final (com IVA)"
+                            description="Valor calculado automaticamente"
+                        >
+                            <div
+                                class="flex items-center h-10 px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200"
+                            >
+                                <span class="font-medium"
+                                    >{{ precoComIva.toFixed(2) }}€</span
+                                >
+                            </div>
                         </FormField>
 
                         <FormField

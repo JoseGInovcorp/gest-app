@@ -15,6 +15,7 @@ class Article extends Model
         'descricao',
         'preco',
         'iva_percentagem',
+        'preco_com_iva',
         'foto',
         'observacoes',
         'estado'
@@ -23,7 +24,23 @@ class Article extends Model
     protected $casts = [
         'preco' => 'decimal:2',
         'iva_percentagem' => 'decimal:2',
+        'preco_com_iva' => 'decimal:2',
     ];
+
+    /**
+     * Boot do modelo - eventos
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($article) {
+            // Calcular preço com IVA automaticamente
+            if ($article->preco && $article->iva_percentagem !== null) {
+                $article->preco_com_iva = $article->preco * (1 + ($article->iva_percentagem / 100));
+            }
+        });
+    }
 
     /**
      * Gerar próxima referência automática (ART001, ART002...)
@@ -57,6 +74,14 @@ class Article extends Model
     public function getPrecoFormatadoAttribute()
     {
         return number_format($this->preco, 2, ',', '.') . '€';
+    }
+
+    /**
+     * Accessor para preço com IVA formatado
+     */
+    public function getPrecoComIvaFormatadoAttribute()
+    {
+        return number_format($this->preco_com_iva, 2, ',', '.') . '€';
     }
 
     /**
