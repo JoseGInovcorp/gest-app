@@ -1,5 +1,5 @@
 <template>
-    <Head title="Encomendas" />
+    <Head title="Encomendas - Clientes" />
 
     <AuthenticatedLayout>
         <!-- Header -->
@@ -14,7 +14,7 @@
                     <h1
                         class="text-2xl font-bold text-gray-900 dark:text-white"
                     >
-                        Encomendas
+                        Encomendas - Clientes
                     </h1>
                     <p class="text-gray-500 dark:text-gray-400">
                         Gerir encomendas de clientes
@@ -37,7 +37,7 @@
                     </Link>
                 </li>
                 <li>/</li>
-                <li class="text-gray-900 dark:text-white">Encomendas</li>
+                <li class="text-gray-900 dark:text-white">Encomendas - Clientes</li>
             </ol>
         </nav>
 
@@ -138,7 +138,7 @@
                     <tbody
                         class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"
                     >
-                        <tr v-if="filteredOrders.length === 0">
+                        <tr v-if="orders.data.length === 0">
                             <td
                                 colspan="7"
                                 class="px-6 py-12 text-center text-gray-500 dark:text-gray-400"
@@ -159,7 +159,7 @@
                             </td>
                         </tr>
                         <tr
-                            v-for="order in filteredOrders"
+                            v-for="order in orders.data"
                             :key="order.id"
                             class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                         >
@@ -183,7 +183,7 @@
                             <td
                                 class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"
                             >
-                                {{ order.customer }}
+                                {{ order.customer.name }}
                             </td>
                             <td
                                 class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100"
@@ -239,12 +239,48 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Pagination -->
+            <div
+                v-if="orders.data.length > 0"
+                class="px-6 py-4 border-t border-gray-200 dark:border-gray-700"
+            >
+                <div class="flex items-center justify-between">
+                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                        Mostrando {{ orders.from }} a {{ orders.to }} de
+                        {{ orders.total }} registos
+                    </div>
+                    <div class="flex gap-2">
+                        <template
+                            v-for="link in orders.links"
+                            :key="link.label"
+                        >
+                            <Link
+                                v-if="link.url"
+                                :href="link.url"
+                                v-html="link.label"
+                                :class="[
+                                    'px-3 py-1 text-sm rounded',
+                                    link.active
+                                        ? 'bg-blue-600 text-white'
+                                        : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600',
+                                ]"
+                            />
+                            <span
+                                v-else
+                                v-html="link.label"
+                                class="px-3 py-1 text-sm rounded bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 opacity-50 cursor-not-allowed"
+                            />
+                        </template>
+                    </div>
+                </div>
+            </div>
         </div>
     </AuthenticatedLayout>
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref } from "vue";
 import { Head, Link, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import {
@@ -257,32 +293,12 @@ import {
 } from "lucide-vue-next";
 
 const props = defineProps({
-    orders: Array,
+    orders: Object,
+    filters: Object,
 });
 
-const search = ref("");
-const statusFilter = ref("");
-
-const filteredOrders = computed(() => {
-    let result = props.orders;
-
-    // Filtro de pesquisa
-    if (search.value) {
-        const searchLower = search.value.toLowerCase();
-        result = result.filter(
-            (order) =>
-                order.number.toLowerCase().includes(searchLower) ||
-                order.customer.toLowerCase().includes(searchLower)
-        );
-    }
-
-    // Filtro de estado
-    if (statusFilter.value) {
-        result = result.filter((order) => order.status === statusFilter.value);
-    }
-
-    return result;
-});
+const search = ref(props.filters?.search || "");
+const statusFilter = ref(props.filters?.status || "");
 
 const formatDate = (date) => {
     if (!date) return "-";
@@ -310,6 +326,16 @@ const confirmDelete = (order) => {
 };
 
 const filterOrders = () => {
-    // Reactivity handled by computed property
+    router.get(
+        route("customer-orders.index"),
+        {
+            search: search.value,
+            status: statusFilter.value,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+        }
+    );
 };
 </script>

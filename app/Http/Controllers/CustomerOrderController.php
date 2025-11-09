@@ -15,25 +15,32 @@ class CustomerOrderController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $orders = CustomerOrder::with('customer')
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function ($order) {
-                return [
-                    'id' => $order->id,
-                    'number' => $order->number,
-                    'proposal_date' => $order->proposal_date?->format('Y-m-d'),
-                    'validity_date' => $order->validity_date?->format('Y-m-d'),
-                    'customer' => $order->customer->name,
-                    'total_value' => $order->total_value,
-                    'status' => $order->status,
-                ];
+        $query = CustomerOrder::with('customer')
+            ->orderBy('created_at', 'desc');
+
+        // Filtro de pesquisa
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('number', 'like', "%{$search}%")
+                    ->orWhereHas('customer', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    });
             });
+        }
+
+        // Filtro de estado
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $orders = $query->paginate(15);
 
         return Inertia::render('CustomerOrders/Index', [
             'orders' => $orders,
+            'filters' => $request->only(['search', 'status']),
         ]);
     }
 
