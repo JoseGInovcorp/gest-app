@@ -25,7 +25,7 @@ const isFormValid = computed(() => {
 
 const submit = () => {
     if (!isFormValid.value) return;
-    form.put(route("contact-functions.update", props.function.id));
+    form.patch(route("contact-functions.update", props.function.id));
 };
 </script>
 

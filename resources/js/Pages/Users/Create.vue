@@ -157,15 +157,19 @@ const handleSubmit = () => {
                             label="Password"
                             required
                             :error="form.errors.password"
-                            description="Mínimo 8 caracteres"
                         >
                             <Input
                                 v-model="form.password"
                                 id="password"
                                 type="password"
-                                placeholder="••••••••"
+                                placeholder="Mínimo 8 caracteres"
                                 required
                             />
+                            <p
+                                class="mt-1 text-xs text-gray-500 dark:text-gray-400"
+                            >
+                                A password deve ter no mínimo 8 caracteres.
+                            </p>
                         </FormField>
 
                         <!-- Confirmar Password -->
@@ -179,9 +183,34 @@ const handleSubmit = () => {
                                 v-model="form.password_confirmation"
                                 id="password_confirmation"
                                 type="password"
-                                placeholder="••••••••"
+                                placeholder="Repita a password"
                                 required
                             />
+                            <p
+                                v-if="form.password && form.password.length > 0"
+                                class="mt-1 text-xs"
+                                :class="
+                                    form.password ===
+                                        form.password_confirmation &&
+                                    form.password.length >= 8
+                                        ? 'text-green-600 dark:text-green-400'
+                                        : 'text-red-600 dark:text-red-400'
+                                "
+                            >
+                                <span v-if="form.password.length < 8">
+                                    ⚠️ Password deve ter pelo menos 8 caracteres
+                                    ({{ form.password.length }}/8)
+                                </span>
+                                <span
+                                    v-else-if="
+                                        form.password !==
+                                        form.password_confirmation
+                                    "
+                                >
+                                    ⚠️ As passwords não coincidem
+                                </span>
+                                <span v-else> ✓ Passwords coincidem </span>
+                            </p>
                         </FormField>
 
                         <!-- Estado Ativo -->

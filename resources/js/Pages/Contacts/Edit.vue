@@ -393,7 +393,7 @@ const getEntityTypeLabel = (type) => {
 const handleSubmit = () => {
     processing.value = true;
 
-    form.put(route("contacts.update", props.contact.id), {
+    form.patch(route("contacts.update", props.contact.id), {
         onSuccess: () => {
             // Redirecionamento é feito pelo controller
         },

@@ -59,6 +59,10 @@
                 >
                     <ContactsDataTable
                         :contacts="contacts.data"
+                        :can-create="can.create"
+                        :can-view="can.view"
+                        :can-edit="can.edit"
+                        :can-delete="can.delete"
                         @edit="handleEdit"
                         @delete="handleDelete"
                         @create="handleCreate"

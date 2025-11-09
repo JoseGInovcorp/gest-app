@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, inject } from "vue";
 import { Head, Link, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Button from "@/Components/ui/Button.vue";
@@ -13,8 +13,20 @@ import Input from "@/Components/ui/Input.vue";
 import Badge from "@/Components/ui/Badge.vue";
 import { Plus, Search, Pencil, Trash2, Percent } from "lucide-vue-next";
 
+// Inject permission checker with fallback
+const hasPermission = inject("hasPermission", () => () => false);
+
 const props = defineProps({
     vatRates: Array,
+    can: {
+        type: Object,
+        default: () => ({
+            create: false,
+            view: true,
+            edit: false,
+            delete: false,
+        }),
+    },
 });
 
 const searchQuery = ref("");
@@ -80,7 +92,10 @@ const deleteVatRate = (id) => {
                                 </div>
                             </div>
 
-                            <Link :href="route('vat-rates.create')">
+                            <Link
+                                v-if="can.create"
+                                :href="route('vat-rates.create')"
+                            >
                                 <Button
                                     class="ml-4 bg-blue-600 hover:bg-blue-700 text-white"
                                 >
@@ -163,6 +178,7 @@ const deleteVatRate = (id) => {
                                                 class="flex items-center justify-end gap-2"
                                             >
                                                 <Link
+                                                    v-if="can.edit"
                                                     :href="
                                                         route(
                                                             'vat-rates.edit',
@@ -181,6 +197,7 @@ const deleteVatRate = (id) => {
                                                     </Button>
                                                 </Link>
                                                 <Button
+                                                    v-if="can.delete"
                                                     variant="ghost"
                                                     size="sm"
                                                     class="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"

@@ -62,7 +62,13 @@ class ContactController extends Controller
         return Inertia::render('Contacts/Index', [
             'contacts' => $contacts,
             'entities' => $entities,
-            'filters' => $request->only(['search', 'status', 'entity_id'])
+            'filters' => $request->only(['search', 'status', 'entity_id']),
+            'can' => [
+                'create' => $request->user()->can('contacts.create'),
+                'view' => $request->user()->can('contacts.read'),
+                'edit' => $request->user()->can('contacts.update'),
+                'delete' => $request->user()->can('contacts.delete'),
+            ]
         ]);
     }
 

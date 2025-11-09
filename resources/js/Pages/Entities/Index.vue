@@ -15,28 +15,28 @@ const props = defineProps({
 
 // Event handlers
 const handleCreate = () => {
-    router.visit(route("clients.create"));
+    router.visit(route("entities.create"));
 };
 
 const handleView = (entity) => {
-    router.visit(route("clients.show", entity.id));
+    router.visit(route("entities.show", entity.id));
 };
 
 const handleEdit = (entity) => {
-    router.visit(route("clients.edit", entity.id));
+    router.visit(route("entities.edit", entity.id));
 };
 
 const handleDelete = (entity) => {
     if (
-        confirm(`Tem certeza que deseja eliminar o cliente "${entity.name}"?`)
+        confirm(`Tem certeza que deseja eliminar a entidade "${entity.name}"?`)
     ) {
-        router.delete(route("clients.destroy", entity.id));
+        router.delete(route("entities.destroy", entity.id));
     }
 };
 </script>
 
 <template>
-    <Head :title="pageTitle" />
+    <Head :title="pageTitle || 'Entidades'" />
 
     <AuthenticatedLayout>
         <!-- Header -->
@@ -49,41 +49,20 @@ const handleDelete = (entity) => {
                     <h1
                         class="text-2xl font-bold text-gray-900 dark:text-white"
                     >
-                        {{ pageTitle }}
+                        {{ pageTitle || "Entidades" }}
                     </h1>
-                    <p class="text-gray-500 dark:text-gray-400">
-                        Gerir informações dos clientes
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        Gestão de todas as entidades do sistema
                     </p>
                 </div>
             </div>
         </div>
 
-        <!-- Breadcrumbs -->
-        <nav class="mb-6">
-            <ol
-                class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400"
-            >
-                <li>
-                    <Link
-                        :href="route('dashboard')"
-                        class="hover:text-gray-700 dark:hover:text-gray-200"
-                    >
-                        Dashboard
-                    </Link>
-                </li>
-                <li>/</li>
-                <li class="text-gray-900 dark:text-white">Clientes</li>
-            </ol>
-        </nav>
-
-        <!-- Data Table -->
+        <!-- DataTable -->
         <EntitiesDataTable
-            :entities="entities.data || []"
-            :can-create="can.create"
-            :can-view="can.view"
-            :can-edit="can.edit"
-            :can-delete="can.delete"
-            entity-type="client"
+            :entities="entities"
+            :filters="filters"
+            :entity-type="entityType || 'all'"
             @create="handleCreate"
             @view="handleView"
             @edit="handleEdit"

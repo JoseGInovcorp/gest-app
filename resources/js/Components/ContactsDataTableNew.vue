@@ -12,6 +12,7 @@
                 {{ filteredContacts.length }} contacto(s)
             </Badge>
             <Button
+                v-if="canCreate"
                 @click="$emit('create')"
                 class="bg-blue-600 hover:bg-blue-700"
             >
@@ -27,10 +28,16 @@
 
         <template #actions="{ row }">
             <div class="flex items-center space-x-2">
-                <Button variant="outline" size="sm" @click="$emit('edit', row)">
+                <Button
+                    v-if="canEdit"
+                    variant="outline"
+                    size="sm"
+                    @click="$emit('edit', row)"
+                >
                     <Edit class="w-4 h-4" />
                 </Button>
                 <Button
+                    v-if="canDelete"
                     variant="destructive"
                     size="sm"
                     @click="$emit('delete', row)"
@@ -61,6 +68,22 @@ const props = defineProps({
         default: () => [],
     },
     loading: {
+        type: Boolean,
+        default: false,
+    },
+    canCreate: {
+        type: Boolean,
+        default: false,
+    },
+    canView: {
+        type: Boolean,
+        default: true,
+    },
+    canEdit: {
+        type: Boolean,
+        default: false,
+    },
+    canDelete: {
         type: Boolean,
         default: false,
     },

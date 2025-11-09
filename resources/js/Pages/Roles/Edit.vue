@@ -29,38 +29,44 @@ const isFormValid = computed(() => {
 
 // Methods
 const handleSubmit = () => {
-    form.put(route("roles.update", props.role.id));
+    form.patch(route("roles.update", props.role.id));
 };
 
-const toggleModule = (module) => {
-    const modulePermissions = Object.values(module.permissions).map(
-        (p) => p.name
-    );
-    const isModuleActive = modulePermissions.every((p) =>
-        form.permissions.includes(p)
-    );
-
-    if (isModuleActive) {
-        // Remove all module permissions
-        modulePermissions.forEach((p) => {
-            const index = form.permissions.indexOf(p);
-            if (index !== -1) form.permissions.splice(index, 1);
-        });
+// Toggle individual permission
+const togglePermission = (permissionName) => {
+    const index = form.permissions.indexOf(permissionName);
+    if (index !== -1) {
+        form.permissions.splice(index, 1);
     } else {
-        // Add all module permissions
-        modulePermissions.forEach((p) => {
-            if (!form.permissions.includes(p)) {
-                form.permissions.push(p);
-            }
-        });
+        form.permissions.push(permissionName);
     }
 };
 
-const isModuleActive = (module) => {
-    const modulePermissions = Object.values(module.permissions).map(
-        (p) => p.name
-    );
-    return modulePermissions.every((p) => form.permissions.includes(p));
+// Check if permission is active
+const isPermissionActive = (permissionName) => {
+    return form.permissions.includes(permissionName);
+};
+
+// Get permission label in Portuguese
+const getPermissionLabel = (action) => {
+    const labels = {
+        create: "Criar",
+        read: "Visualizar",
+        update: "Editar",
+        delete: "Eliminar",
+    };
+    return labels[action] || action;
+};
+
+// Get action color
+const getActionColor = (action) => {
+    const colors = {
+        create: "text-green-600 dark:text-green-400",
+        read: "text-blue-600 dark:text-blue-400",
+        update: "text-yellow-600 dark:text-yellow-400",
+        delete: "text-red-600 dark:text-red-400",
+    };
+    return colors[action] || "text-gray-600 dark:text-gray-400";
 };
 </script>
 
@@ -125,34 +131,71 @@ const isModuleActive = (module) => {
                         />
                     </FormField>
 
-                    <!-- Permissões por Módulo -->
+                    <!-- Permissões por Menu -->
                     <div class="space-y-4">
                         <label
                             class="text-sm font-medium text-gray-900 dark:text-white"
                         >
-                            Ativar ou Inativar Menus
+                            Permissões por Menu
                         </label>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            Organizadas pela ordem da sidebar
+                        </p>
 
-                        <div class="space-y-3">
+                        <div class="space-y-4">
                             <div
                                 v-for="module in permissions"
                                 :key="module.key"
-                                class="flex items-center justify-between border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                                class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                             >
-                                <div class="flex items-center space-x-3">
-                                    <Checkbox
-                                        :checked="isModuleActive(module)"
-                                        @update:checked="toggleModule(module)"
-                                    />
+                                <div class="mb-3">
                                     <span
                                         class="font-medium text-gray-900 dark:text-white"
                                     >
                                         {{ module.name }}
                                     </span>
+                                    <span
+                                        v-if="module.group"
+                                        class="ml-2 text-xs text-gray-500 dark:text-gray-400"
+                                    >
+                                        ({{ module.group }})
+                                    </span>
                                 </div>
-                                <span class="text-xs text-gray-500">
-                                    Create, Read, Update, Delete
-                                </span>
+
+                                <div
+                                    class="grid grid-cols-2 md:grid-cols-4 gap-3"
+                                >
+                                    <div
+                                        v-for="(
+                                            permission, action
+                                        ) in module.permissions"
+                                        :key="permission.name"
+                                        class="flex items-center space-x-2"
+                                    >
+                                        <Checkbox
+                                            :id="`permission-${permission.name}`"
+                                            :checked="
+                                                isPermissionActive(
+                                                    permission.name
+                                                )
+                                            "
+                                            @update:checked="
+                                                togglePermission(
+                                                    permission.name
+                                                )
+                                            "
+                                        />
+                                        <label
+                                            :for="`permission-${permission.name}`"
+                                            :class="[
+                                                'text-sm font-medium cursor-pointer',
+                                                getActionColor(action),
+                                            ]"
+                                        >
+                                            {{ getPermissionLabel(action) }}
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -166,11 +209,13 @@ const isModuleActive = (module) => {
                         </label>
                         <div class="flex items-center space-x-2">
                             <Checkbox
+                                id="active-checkbox"
                                 :checked="form.active"
                                 @update:checked="form.active = $event"
                             />
                             <label
-                                class="text-sm text-gray-700 dark:text-gray-300"
+                                for="active-checkbox"
+                                class="text-sm text-gray-700 dark:text-gray-300 cursor-pointer"
                             >
                                 Ativo
                             </label>

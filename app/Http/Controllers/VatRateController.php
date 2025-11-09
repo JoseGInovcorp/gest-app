@@ -12,12 +12,18 @@ class VatRateController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $vatRates = VatRate::orderBy('rate', 'desc')->get();
 
         return Inertia::render('VatRates/Index', [
-            'vatRates' => $vatRates
+            'vatRates' => $vatRates,
+            'can' => [
+                'create' => $request->user()->can('vat-rates.create'),
+                'view' => $request->user()->can('vat-rates.read'),
+                'edit' => $request->user()->can('vat-rates.update'),
+                'delete' => $request->user()->can('vat-rates.delete'),
+            ]
         ]);
     }
 

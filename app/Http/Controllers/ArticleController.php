@@ -52,6 +52,12 @@ class ArticleController extends Controller
             'articles' => $articles,
             'filters' => $request->only(['search', 'estado']),
             'sort' => $request->only(['sort', 'direction']),
+            'can' => [
+                'create' => $request->user()->can('articles.create'),
+                'view' => $request->user()->can('articles.read'),
+                'edit' => $request->user()->can('articles.update'),
+                'delete' => $request->user()->can('articles.delete'),
+            ]
         ]);
     }
 

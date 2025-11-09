@@ -13,7 +13,7 @@ class ContactFunctionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $functions = ContactFunction::query()
             ->orderBy('name')
@@ -21,6 +21,12 @@ class ContactFunctionController extends Controller
 
         return Inertia::render('ContactFunctions/Index', [
             'functions' => $functions,
+            'can' => [
+                'create' => $request->user()->can('contact-functions.create'),
+                'view' => $request->user()->can('contact-functions.read'),
+                'edit' => $request->user()->can('contact-functions.update'),
+                'delete' => $request->user()->can('contact-functions.delete'),
+            ]
         ]);
     }
 

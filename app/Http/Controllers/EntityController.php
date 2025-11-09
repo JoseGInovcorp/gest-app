@@ -7,6 +7,7 @@ use App\Models\Country;
 use App\Services\ViesService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -148,16 +149,19 @@ class EntityController extends Controller
             $pageTitle = 'Fornecedores';
         }
 
+        // Determinar o prefixo de permissões baseado no tipo da rota
+        $permissionPrefix = $routeType === 'client' ? 'clients' : ($routeType === 'supplier' ? 'suppliers' : 'entities');
+
         return Inertia::render($template, [
             'entities' => $entities,
             'filters' => $request->only(['type', 'active', 'search', 'sort', 'direction']),
             'pageTitle' => $pageTitle,
             'entityType' => $routeType ?? 'all',
             'can' => [
-                'create' => true, // Temporariamente true até implementar permissões
-                'edit' => true,
-                'delete' => true,
-                'export' => true,
+                'create' => $request->user()->can("{$permissionPrefix}.create"),
+                'view' => $request->user()->can("{$permissionPrefix}.read"),
+                'edit' => $request->user()->can("{$permissionPrefix}.update"),
+                'delete' => $request->user()->can("{$permissionPrefix}.delete"),
             ]
         ]);
     }
@@ -196,7 +200,7 @@ class EntityController extends Controller
     public function store(Request $request)
     {
         // Debug: Log da request recebida
-        \Log::info('Store request received', [
+        Log::info('Store request received', [
             'url' => $request->url(),
             'method' => $request->method(),
             'all_data' => $request->all()
@@ -204,7 +208,7 @@ class EntityController extends Controller
 
         $validated = $request->validate([
             'type' => ['required', Rule::in(['client', 'supplier', 'both'])],
-            'number' => 'required|integer|unique:entities,number',
+            'number' => 'nullable|integer', // Tornado opcional - será gerado automaticamente
             'nif' => 'required|string|max:20|unique:entities,tax_number',
             'name' => 'required|string|max:255',
             'address' => 'required|string|max:255',
@@ -220,46 +224,67 @@ class EntityController extends Controller
             'active' => 'boolean',
         ]);
 
-        // Mapear campos do formulário para BD
-        $entityData = [
-            'type' => $validated['type'],
-            'number' => $validated['number'],
-            'name' => $validated['name'],
-            'tax_number' => $validated['nif'], // NIF -> tax_number
-            'vat_number' => $validated['nif'], // Usar NIF como VAT também
-            'country_code' => $validated['country'],
-            'address' => $validated['address'],
-            'postal_code' => $validated['postal_code'] ?? null,
-            'city' => $validated['city'],
-            'country' => $validated['country'] === 'PT' ? 'Portugal' : $validated['country'],
-            'phone' => $validated['phone'] ?? null,
-            'mobile' => $validated['mobile'] ?? null,
-            'website' => $validated['website'] ?? null,
-            'email' => $validated['email'] ?? null,
-            'observations' => $validated['observations'] ?? null,
-            'active' => $validated['active'] ?? true,
-            'created_by' => Auth::id(),
-        ];
+        // Usar transação para evitar race condition no número
+        $entity = DB::transaction(function () use ($validated, $request) {
+            // Gerar próximo número disponível dentro da transação
+            // Busca o maior número existente
+            $maxNumber = Entity::withTrashed()->max('number') ?? 0;
 
-        // Validar VAT se necessário (usar NIF como VAT)
-        if ($entityData['vat_number'] && ViesService::isViesCountry($entityData['country_code'])) {
-            $viesResult = $this->viesService->validateVat($entityData['country_code'], $entityData['vat_number']);
-            $entityData['vies_valid'] = $viesResult['valid'];
-            $entityData['vies_last_check'] = now();
-            $entityData['vies_data'] = $viesResult;
-        }
+            // Loop para encontrar próximo número disponível (caso haja gaps)
+            $nextNumber = $maxNumber + 1;
+            $attempts = 0;
+            while (Entity::withTrashed()->where('number', $nextNumber)->exists() && $attempts < 100) {
+                $nextNumber++;
+                $attempts++;
+            }
 
-        $entity = Entity::create($entityData);
+            if ($attempts >= 100) {
+                throw new \Exception('Não foi possível gerar número sequencial único após 100 tentativas');
+            }
 
-        // Log activity
-        activity()
-            ->performedOn($entity)
-            ->causedBy(Auth::user())
-            ->withProperties([
-                'ip' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-            ])
-            ->log('created');
+            // Mapear campos do formulário para BD
+            $entityData = [
+                'type' => $validated['type'],
+                'number' => $nextNumber, // Número gerado automaticamente
+                'name' => $validated['name'],
+                'tax_number' => $validated['nif'], // NIF -> tax_number
+                'vat_number' => $validated['nif'], // Usar NIF como VAT também
+                'country_code' => $validated['country'],
+                'address' => $validated['address'],
+                'postal_code' => $validated['postal_code'] ?? null,
+                'city' => $validated['city'],
+                'country' => $validated['country'] === 'PT' ? 'Portugal' : $validated['country'],
+                'phone' => $validated['phone'] ?? null,
+                'mobile' => $validated['mobile'] ?? null,
+                'website' => $validated['website'] ?? null,
+                'email' => $validated['email'] ?? null,
+                'observations' => $validated['observations'] ?? null,
+                'active' => $validated['active'] ?? true,
+                'created_by' => Auth::id(),
+            ];
+
+            // Validar VAT se necessário (usar NIF como VAT)
+            if ($entityData['vat_number'] && ViesService::isViesCountry($entityData['country_code'])) {
+                $viesResult = $this->viesService->validateVat($entityData['country_code'], $entityData['vat_number']);
+                $entityData['vies_valid'] = $viesResult['valid'];
+                $entityData['vies_last_check'] = now();
+                $entityData['vies_data'] = $viesResult;
+            }
+
+            $entity = Entity::create($entityData);
+
+            // Log activity
+            activity()
+                ->performedOn($entity)
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'ip' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                ])
+                ->log('created');
+
+            return $entity;
+        });
 
         // Redirecionar baseado no contexto
         $routeName = $request->route()->getName();
@@ -381,7 +406,7 @@ class EntityController extends Controller
     /**
      * Eliminar entidade (soft delete)
      */
-    public function destroy(Entity $entity)
+    public function destroy(Entity $entity, Request $request)
     {
         // Log activity antes de eliminar
         activity()
@@ -395,6 +420,17 @@ class EntityController extends Controller
             ->log('deleted');
 
         $entity->delete();
+
+        // Redirecionar baseado no contexto (rota de onde veio)
+        $routeName = $request->route()->getName();
+
+        if (str_starts_with($routeName, 'clients.')) {
+            return redirect()->route('clients.index')
+                ->with('success', 'Cliente eliminado com sucesso.');
+        } elseif (str_starts_with($routeName, 'suppliers.')) {
+            return redirect()->route('suppliers.index')
+                ->with('success', 'Fornecedor eliminado com sucesso.');
+        }
 
         return redirect()->route('entities.index')
             ->with('success', 'Entidade eliminada com sucesso.');

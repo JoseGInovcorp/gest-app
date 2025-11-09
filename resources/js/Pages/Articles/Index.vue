@@ -114,6 +114,7 @@
                                     <Filter class="h-4 w-4" />
                                 </button>
                                 <Link
+                                    v-if="can.create"
                                     :href="route('articles.create')"
                                     class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-2"
                                 >
@@ -159,6 +160,7 @@
                                     </div>
                                     <div class="flex items-center gap-2 ml-4">
                                         <Link
+                                            v-if="can.edit"
                                             :href="
                                                 route(
                                                     'articles.edit',
@@ -174,6 +176,7 @@
                                             </button>
                                         </Link>
                                         <button
+                                            v-if="can.delete"
                                             @click="deleteArticle(article.id)"
                                             class="p-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
                                             title="Eliminar"
@@ -198,7 +201,7 @@
 </template>
 
 <script setup>
-import { ref, reactive } from "vue";
+import { ref, reactive, inject } from "vue";
 import { router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Link } from "@inertiajs/vue3";
@@ -216,11 +219,23 @@ import {
     Trash2,
 } from "lucide-vue-next";
 
+// Inject permission checker with fallback
+const hasPermission = inject("hasPermission", () => () => false);
+
 // Props
 const props = defineProps({
     articles: Object,
     filters: Object,
     sort: Object,
+    can: {
+        type: Object,
+        default: () => ({
+            create: false,
+            view: true,
+            edit: false,
+            delete: false,
+        }),
+    },
 });
 
 // Formulário de pesquisa

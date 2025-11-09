@@ -65,7 +65,7 @@ const viesCountries = computed(() => {
 
 // Computed properties
 const isFormValid = computed(() => {
-    const basicValid = form.nif && form.name && form.address && form.city;
+    const basicValid = !!(form.nif && form.name && form.address && form.city);
     const nifValid =
         !nifValidation.value.exists && !nifValidation.value.checking;
     const valid = basicValid && nifValid;
@@ -75,23 +75,12 @@ const isFormValid = computed(() => {
 
 // Methods
 const handleSubmit = () => {
-    console.log("handleSubmit chamado!");
-    console.log("Form data:", form.data());
-
     form.post(route("clients.store"), {
         onSuccess: (response) => {
-            console.log("Sucesso:", response);
             // Redireciona para a lista após sucesso
         },
         onError: (errors) => {
-            console.log("Erros:", errors);
             // Erros serão mostrados automaticamente nos campos
-        },
-        onStart: () => {
-            console.log("Iniciando submissão...");
-        },
-        onFinish: () => {
-            console.log("Submissão finalizada");
         },
     });
 };
@@ -127,8 +116,6 @@ const validateNIF = async () => {
             message: response.data.message,
             error: "",
         };
-
-        console.log("NIF validation result:", response.data);
 
         // Se NIF é válido e não existe, verificar VIES para países UE
         if (
@@ -172,7 +159,6 @@ const performViesLookup = async () => {
             }
 
             viesLookup.value.success = true;
-            console.log("VIES lookup success:", response.data);
         } else {
             viesLookup.value.error =
                 response.data.message || "Erro na consulta VIES";

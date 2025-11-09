@@ -18,7 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Registar middlewares personalizados
         $middleware->alias([
-            'permission' => \App\Http\Middleware\PermissionMiddleware::class,
+            'permission' => \App\Http\Middleware\CheckPermission::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -39,50 +39,109 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Rotas de Clientes (usando EntityController com filtro 'client')
-    Route::get('/clients', [EntityController::class, 'index'])->name('clients.index');
-    Route::get('/clients/create', [EntityController::class, 'create'])->name('clients.create');
-    Route::post('/clients', [EntityController::class, 'store'])->name('clients.store');
-    Route::get('/clients/{entity}', [EntityController::class, 'show'])->name('clients.show');
-    Route::get('/clients/{entity}/edit', [EntityController::class, 'edit'])->name('clients.edit');
-    Route::patch('/clients/{entity}', [EntityController::class, 'update'])->name('clients.update');
-    Route::delete('/clients/{entity}', [EntityController::class, 'destroy'])->name('clients.destroy');
-    Route::post('/clients/{entity}/revalidate-vat', [EntityController::class, 'revalidateVat'])->name('clients.revalidate-vat');
+    Route::get('/clients/create', [EntityController::class, 'create'])->name('clients.create')->middleware('permission:clients.create');
+    Route::middleware('permission:clients.read')->group(function () {
+        Route::get('/clients', [EntityController::class, 'index'])->name('clients.index');
+        Route::get('/clients/{entity}', [EntityController::class, 'show'])->name('clients.show');
+    });
+    Route::post('/clients', [EntityController::class, 'store'])->name('clients.store')->middleware('permission:clients.create');
+    Route::get('/clients/{entity}/edit', [EntityController::class, 'edit'])->name('clients.edit')->middleware('permission:clients.update');
+    Route::patch('/clients/{entity}', [EntityController::class, 'update'])->name('clients.update')->middleware('permission:clients.update');
+    Route::delete('/clients/{entity}', [EntityController::class, 'destroy'])->name('clients.destroy')->middleware('permission:clients.delete');
+    Route::post('/clients/{entity}/revalidate-vat', [EntityController::class, 'revalidateVat'])->name('clients.revalidate-vat')->middleware('permission:clients.update');
 
-    // Rotas de Fornecedores (usando EntityController com filtro 'supplier')  
-    Route::get('/suppliers', [EntityController::class, 'index'])->name('suppliers.index');
-    Route::get('/suppliers/create', [EntityController::class, 'create'])->name('suppliers.create');
-    Route::post('/suppliers', [EntityController::class, 'store'])->name('suppliers.store');
-    Route::get('/suppliers/{entity}', [EntityController::class, 'show'])->name('suppliers.show');
-    Route::get('/suppliers/{entity}/edit', [EntityController::class, 'edit'])->name('suppliers.edit');
-    Route::patch('/suppliers/{entity}', [EntityController::class, 'update'])->name('suppliers.update');
-    Route::delete('/suppliers/{entity}', [EntityController::class, 'destroy'])->name('suppliers.destroy');
-    Route::post('/suppliers/{entity}/revalidate-vat', [EntityController::class, 'revalidateVat'])->name('suppliers.revalidate-vat');
-
-    // Rotas das Entidades (Admin - todas as entidades)
-    Route::resource('entities', EntityController::class);
-    Route::post('/entities/{entity}/revalidate-vat', [EntityController::class, 'revalidateVat'])->name('entities.revalidate-vat');
+    // Rotas de Fornecedores (usando EntityController com filtro 'supplier')
+    Route::get('/suppliers/create', [EntityController::class, 'create'])->name('suppliers.create')->middleware('permission:suppliers.create');
+    Route::middleware('permission:suppliers.read')->group(function () {
+        Route::get('/suppliers', [EntityController::class, 'index'])->name('suppliers.index');
+        Route::get('/suppliers/{entity}', [EntityController::class, 'show'])->name('suppliers.show');
+    });
+    Route::post('/suppliers', [EntityController::class, 'store'])->name('suppliers.store')->middleware('permission:suppliers.create');
+    Route::get('/suppliers/{entity}/edit', [EntityController::class, 'edit'])->name('suppliers.edit')->middleware('permission:suppliers.update');
+    Route::patch('/suppliers/{entity}', [EntityController::class, 'update'])->name('suppliers.update')->middleware('permission:suppliers.update');
+    Route::delete('/suppliers/{entity}', [EntityController::class, 'destroy'])->name('suppliers.destroy')->middleware('permission:suppliers.delete');
+    Route::post('/suppliers/{entity}/revalidate-vat', [EntityController::class, 'revalidateVat'])->name('suppliers.revalidate-vat')->middleware('permission:suppliers.update');
 
     // Rotas dos Contactos
-    Route::resource('contacts', ContactController::class);
+    Route::get('/contacts/create', [ContactController::class, 'create'])->name('contacts.create')->middleware('permission:contacts.create');
+    Route::middleware('permission:contacts.read')->group(function () {
+        Route::get('/contacts', [ContactController::class, 'index'])->name('contacts.index');
+        Route::get('/contacts/{contact}', [ContactController::class, 'show'])->name('contacts.show');
+    });
+    Route::post('/contacts', [ContactController::class, 'store'])->name('contacts.store')->middleware('permission:contacts.create');
+    Route::get('/contacts/{contact}/edit', [ContactController::class, 'edit'])->name('contacts.edit')->middleware('permission:contacts.update');
+    Route::patch('/contacts/{contact}', [ContactController::class, 'update'])->name('contacts.update')->middleware('permission:contacts.update');
+    Route::delete('/contacts/{contact}', [ContactController::class, 'destroy'])->name('contacts.destroy')->middleware('permission:contacts.delete');
 
     // Rotas dos Artigos
-    Route::resource('articles', ArticleController::class);
+    Route::get('/articles/create', [ArticleController::class, 'create'])->name('articles.create')->middleware('permission:articles.create');
+    Route::middleware('permission:articles.read')->group(function () {
+        Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
+        Route::get('/articles/{article}', [ArticleController::class, 'show'])->name('articles.show');
+    });
+    Route::post('/articles', [ArticleController::class, 'store'])->name('articles.store')->middleware('permission:articles.create');
+    Route::get('/articles/{article}/edit', [ArticleController::class, 'edit'])->name('articles.edit')->middleware('permission:articles.update');
+    Route::patch('/articles/{article}', [ArticleController::class, 'update'])->name('articles.update')->middleware('permission:articles.update');
+    Route::delete('/articles/{article}', [ArticleController::class, 'destroy'])->name('articles.destroy')->middleware('permission:articles.delete');
 
     // Rotas dos Países (Configurações)
-    Route::resource('countries', CountryController::class);
+    Route::get('/countries/create', [CountryController::class, 'create'])->name('countries.create')->middleware('permission:countries.create');
+    Route::middleware('permission:countries.read')->group(function () {
+        Route::get('/countries', [CountryController::class, 'index'])->name('countries.index');
+        Route::get('/countries/{country}', [CountryController::class, 'show'])->name('countries.show');
+    });
+    Route::post('/countries', [CountryController::class, 'store'])->name('countries.store')->middleware('permission:countries.create');
+    Route::get('/countries/{country}/edit', [CountryController::class, 'edit'])->name('countries.edit')->middleware('permission:countries.update');
+    Route::patch('/countries/{country}', [CountryController::class, 'update'])->name('countries.update')->middleware('permission:countries.update');
+    Route::delete('/countries/{country}', [CountryController::class, 'destroy'])->name('countries.destroy')->middleware('permission:countries.delete');
 
     // Rotas das Funções de Contactos (Configurações)
-    Route::resource('contact-functions', ContactFunctionController::class);
+    Route::get('/contact-functions/create', [ContactFunctionController::class, 'create'])->name('contact-functions.create')->middleware('permission:contact-functions.create');
+    Route::middleware('permission:contact-functions.read')->group(function () {
+        Route::get('/contact-functions', [ContactFunctionController::class, 'index'])->name('contact-functions.index');
+        Route::get('/contact-functions/{contactFunction}', [ContactFunctionController::class, 'show'])->name('contact-functions.show');
+    });
+    Route::post('/contact-functions', [ContactFunctionController::class, 'store'])->name('contact-functions.store')->middleware('permission:contact-functions.create');
+    Route::get('/contact-functions/{contactFunction}/edit', [ContactFunctionController::class, 'edit'])->name('contact-functions.edit')->middleware('permission:contact-functions.update');
+    Route::patch('/contact-functions/{contactFunction}', [ContactFunctionController::class, 'update'])->name('contact-functions.update')->middleware('permission:contact-functions.update');
+    Route::delete('/contact-functions/{contactFunction}', [ContactFunctionController::class, 'destroy'])->name('contact-functions.destroy')->middleware('permission:contact-functions.delete');
 
     // Rotas das Taxas de IVA (Configurações - Financeiro)
-    Route::resource('vat-rates', VatRateController::class);
+    Route::get('/vat-rates/create', [VatRateController::class, 'create'])->name('vat-rates.create')->middleware('permission:vat-rates.create');
+    Route::middleware('permission:vat-rates.read')->group(function () {
+        Route::get('/vat-rates', [VatRateController::class, 'index'])->name('vat-rates.index');
+        Route::get('/vat-rates/{vatRate}', [VatRateController::class, 'show'])->name('vat-rates.show');
+    });
+    Route::post('/vat-rates', [VatRateController::class, 'store'])->name('vat-rates.store')->middleware('permission:vat-rates.create');
+    Route::get('/vat-rates/{vatRate}/edit', [VatRateController::class, 'edit'])->name('vat-rates.edit')->middleware('permission:vat-rates.update');
+    Route::patch('/vat-rates/{vatRate}', [VatRateController::class, 'update'])->name('vat-rates.update')->middleware('permission:vat-rates.update');
+    Route::delete('/vat-rates/{vatRate}', [VatRateController::class, 'destroy'])->name('vat-rates.destroy')->middleware('permission:vat-rates.delete');
 
     // Rotas de Gestão de Acessos
-    Route::resource('roles', RoleController::class);
-    Route::resource('users', UserManagementController::class);
+    Route::get('/roles/create', [RoleController::class, 'create'])->name('roles.create')->middleware('permission:roles.create');
+    Route::middleware('permission:roles.read')->group(function () {
+        Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
+        Route::get('/roles/{role}', [RoleController::class, 'show'])->name('roles.show');
+    });
+    Route::post('/roles', [RoleController::class, 'store'])->name('roles.store')->middleware('permission:roles.create');
+    Route::get('/roles/{role}/edit', [RoleController::class, 'edit'])->name('roles.edit')->middleware('permission:roles.update');
+    Route::patch('/roles/{role}', [RoleController::class, 'update'])->name('roles.update')->middleware('permission:roles.update');
+    Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy')->middleware('permission:roles.delete');
+
+    Route::get('/users/create', [UserManagementController::class, 'create'])->name('users.create')->middleware('permission:users.create');
+    Route::middleware('permission:users.read')->group(function () {
+        Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');
+        Route::get('/users/{user}', [UserManagementController::class, 'show'])->name('users.show');
+    });
+    Route::post('/users', [UserManagementController::class, 'store'])->name('users.store')->middleware('permission:users.create');
+    Route::get('/users/{user}/edit', [UserManagementController::class, 'edit'])->name('users.edit')->middleware('permission:users.update');
+    Route::patch('/users/{user}', [UserManagementController::class, 'update'])->name('users.update')->middleware('permission:users.update');
+    Route::delete('/users/{user}', [UserManagementController::class, 'destroy'])->name('users.destroy')->middleware('permission:users.delete');
 
     // Rotas de Logs
-    Route::get('/logs', [LogController::class, 'index'])->name('logs.index');
+    Route::middleware('permission:logs.read')->group(function () {
+        Route::get('/logs', [LogController::class, 'index'])->name('logs.index');
+    });
 
     Route::get('/proposals', function () {
         return redirect()->route('dashboard')->with('info', 'Módulo Propostas em desenvolvimento');

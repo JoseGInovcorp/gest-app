@@ -75,23 +75,12 @@ const isFormValid = computed(() => {
 
 // Methods
 const handleSubmit = () => {
-    console.log("handleSubmit chamado!");
-    console.log("Form data:", form.data());
-
-    form.put(route("clients.update", props.entity.id), {
+    form.patch(route("clients.update", props.entity.id), {
         onSuccess: (response) => {
-            console.log("Sucesso:", response);
             // Redireciona para a lista após sucesso
         },
         onError: (errors) => {
-            console.log("Erros:", errors);
             // Erros serão mostrados automaticamente nos campos
-        },
-        onStart: () => {
-            console.log("Iniciando submissão...");
-        },
-        onFinish: () => {
-            console.log("Submissão finalizada");
         },
     });
 };

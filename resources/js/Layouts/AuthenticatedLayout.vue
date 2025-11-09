@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, provide } from "vue";
 import { Link, usePage } from "@inertiajs/vue3";
 import {
     Building2,
@@ -44,6 +44,27 @@ const configurationExpanded = ref(false);
 
 const page = usePage();
 const user = computed(() => page.props.auth?.user);
+const permissions = computed(() => {
+    const perms = page.props.auth?.permissions;
+    return Array.isArray(perms) ? perms : [];
+});
+
+// Helper function para verificar permissões
+const hasPermission = (permission) => {
+    if (!permission || !Array.isArray(permissions.value)) return false;
+    return permissions.value.includes(permission);
+};
+
+// Helper function para verificar se tem pelo menos uma permissão de um módulo
+const hasAnyPermission = (module) => {
+    if (!module || !Array.isArray(permissions.value)) return false;
+    return ["create", "read", "update", "delete"].some((action) =>
+        hasPermission(`${module}.${action}`)
+    );
+};
+
+// Provide hasPermission para todos os componentes filhos
+provide("hasPermission", hasPermission);
 
 // Funções para toggle dos submenus
 const toggleFinancial = () => {
@@ -58,113 +79,143 @@ const toggleConfiguration = () => {
     configurationExpanded.value = !configurationExpanded.value;
 };
 
-// Navigation items seguindo a estrutura do enunciado (usando rotas existentes)
-const mainNavigationItems = [
+// Navigation items  seguindo a estrutura do enunciado (usando rotas existentes)
+const allMainNavigationItems = [
     {
         name: "Dashboard",
         href: "dashboard",
         icon: Home,
-        current: false,
+        permission: null, // Dashboard sempre visível
     },
     {
         name: "Clientes",
         href: "clients.index",
         icon: Users,
-        current: false,
+        permission: "clients", // Verifica se tem qualquer permissão de clients
     },
     {
         name: "Fornecedores",
         href: "suppliers.index",
         icon: UserCheck,
-        current: false,
+        permission: "suppliers",
     },
     {
         name: "Contactos",
         href: "contacts.index",
         icon: Phone,
-        current: false,
+        permission: "contacts",
     },
     {
         name: "Propostas",
         href: "dashboard", // Temporário até implementar
         icon: FileText,
-        current: false,
         disabled: true,
+        permission: "proposals",
     },
     {
         name: "Calendário",
-        href: "dashboard", // Temporário até implementar
+        href: "calendar.index", // Temporário até implementar
         icon: Calendar,
-        current: false,
         disabled: true,
+        permission: "calendar", // Requer permissões de calendário
     },
 ];
 
-const ordersNavigationItems = [
+// Filtrar itens baseado nas permissões
+const mainNavigationItems = computed(() => {
+    return allMainNavigationItems.filter((item) => {
+        if (!item.permission) return true; // Sem permissão = sempre visível
+        return hasAnyPermission(item.permission);
+    });
+});
+
+const allOrdersNavigationItems = [
     {
         name: "Encomendas - Clientes",
         href: "dashboard", // Temporário até implementar
         icon: ShoppingCart,
-        current: false,
         disabled: true,
+        permission: "orders",
     },
     {
         name: "Encomendas - Fornecedores",
         href: "dashboard", // Temporário até implementar
         icon: Truck,
-        current: false,
         disabled: true,
+        permission: "orders",
     },
     {
         name: "Ordens de Trabalho",
         href: "dashboard", // Temporário até implementar
         icon: Briefcase,
-        current: false,
         disabled: true,
+        permission: "orders",
     },
 ];
 
-const financialNavigationItems = [
+const ordersNavigationItems = computed(() => {
+    return allOrdersNavigationItems.filter((item) => {
+        if (!item.permission) return true;
+        return hasAnyPermission(item.permission);
+    });
+});
+
+const allFinancialNavigationItems = [
     {
         name: "Contas Bancárias",
         href: "dashboard", // Temporário até implementar
         icon: Banknote,
-        current: false,
         disabled: true,
+        permission: "financial",
     },
     {
         name: "Conta Corrente Clientes",
         href: "dashboard", // Temporário até implementar
         icon: DollarSign,
-        current: false,
         disabled: true,
+        permission: "financial",
     },
     {
         name: "Faturas Fornecedores",
         href: "dashboard", // Temporário até implementar
         icon: Receipt,
-        current: false,
         disabled: true,
+        permission: "financial",
     },
 ];
 
-const systemNavigationItems = [
+const financialNavigationItems = computed(() => {
+    return allFinancialNavigationItems.filter((item) => {
+        if (!item.permission) return true;
+        return hasAnyPermission(item.permission);
+    });
+});
+
+const allSystemNavigationItems = [
     {
         name: "Arquivo Digital",
         href: "dashboard", // Temporário até implementar
         icon: FolderOpen,
-        current: false,
         disabled: true,
+        permission: "digital-archive", // Requer permissões de arquivo digital
     },
 ];
 
-const accessManagementItems = [
+const systemNavigationItems = computed(() => {
+    return allSystemNavigationItems.filter((item) => {
+        if (!item.permission) return true;
+        return hasAnyPermission(item.permission);
+    });
+});
+
+const allAccessManagementItems = [
     {
         name: "Utilizadores",
         href: "users.index",
         icon: UserCog,
         current: route().current("users.*"),
         disabled: false,
+        permission: "users",
     },
     {
         name: "Permissões",
@@ -172,51 +223,59 @@ const accessManagementItems = [
         icon: Lock,
         current: route().current("roles.*"),
         disabled: false,
+        permission: "roles",
     },
 ];
 
-const configurationItems = [
+const accessManagementItems = computed(() => {
+    return allAccessManagementItems.filter((item) => {
+        if (!item.permission) return true;
+        return hasAnyPermission(item.permission);
+    });
+});
+
+const allConfigurationItems = [
     {
         name: "Entidades - Países",
         href: "countries.index",
         icon: Globe,
-        current: false,
         disabled: false,
+        permission: "countries",
     },
     {
         name: "Contactos - Funções",
         href: "contact-functions.index",
         icon: UserCog,
-        current: false,
         disabled: false,
+        permission: "contact-functions",
     },
     {
         name: "Calendário - Tipos",
         href: "dashboard", // Temporário até implementar
         icon: Calendar,
-        current: false,
         disabled: true,
+        permission: "calendar", // Requer permissões de calendário
     },
     {
         name: "Calendário - Acções",
         href: "dashboard", // Temporário até implementar
         icon: Zap,
-        current: false,
         disabled: true,
+        permission: "calendar", // Requer permissões de calendário
     },
     {
         name: "Artigos",
         href: "articles.index",
         icon: Package,
-        current: false,
         disabled: false,
+        permission: "articles",
     },
     {
         name: "Financeiro - IVA",
         href: "vat-rates.index",
         icon: DollarSign,
-        current: false,
         disabled: false,
+        permission: "vat-rates",
     },
     {
         name: "Logs",
@@ -224,45 +283,28 @@ const configurationItems = [
         icon: Activity,
         current: route().current("logs.*"),
         disabled: false,
+        permission: "logs", // Verificar permissões de logs
     },
     {
         name: "Empresa",
         href: "dashboard", // Temporário até implementar
         icon: Building,
-        current: false,
         disabled: true,
+        permission: null,
     },
 ];
 
+const configurationItems = computed(() => {
+    return allConfigurationItems.filter((item) => {
+        if (!item.permission) return true;
+        return hasAnyPermission(item.permission);
+    });
+});
+
 // Check if route is current
-const isCurrentRoute = (routeName) => {
+const isActive = (routeName) => {
     return route().current(routeName) || route().current(routeName + ".*");
 };
-
-// Update current status for all navigation items
-mainNavigationItems.forEach((item) => {
-    item.current = isCurrentRoute(item.href);
-});
-
-ordersNavigationItems.forEach((item) => {
-    item.current = isCurrentRoute(item.href);
-});
-
-financialNavigationItems.forEach((item) => {
-    item.current = isCurrentRoute(item.href);
-});
-
-systemNavigationItems.forEach((item) => {
-    item.current = isCurrentRoute(item.href);
-});
-
-accessManagementItems.forEach((item) => {
-    item.current = isCurrentRoute(item.href);
-});
-
-configurationItems.forEach((item) => {
-    item.current = isCurrentRoute(item.href);
-});
 
 // Auto-expand menus based on current route
 const currentRouteName = route().current();
@@ -342,7 +384,7 @@ const logout = () => {
                                             <Link
                                                 :href="route(item.href)"
                                                 :class="[
-                                                    item.current
+                                                    isActive(item.href)
                                                         ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
                                                         : 'text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
                                                     'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-medium transition-all',
@@ -351,7 +393,7 @@ const logout = () => {
                                                 <component
                                                     :is="item.icon"
                                                     :class="[
-                                                        item.current
+                                                        isActive(item.href)
                                                             ? 'text-blue-600 dark:text-blue-400'
                                                             : 'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
                                                         'h-5 w-5 shrink-0',
@@ -364,7 +406,7 @@ const logout = () => {
                                 </li>
 
                                 <!-- Orders Section -->
-                                <li>
+                                <li v-if="ordersNavigationItems.length > 0">
                                     <ul role="list" class="-mx-2 space-y-1">
                                         <li
                                             v-for="item in ordersNavigationItems"
@@ -373,7 +415,7 @@ const logout = () => {
                                             <Link
                                                 :href="route(item.href)"
                                                 :class="[
-                                                    item.current
+                                                    isActive(item.href)
                                                         ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
                                                         : 'text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
                                                     'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-medium transition-all',
@@ -382,7 +424,7 @@ const logout = () => {
                                                 <component
                                                     :is="item.icon"
                                                     :class="[
-                                                        item.current
+                                                        isActive(item.href)
                                                             ? 'text-blue-600 dark:text-blue-400'
                                                             : 'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
                                                         'h-5 w-5 shrink-0',
@@ -395,7 +437,7 @@ const logout = () => {
                                 </li>
 
                                 <!-- Financial Section -->
-                                <li>
+                                <li v-if="financialNavigationItems.length > 0">
                                     <button
                                         @click="toggleFinancial"
                                         class="w-full text-left flex items-center justify-between text-xs font-semibold leading-6 text-gray-400 uppercase tracking-wide mb-1 hover:text-gray-300 transition-colors"
@@ -422,7 +464,7 @@ const logout = () => {
                                             <Link
                                                 :href="route(item.href)"
                                                 :class="[
-                                                    item.current
+                                                    isActive(item.href)
                                                         ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
                                                         : 'text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
                                                     'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-medium transition-all',
@@ -431,7 +473,7 @@ const logout = () => {
                                                 <component
                                                     :is="item.icon"
                                                     :class="[
-                                                        item.current
+                                                        isActive(item.href)
                                                             ? 'text-blue-600 dark:text-blue-400'
                                                             : 'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
                                                         'h-5 w-5 shrink-0',
@@ -444,7 +486,7 @@ const logout = () => {
                                 </li>
 
                                 <!-- System Section -->
-                                <li>
+                                <li v-if="systemNavigationItems.length > 0">
                                     <ul role="list" class="-mx-2 space-y-1">
                                         <li
                                             v-for="item in systemNavigationItems"
@@ -453,7 +495,7 @@ const logout = () => {
                                             <Link
                                                 :href="route(item.href)"
                                                 :class="[
-                                                    item.current
+                                                    isActive(item.href)
                                                         ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
                                                         : 'text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
                                                     'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-medium transition-all',
@@ -462,7 +504,7 @@ const logout = () => {
                                                 <component
                                                     :is="item.icon"
                                                     :class="[
-                                                        item.current
+                                                        isActive(item.href)
                                                             ? 'text-blue-600 dark:text-blue-400'
                                                             : 'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
                                                         'h-5 w-5 shrink-0',
@@ -475,7 +517,7 @@ const logout = () => {
                                 </li>
 
                                 <!-- Access Management Section -->
-                                <li>
+                                <li v-if="accessManagementItems.length > 0">
                                     <button
                                         @click="toggleAccessManagement"
                                         class="w-full text-left flex items-center justify-between text-xs font-semibold leading-6 text-gray-400 uppercase tracking-wide mb-1 hover:text-gray-300 transition-colors"
@@ -502,7 +544,7 @@ const logout = () => {
                                             <Link
                                                 :href="route(item.href)"
                                                 :class="[
-                                                    item.current
+                                                    isActive(item.href)
                                                         ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
                                                         : 'text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
                                                     'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-medium transition-all',
@@ -511,7 +553,7 @@ const logout = () => {
                                                 <component
                                                     :is="item.icon"
                                                     :class="[
-                                                        item.current
+                                                        isActive(item.href)
                                                             ? 'text-blue-600 dark:text-blue-400'
                                                             : 'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
                                                         'h-5 w-5 shrink-0',
@@ -524,7 +566,7 @@ const logout = () => {
                                 </li>
 
                                 <!-- Configuration Section -->
-                                <li>
+                                <li v-if="configurationItems.length > 0">
                                     <button
                                         @click="toggleConfiguration"
                                         class="w-full text-left flex items-center justify-between text-xs font-semibold leading-6 text-gray-400 uppercase tracking-wide mb-1 hover:text-gray-300 transition-colors"
@@ -552,7 +594,7 @@ const logout = () => {
                                                 v-if="!item.disabled"
                                                 :href="route(item.href)"
                                                 :class="[
-                                                    item.current
+                                                    isActive(item.href)
                                                         ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
                                                         : 'text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
                                                     'group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-medium transition-all',
@@ -561,7 +603,7 @@ const logout = () => {
                                                 <component
                                                     :is="item.icon"
                                                     :class="[
-                                                        item.current
+                                                        isActive(item.href)
                                                             ? 'text-blue-600 dark:text-blue-400'
                                                             : 'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
                                                         'h-4 w-4 shrink-0',
@@ -635,7 +677,7 @@ const logout = () => {
                                     <Link
                                         :href="route(item.href)"
                                         :class="[
-                                            item.current
+                                            isActive(item.href)
                                                 ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
                                                 : 'text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
                                             'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-medium transition-all',
@@ -644,7 +686,7 @@ const logout = () => {
                                         <component
                                             :is="item.icon"
                                             :class="[
-                                                item.current
+                                                isActive(item.href)
                                                     ? 'text-blue-600 dark:text-blue-400'
                                                     : 'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
                                                 'h-5 w-5 shrink-0',
@@ -657,7 +699,7 @@ const logout = () => {
                         </li>
 
                         <!-- Orders Section -->
-                        <li>
+                        <li v-if="ordersNavigationItems.length > 0">
                             <ul role="list" class="-mx-2 space-y-1">
                                 <li
                                     v-for="item in ordersNavigationItems"
@@ -666,7 +708,7 @@ const logout = () => {
                                     <Link
                                         :href="route(item.href)"
                                         :class="[
-                                            item.current
+                                            isActive(item.href)
                                                 ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
                                                 : 'text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
                                             'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-medium transition-all',
@@ -675,7 +717,7 @@ const logout = () => {
                                         <component
                                             :is="item.icon"
                                             :class="[
-                                                item.current
+                                                isActive(item.href)
                                                     ? 'text-blue-600 dark:text-blue-400'
                                                     : 'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
                                                 'h-5 w-5 shrink-0',
@@ -688,7 +730,7 @@ const logout = () => {
                         </li>
 
                         <!-- Financial Section -->
-                        <li>
+                        <li v-if="financialNavigationItems.length > 0">
                             <button
                                 @click="toggleFinancial"
                                 class="w-full text-left flex items-center justify-between text-xs font-semibold leading-6 text-gray-400 uppercase tracking-wide mb-2 hover:text-gray-300 transition-colors"
@@ -713,7 +755,7 @@ const logout = () => {
                                     <Link
                                         :href="route(item.href)"
                                         :class="[
-                                            item.current
+                                            isActive(item.href)
                                                 ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
                                                 : 'text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
                                             'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-medium transition-all',
@@ -722,7 +764,7 @@ const logout = () => {
                                         <component
                                             :is="item.icon"
                                             :class="[
-                                                item.current
+                                                isActive(item.href)
                                                     ? 'text-blue-600 dark:text-blue-400'
                                                     : 'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
                                                 'h-5 w-5 shrink-0',
@@ -735,7 +777,7 @@ const logout = () => {
                         </li>
 
                         <!-- System Section -->
-                        <li>
+                        <li v-if="systemNavigationItems.length > 0">
                             <ul role="list" class="-mx-2 space-y-1">
                                 <li
                                     v-for="item in systemNavigationItems"
@@ -744,7 +786,7 @@ const logout = () => {
                                     <Link
                                         :href="route(item.href)"
                                         :class="[
-                                            item.current
+                                            isActive(item.href)
                                                 ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
                                                 : 'text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
                                             'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-medium transition-all',
@@ -753,7 +795,7 @@ const logout = () => {
                                         <component
                                             :is="item.icon"
                                             :class="[
-                                                item.current
+                                                isActive(item.href)
                                                     ? 'text-blue-600 dark:text-blue-400'
                                                     : 'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
                                                 'h-5 w-5 shrink-0',
@@ -766,7 +808,7 @@ const logout = () => {
                         </li>
 
                         <!-- Access Management Section -->
-                        <li>
+                        <li v-if="accessManagementItems.length > 0">
                             <button
                                 @click="toggleAccessManagement"
                                 class="w-full text-left flex items-center justify-between text-xs font-semibold leading-6 text-gray-400 uppercase tracking-wide mb-2 hover:text-gray-300 transition-colors"
@@ -793,7 +835,7 @@ const logout = () => {
                                     <Link
                                         :href="route(item.href)"
                                         :class="[
-                                            item.current
+                                            isActive(item.href)
                                                 ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
                                                 : 'text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
                                             'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-medium transition-all',
@@ -802,7 +844,7 @@ const logout = () => {
                                         <component
                                             :is="item.icon"
                                             :class="[
-                                                item.current
+                                                isActive(item.href)
                                                     ? 'text-blue-600 dark:text-blue-400'
                                                     : 'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
                                                 'h-5 w-5 shrink-0',
@@ -815,7 +857,7 @@ const logout = () => {
                         </li>
 
                         <!-- Configuration Section -->
-                        <li>
+                        <li v-if="configurationItems.length > 0">
                             <button
                                 @click="toggleConfiguration"
                                 class="w-full text-left flex items-center justify-between text-xs font-semibold leading-6 text-gray-400 uppercase tracking-wide mb-2 hover:text-gray-300 transition-colors"
@@ -843,7 +885,7 @@ const logout = () => {
                                         v-if="!item.disabled"
                                         :href="route(item.href)"
                                         :class="[
-                                            item.current
+                                            isActive(item.href)
                                                 ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
                                                 : 'text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
                                             'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-medium transition-all',
@@ -852,7 +894,7 @@ const logout = () => {
                                         <component
                                             :is="item.icon"
                                             :class="[
-                                                item.current
+                                                isActive(item.href)
                                                     ? 'text-blue-600 dark:text-blue-400'
                                                     : 'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
                                                 'h-4 w-4 shrink-0',

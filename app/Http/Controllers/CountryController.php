@@ -13,7 +13,7 @@ class CountryController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $countries = Country::query()
             ->orderBy('name')
@@ -21,6 +21,12 @@ class CountryController extends Controller
 
         return Inertia::render('Countries/Index', [
             'countries' => $countries,
+            'can' => [
+                'create' => $request->user()->can('countries.create'),
+                'view' => $request->user()->can('countries.read'),
+                'edit' => $request->user()->can('countries.update'),
+                'delete' => $request->user()->can('countries.delete'),
+            ]
         ]);
     }
 

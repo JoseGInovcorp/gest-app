@@ -33,7 +33,7 @@ const isFormValid = computed(() => {
 
 // Methods
 const handleSubmit = () => {
-    form.put(route("vat-rates.update", props.vatRate.id));
+    form.patch(route("vat-rates.update", props.vatRate.id));
 };
 </script>
 

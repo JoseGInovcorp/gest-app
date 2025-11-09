@@ -4,12 +4,12 @@
 
 ## 📊 Status do Projeto
 
-**Versão:** v0.8.0  
-**Progresso:** 47% (9 de 19+ módulos)  
+**Versão:** v0.8.5  
+**Progresso:** 50% (10 de 20 módulos)  
 **Entrega:** 18 Nov 2025  
 **BD:** ✅ MySQL configurado e funcionando  
 **Welcome:** ✅ Navegação funcional  
-**Segurança:** ✅ Sistema de permissões completo  
+**Segurança:** ✅ Sistema de permissões com controlo de UI  
 **Logs:** ✅ Histórico de atividades completo
 
 ## 🛠️ Tecnologias
@@ -72,12 +72,38 @@
 ### ✅ Módulo 7: Gestão de Acessos (Utilizadores e Permissões)
 
 -   **Utilizadores:** CRUD completo com campos nome, email, telemóvel, role, estado
--   **Permissões:** Grupos com ativação por menu (12 módulos × 4 ações CRUD = 48 permissões)
--   **4 Roles Hierárquicos:** Super Admin, Administrador, Gestor, Utilizador
--   **Segurança:** Proteção contra auto-eliminação e eliminação de Super Admin
--   **UI Simplificada:** 1 checkbox por menu ativa 4 permissões CRUD automaticamente
+-   **Permissões:** Sistema baseado em 64 permissões (16 módulos × 4 ações CRUD)
+-   **6 Grupos Hierárquicos:** Super Admin, Administrador, Gestor Comercial, Gestor Financeiro, Editor, Visualizador
+-   **Controlo Granular de UI:** Botões de ação (Criar, Editar, Eliminar) só aparecem se utilizador tiver permissão
+-   **Segurança Aprimorada:**
+    -   Utilizadores nunca vêem botões que não podem usar
+    -   Zero erros 403 - interface limpa e intuitiva
+    -   Sistema genérico que funciona com qualquer grupo criado
+-   **UI Baseada em Permissões:**
+    -   Backend: Controllers verificam `$request->user()->can('module.action')`
+    -   Frontend: Componentes usam `v-if="can.action"` para renderização condicional
+    -   Exemplo: Utilizador "Visualizador" vê listas mas não vê botões de ação
 -   **Package:** Spatie Laravel Permission v6.23.0
 -   **Documentação:** Ver `docs/access-management.md` para detalhes técnicos
+
+#### 📋 Distribuição de Permissões por Grupo
+
+| Grupo                 | Permissões    | Módulos com Acesso Completo                                 |
+| --------------------- | ------------- | ----------------------------------------------------------- |
+| **Super Admin**       | 64/64 (100%)  | Todos os 16 módulos                                         |
+| **Administrador**     | 56/64 (87.5%) | Todos exceto algumas restrições                             |
+| **Gestor Comercial**  | 22/64 (34%)   | Clientes, Fornecedores, Contactos, Artigos, Ordens Trabalho |
+| **Gestor Financeiro** | 11/64 (17%)   | Apenas leitura: Clientes, Fornecedores, Taxas IVA           |
+| **Editor**            | 9/64 (14%)    | Contactos, Arquivo Digital                                  |
+| **Visualizador**      | 16/64 (25%)   | Apenas leitura em todos os módulos                          |
+
+#### 🎯 Módulos Cobertos pelo Sistema de Permissões
+
+1. **Comercial:** Clientes, Fornecedores, Contactos, Artigos
+2. **Financeiro:** Taxas IVA
+3. **Operacional:** Calendário, Ordens de Trabalho, Arquivo Digital
+4. **Sistema:** Logs, Utilizadores, Grupos de Permissões
+5. **Configurações:** Países, Funções de Contactos
 
 ### ✅ Módulo 8: Logs de Atividade
 
@@ -197,17 +223,62 @@ npm run dev
 -   Upload e gestão de imagens
 -   Taxas IVA dinâmicas da BD
 
-### Gestão de Acessos (v0.7.0)
+### Gestão de Acessos e Permissões
 
--   **Utilizadores:** Criação, edição, ativação/desativação
--   **Grupos de Permissões:** Interface simplificada (1 checkbox = 4 permissões CRUD)
--   **Roles Predefinidos:**
-    -   **Super Admin:** Controle total (96 perms)
-    -   **Administrador:** Gestão operacional (85 perms, sem users/roles)
-    -   **Gestor:** Operações principais (20 perms, create/read/update)
-    -   **Utilizador:** Apenas leitura (12 perms)
--   **Segurança:** Proteção contra auto-eliminação e eliminação de Super Admin
--   **Documentação:** Ver `docs/access-management.md`
+#### 🔐 Sistema de Controlo de Acesso Baseado em Permissões
+
+**Visibilidade Inteligente de UI:**
+
+-   Botões de ação (Criar, Editar, Eliminar) só aparecem se utilizador tiver permissão
+-   Zero erros 403 - interface limpa e adaptativa
+-   Sistema 100% genérico que funciona com qualquer combinação de permissões
+
+**Arquitetura do Sistema:**
+
+```
+Backend (Controller) → Verifica permissões → Envia objeto 'can'
+        ↓
+Frontend (Vue) → Recebe props → Renderiza condicionalmente com v-if
+        ↓
+Resultado → Botões só existem se houver permissão
+```
+
+**Exemplos de Comportamento:**
+
+| Grupo                 | Módulo Clientes | Botões Visíveis         |
+| --------------------- | --------------- | ----------------------- |
+| **Super Admin**       | CRUD completo   | Criar, Editar, Eliminar |
+| **Gestor Comercial**  | CRUD completo   | Criar, Editar, Eliminar |
+| **Gestor Financeiro** | Apenas leitura  | Nenhum botão            |
+| **Visualizador**      | Apenas leitura  | Nenhum botão            |
+
+**Módulos com Controlo de Permissões:**
+
+-   ✅ Clientes e Fornecedores
+-   ✅ Contactos
+-   ✅ Artigos
+-   ✅ Países
+-   ✅ Funções de Contactos
+-   ✅ Taxas de IVA
+-   ✅ Grupos de Permissões
+-   ✅ Utilizadores
+
+**Grupos de Utilizadores:**
+
+1. **Super Admin** (64 permissões) - Acesso total ao sistema
+2. **Administrador** (56 permissões) - Gestão operacional completa
+3. **Gestor Comercial** (22 permissões) - Área comercial e operacional
+4. **Gestor Financeiro** (11 permissões) - Apenas visualização financeira
+5. **Editor** (9 permissões) - Contactos e arquivo digital
+6. **Visualizador** (16 permissões) - Apenas leitura em todos módulos
+
+**Segurança Implementada:**
+
+-   ✅ Proteção contra auto-eliminação
+-   ✅ Proteção de Super Admin (não pode ser eliminado)
+-   ✅ Validação backend em todos os endpoints
+-   ✅ UI adaptativa baseada em permissões reais
+-   ✅ Middleware de autorização em todas as rotas
 
 ### Configurações Sistema
 
@@ -243,12 +314,14 @@ npm run dev
 ## 🔒 Segurança
 
 -   ✅ Validação de inputs em todos os formulários
--   ✅ Sistema de permissões granular (48 permissões)
+-   ✅ Sistema de permissões granular (64 permissões em 16 módulos)
+-   ✅ Controlo de UI baseado em permissões (botões adaptáveis)
 -   ✅ Proteção CSRF (Laravel)
 -   ✅ Password hashing (bcrypt)
--   ✅ Middleware de autenticação
+-   ✅ Middleware de autenticação e autorização
 -   ✅ Proteção contra auto-eliminação
 -   ✅ Validação de roles hierárquicos
+-   ✅ Zero erros 403 desnecessários (UI inteligente)
 
 ## 🛠️ Resolução de Problemas
 

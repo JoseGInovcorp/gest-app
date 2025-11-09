@@ -15,7 +15,7 @@ class UserManagementController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $users = User::with('roles')->get()->map(function ($user) {
             return [
@@ -30,7 +30,13 @@ class UserManagementController extends Controller
         });
 
         return Inertia::render('Users/Index', [
-            'users' => $users
+            'users' => $users,
+            'can' => [
+                'create' => $request->user()->can('users.create'),
+                'view' => $request->user()->can('users.read'),
+                'edit' => $request->user()->can('users.update'),
+                'delete' => $request->user()->can('users.delete'),
+            ]
         ]);
     }
 

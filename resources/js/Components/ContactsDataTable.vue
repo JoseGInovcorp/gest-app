@@ -55,7 +55,7 @@
 
             <!-- Actions -->
             <div class="flex items-center space-x-2">
-                <Button @click="$emit('create')">
+                <Button v-if="canCreate" @click="$emit('create')">
                     <Plus class="h-4 w-4 mr-2" />
                     Novo Contacto
                 </Button>
@@ -167,6 +167,7 @@
             <template #actions="{ row }">
                 <div class="flex items-center space-x-1">
                     <Button
+                        v-if="canView"
                         variant="ghost"
                         size="sm"
                         @click="$emit('view', row)"
@@ -175,6 +176,7 @@
                         <Eye class="h-4 w-4" />
                     </Button>
                     <Button
+                        v-if="canEdit"
                         variant="ghost"
                         size="sm"
                         @click="$emit('edit', row)"
@@ -183,6 +185,7 @@
                         <Pencil class="h-4 w-4" />
                     </Button>
                     <Button
+                        v-if="canDelete"
                         variant="ghost"
                         size="sm"
                         @click="$emit('delete', row)"
@@ -265,6 +268,22 @@ const props = defineProps({
     sortDirection: {
         type: String,
         default: "asc",
+    },
+    canCreate: {
+        type: Boolean,
+        default: false,
+    },
+    canView: {
+        type: Boolean,
+        default: true,
+    },
+    canEdit: {
+        type: Boolean,
+        default: false,
+    },
+    canDelete: {
+        type: Boolean,
+        default: false,
     },
 });
 

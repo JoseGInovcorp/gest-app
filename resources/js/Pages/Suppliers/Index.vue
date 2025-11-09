@@ -83,6 +83,7 @@ const handleDelete = (entity) => {
         <!-- Data Table -->
         <EntitiesDataTable
             :entities="entities.data || []"
+            :can-create="can.create"
             :can-view="can.view"
             :can-edit="can.edit"
             :can-delete="can.delete"

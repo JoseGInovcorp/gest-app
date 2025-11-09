@@ -2,6 +2,650 @@
 
 ---
 
+## [0.8.5] — 2025-11-09
+
+### 🔐 Sistema de Visibilidade de Botões Baseado em Permissões
+
+**Implementação de Controlo Granular de UI por Permissões**
+
+#### 🎯 Objetivo
+
+Implementar um sistema genérico onde os botões de ação (Criar, Editar, Eliminar) só aparecem se o utilizador tiver a permissão correspondente. Anteriormente, os botões apareciam sempre e devolviam erro 403 quando clicados por utilizadores sem permissão.
+
+#### ✨ Funcionalidades Implementadas
+
+**Backend (Controllers)**
+
+-   Todos os controllers agora enviam objeto `can` com verificação real de permissões:
+
+```php
+'can' => [
+    'create' => $request->user()->can('module.create'),
+    'view' => $request->user()->can('module.read'),
+    'edit' => $request->user()->can('module.update'),
+    'delete' => $request->user()->can('module.delete'),
+]
+```
+
+**Frontend (Vue Components)**
+
+-   Botões usam diretiva `v-if` para renderização condicional baseada em permissões:
+
+```vue
+<Button v-if="can.create">Criar</Button>
+<Button v-if="can.edit">Editar</Button>
+<Button v-if="can.delete">Eliminar</Button>
+```
+
+#### 📋 Módulos Atualizados
+
+**Controllers Modificados:**
+
+1. `EntityController.php` - Clientes/Fornecedores (com lógica dinâmica de prefixo)
+2. `ArticleController.php` - Artigos
+3. `ContactController.php` - Contactos
+4. `VatRateController.php` - Taxas de IVA
+5. `CountryController.php` - Países
+6. `ContactFunctionController.php` - Funções de Contactos
+7. `RoleController.php` - Grupos de Permissões
+8. `UserManagementController.php` - Utilizadores
+
+**Componentes Vue Modificados:**
+
+1. `EntitiesDataTableNew.vue` - Tabela de Clientes/Fornecedores
+    - Props: `canCreate`, `canView`, `canEdit`, `canDelete`
+2. `ContactsDataTableNew.vue` - Tabela de Contactos
+    - Props: `canCreate`, `canView`, `canEdit`, `canDelete`
+
+**Páginas Index.vue Atualizadas:**
+
+1. `Clients/Index.vue` - Passa props de permissões
+2. `Suppliers/Index.vue` - Passa props de permissões
+3. `Contacts/Index.vue` - Passa props de permissões
+4. `Articles/Index.vue` - Usa objeto `can` em vez de `hasPermission()`
+5. `Countries/Index.vue` - Usa objeto `can` em vez de `hasPermission()`
+6. `ContactFunctions/Index.vue` - Usa objeto `can` em vez de `hasPermission()`
+7. `VatRates/Index.vue` - Usa objeto `can` em vez de `hasPermission()`
+8. `Roles/Index.vue` - Usa objeto `can` em vez de `hasPermission()`
+9. `Users/Index.vue` - Usa objeto `can` em vez de `hasPermission()`
+
+#### 🎯 Comportamento por Tipo de Utilizador
+
+**Exemplo: Utilizador "Visualizador" (apenas permissões `.read`)**
+
+-   ✅ Vê todas as listas de dados
+-   ❌ NÃO vê botão "Criar"
+-   ❌ NÃO vê botão "Editar"
+-   ❌ NÃO vê botão "Eliminar"
+-   ✅ Nunca recebe erro 403 (botões simplesmente não existem)
+
+**Exemplo: Utilizador "Gestor Financeiro"**
+
+-   ✅ Vê listas: Clientes, Fornecedores, Taxas IVA
+-   ✅ Pode visualizar detalhes
+-   ❌ NÃO vê botões de criação/edição/eliminação
+-   ❌ Não tem acesso a módulos sem permissão
+
+#### 🔧 Padrão de Implementação
+
+**1. Controller envia permissões:**
+
+```php
+return Inertia::render('Module/Index', [
+    'data' => $data,
+    'can' => [
+        'create' => $request->user()->can('module.create'),
+        'view' => $request->user()->can('module.read'),
+        'edit' => $request->user()->can('module.update'),
+        'delete' => $request->user()->can('module.delete'),
+    ]
+]);
+```
+
+**2. View recebe como prop:**
+
+```vue
+const props = defineProps({ data: Object, can: { type: Object, default: () => ({
+create: false, view: true, edit: false, delete: false, }), }, });
+```
+
+**3. Componentes usam v-if:**
+
+```vue
+<Link v-if="can.create" :href="route('module.create')">
+    <Button>Novo</Button>
+</Link>
+<Button v-if="can.edit" @click="edit(row)">Editar</Button>
+<Button v-if="can.delete" @click="destroy(row)">Eliminar</Button>
+```
+
+#### ✅ Benefícios
+
+1. **Segurança Aprimorada**: Utilizadores nunca vêem opções que não podem usar
+2. **UX Melhorada**: Sem erros 403 confusos - interface limpa e clara
+3. **Sistema Genérico**: Funciona automaticamente para qualquer grupo criado
+4. **Manutenção Simples**: Permissões geridas centralmente via Spatie Permission
+5. **Performance**: Botões não renderizados = menos HTML no DOM
+
+#### 📦 Arquivos Modificados
+
+**Backend:**
+
+-   `app/Http/Controllers/EntityController.php`
+-   `app/Http/Controllers/ArticleController.php`
+-   `app/Http/Controllers/ContactController.php`
+-   `app/Http/Controllers/VatRateController.php`
+-   `app/Http/Controllers/CountryController.php`
+-   `app/Http/Controllers/ContactFunctionController.php`
+-   `app/Http/Controllers/RoleController.php`
+-   `app/Http/Controllers/UserManagementController.php`
+
+**Frontend:**
+
+-   `resources/js/Components/EntitiesDataTableNew.vue`
+-   `resources/js/Components/ContactsDataTableNew.vue`
+-   `resources/js/Pages/Clients/Index.vue`
+-   `resources/js/Pages/Suppliers/Index.vue`
+-   `resources/js/Pages/Contacts/Index.vue`
+-   `resources/js/Pages/Articles/Index.vue`
+-   `resources/js/Pages/Countries/Index.vue`
+-   `resources/js/Pages/ContactFunctions/Index.vue`
+-   `resources/js/Pages/VatRates/Index.vue`
+-   `resources/js/Pages/Roles/Index.vue`
+-   `resources/js/Pages/Users/Index.vue`
+
+#### 🧪 Testes Recomendados
+
+1. Login como cada grupo de utilizador
+2. Verificar quais botões aparecem em cada módulo
+3. Confirmar que correspondem às permissões do grupo
+4. Verificar que não há erros 403 ao navegar normalmente
+
+---
+
+## [0.8.4] — 2025-11-09
+
+### 📦 Adição de Novos Módulos ao Sistema de Permissões
+
+**Novos Módulos Adicionados**
+
+1. **Calendário** (`calendar`)
+    - 4 permissões CRUD (create, read, update, delete)
+2. **Ordens de Trabalho** (`work-orders`)
+    - 4 permissões CRUD (create, read, update, delete)
+3. **Arquivo Digital** (`digital-archive`)
+    - 4 permissões CRUD (create, read, update, delete)
+4. **Logs** (`logs`)
+    - 4 permissões CRUD (create, read, update, delete)
+
+**Distribuição de Permissões por Grupo**
+
+-   ✅ **Super Admin**: Todas as 64 permissões (16 módulos × 4 ações)
+-   ✅ **Administrador**: 56 permissões (inclui todos os novos módulos)
+-   ✅ **Gestor Comercial**: 22 permissões
+    -   Calendário: apenas leitura
+    -   Ordens de Trabalho: CRUD completo
+-   ✅ **Gestor Financeiro**: 11 permissões (sem novos módulos)
+-   ✅ **Editor**: 10 permissões
+    -   Arquivo Digital: CRUD completo
+-   ✅ **Visualizador**: 16 permissões (apenas leitura em todos os módulos)
+
+**Arquivos Criados**
+
+-   `database/seeders/AddNewModulesPermissionsSeeder.php`
+
+**Arquivos Modificados**
+
+-   `database/seeders/UpdateRolesSeeder.php` - Adicionadas permissões aos grupos
+-   `database/seeders/RoleAndPermissionSeeder.php` - Incluídos novos módulos
+
+**Comandos Executados**
+
+```bash
+# Criar permissões dos novos módulos
+php artisan db:seed --class=AddNewModulesPermissionsSeeder
+
+# Atualizar grupos com novas permissões
+php artisan db:seed --class=UpdateRolesSeeder
+```
+
+**Estatísticas Finais**
+
+-   Total de Permissões: 64 (antes: 48)
+-   Total de Módulos: 16 (antes: 12)
+-   Novos módulos: 4 (calendar, work-orders, digital-archive, logs)
+
+---
+
+## [0.8.3] — 2025-11-09
+
+### 🔧 Correção de Formulários e Reorganização do Sistema de Permissões
+
+**Problemas Corrigidos**
+
+1. **Erro 405 ao Editar Utilizadores e Grupos**
+
+    - Formulários Vue usavam `form.put()` mas rotas Laravel esperavam `PATCH`
+    - Correção aplicada em 5 formulários de edição
+
+2. **Sistema de Permissões Desorganizado**
+
+    - Utilizadores tinham permissões diretas em vez de grupos
+    - Grupos não estavam atribuídos aos utilizadores
+    - Confusão sobre como funcionava o sistema de permissões
+
+3. **Campo 'active' não aparecia na tabela de Permissões**
+    - Controller não enviava o campo 'active' para o Vue
+    - Correção no `RoleController::index()`
+
+**Soluções Implementadas**
+
+**Frontend - Correção de Formulários**
+
+-   ✅ Alterado `form.put()` para `form.patch()` em:
+    -   `resources/js/Pages/Users/Edit.vue`
+    -   `resources/js/Pages/Roles/Edit.vue`
+    -   `resources/js/Pages/VatRates/Edit.vue`
+    -   `resources/js/Pages/ContactFunctions/Edit.vue`
+    -   `resources/js/Pages/Contacts/Edit.vue`
+
+**Backend - Reorganização de Grupos**
+
+-   ✅ **UpdateRolesSeeder**: Novo seeder que cria 6 grupos específicos
+
+    -   👑 Super Admin (48 permissões → 64) - Acesso total
+    -   🔧 Administrador (40 permissões → 56) - Tudo exceto users/roles
+    -   💼 Gestor Comercial (17 permissões → 22) - Clientes, Fornecedores, Contactos, Propostas, Ordens de Trabalho
+    -   💰 Gestor Financeiro (11 permissões) - Financeiro, Encomendas, Taxas IVA
+    -   ✏️ Editor (6 permissões → 10) - Artigos, configurações básicas e Arquivo Digital
+    -   👁️ Visualizador (12 permissões → 16) - Apenas leitura em tudo
+
+-   ✅ **TestUsersSeeder Atualizado**: Agora atribui grupos aos utilizadores
+
+    -   Removidas todas as permissões diretas
+    -   Todos os 7 utilizadores têm grupos atribuídos
+    -   Permissões geridas APENAS através dos grupos
+
+-   ✅ **RoleController**: Adicionado campo 'active' no método index()
+
+**Estrutura Final**
+
+-   ✅ 6 grupos ativos com permissões bem definidas
+-   ✅ 7 utilizadores todos com grupos atribuídos
+-   ✅ 0 utilizadores com permissões diretas
+-   ✅ Sistema funcionando corretamente
+
+**Arquivos Criados**
+
+-   `database/seeders/UpdateRolesSeeder.php`
+-   `database/seeders/AddNewModulesPermissionsSeeder.php`
+-   `docs/fix-access-management.md` (documentação completa)
+
+**Arquivos Modificados**
+
+-   `database/seeders/TestUsersSeeder.php`
+-   `database/seeders/RoleAndPermissionSeeder.php`
+-   `app/Http/Controllers/RoleController.php`
+-   5 formulários Edit.vue (Users, Roles, VatRates, ContactFunctions, Contacts)
+
+**Comandos para Aplicar**
+
+```bash
+# Criar permissões dos novos módulos
+php artisan db:seed --class=AddNewModulesPermissionsSeeder
+
+# Atualizar grupos
+php artisan db:seed --class=UpdateRolesSeeder
+
+# Atribuir grupos aos utilizadores
+php artisan db:seed --class=TestUsersSeeder
+```
+
+---
+
+## [0.8.2] — 2025-11-08
+
+### 🔒 Sistema de Permissões - Implementação Completa e Correções
+
+**Problema Identificado**
+
+-   Permissões não bloqueavam acesso real aos módulos
+-   Sidebar mostrava todos os menus independentemente das permissões do utilizador
+-   Duplicação de permissões na base de dados (96 em vez de 48)
+-   Nomenclatura inconsistente (view/edit vs read/update)
+-   Middleware de permissões criado mas não aplicado nas rotas
+
+**Soluções Implementadas**
+
+**Backend - Middleware e Rotas**
+
+-   ✅ **CheckPermission Middleware**: Criado middleware para verificar permissões
+
+    -   Valida se user está autenticado
+    -   Verifica permissão específica com `$user->can($permission)`
+    -   Retorna 403 se não tiver permissão
+    -   Registrado em `bootstrap/app.php` com alias `permission`
+
+-   ✅ **Rotas Protegidas**: Aplicado middleware em todas as rotas
+    -   `clients.*` → `permission:clients.{create|read|update|delete}`
+    -   `suppliers.*` → `permission:suppliers.{create|read|update|delete}`
+    -   `contacts.*` → `permission:contacts.{create|read|update|delete}`
+    -   `articles.*` → `permission:articles.{create|read|update|delete}`
+    -   `countries.*` → `permission:countries.{create|read|update|delete}`
+    -   `contact-functions.*` → `permission:contact-functions.{create|read|update|delete}`
+    -   `vat-rates.*` → `permission:vat-rates.{create|read|update|delete}`
+    -   `users.*` → `permission:users.{create|read|update|delete}`
+    -   `roles.*` → `permission:roles.{create|read|update|delete}`
+
+**Backend - Limpeza Permissões**
+
+-   ✅ **CleanAndResetPermissionsSeeder**: Novo seeder para limpeza completa
+
+    -   Remove TODAS as permissões e roles antigas
+    -   Recria exatamente 48 permissões (12 módulos × 4 ações)
+    -   Nomenclatura padronizada: `create`, `read`, `update`, `delete`
+    -   Estrutura limpa sem duplicações
+
+-   ✅ **Estrutura Final de Permissões**:
+
+    ```
+    📊 12 Módulos × 4 Ações = 48 Permissões
+    - clients: create, read, update, delete
+    - suppliers: create, read, update, delete
+    - contacts: create, read, update, delete
+    - articles: create, read, update, delete
+    - proposals: create, read, update, delete
+    - orders: create, read, update, delete
+    - financial: create, read, update, delete
+    - users: create, read, update, delete
+    - roles: create, read, update, delete
+    - countries: create, read, update, delete
+    - contact-functions: create, read, update, delete
+    - vat-rates: create, read, update, delete
+    ```
+
+-   ✅ **Distribuição por Role**:
+    -   **Super Admin**: 48 permissões (100%)
+    -   **Administrador**: 40 permissões (sem users e roles)
+    -   **Gestor**: 20 permissões (operacionais, sem delete)
+    -   **Utilizador**: 12 permissões (apenas read)
+
+**Frontend - Middleware e Compartilhamento**
+
+-   ✅ **HandleInertiaRequests**: Atualizado para compartilhar permissões
+    -   Antes: Apenas `auth.user`
+    -   Depois: `auth.user` + `auth.permissions` (array de nomes)
+    -   Exemplo: `['clients.create', 'clients.read', 'articles.update']`
+
+**Frontend - AuthenticatedLayout.vue**
+
+-   ✅ **Helper Functions**:
+
+    ```javascript
+    // Armazena permissões do user logado
+    const permissions = computed(() => {
+        const perms = page.props.auth?.permissions;
+        return Array.isArray(perms) ? perms : [];
+    });
+
+    // Verifica permissão específica
+    const hasPermission = (permission) => {
+        if (!permission || !Array.isArray(permissions.value)) return false;
+        return permissions.value.includes(permission);
+    };
+
+    // Verifica se tem qualquer permissão de um módulo
+    const hasAnyPermission = (module) => {
+        if (!module || !Array.isArray(permissions.value)) return false;
+        return ["create", "read", "update", "delete"].some((action) =>
+            hasPermission(`${module}.${action}`)
+        );
+    };
+
+    // Verifica se rota está ativa
+    const isActive = (routeName) => {
+        return route().current(routeName) || route().current(routeName + ".*");
+    };
+    ```
+
+-   ✅ **Navegação Filtrada**: Todos os arrays de menu convertidos para `computed`
+
+    ```javascript
+    // Antes: array estático
+    const mainNavigationItems = [...];
+
+    // Depois: computed com filtro
+    const mainNavigationItems = computed(() => {
+        return allMainNavigationItems.filter((item) => {
+            if (!item.permission) return true; // Sem permissão = sempre visível
+            return hasAnyPermission(item.permission);
+        });
+    });
+    ```
+
+-   ✅ **Menus Protegidos**:
+
+    -   `mainNavigationItems` (Dashboard, Clientes, Fornecedores, Contactos, Propostas, Calendário)
+    -   `ordersNavigationItems` (Encomendas)
+    -   `financialNavigationItems` (Financeiro)
+    -   `accessManagementItems` (Utilizadores, Permissões)
+    -   `configurationItems` (Países, Funções, Artigos, IVA, Logs)
+
+-   ✅ **Seções Ocultas**: Adicionado `v-if` para ocultar seções completas
+    ```vue
+    <!-- Só mostra seção se user tiver pelo menos 1 permissão -->
+    <li v-if="ordersNavigationItems.length > 0">
+        <!-- Encomendas -->
+    </li>
+    <li v-if="financialNavigationItems.length > 0">
+        <!-- Financeiro -->
+    </li>
+    <li v-if="accessManagementItems.length > 0">
+        <!-- Gestão de Acessos -->
+    </li>
+    <li v-if="configurationItems.length > 0">
+        <!-- Configurações -->
+    </li>
+    ```
+
+**Frontend - Página de Erro 403**
+
+-   ✅ **resources/js/Pages/Errors/403.vue**: Criada página personalizada
+    -   Design moderno com ícone de aviso
+    -   Mensagem clara: "Não tem permissão para aceder a este recurso"
+    -   Botões: Voltar ao Dashboard | Voltar à Página Anterior
+    -   Responsive e com dark mode
+
+**Frontend - Controlo Visibilidade Botões (UX Melhorada)**
+
+-   ✅ **hasPermission() Global**: Função `inject` disponível em todos os componentes
+
+    -   Exportada via `provide("hasPermission", hasPermission)` no AuthenticatedLayout
+    -   Permite verificar permissões específicas (ex: `hasPermission('articles.create')`)
+    -   Reutilizável em qualquer componente filho
+
+-   ✅ **Botões Condicionais**: Aplicado `v-if` baseado em permissões
+
+    -   **Botão "Criar/Adicionar"**: `v-if="hasPermission('module.create')"`
+        -   Articles, Countries, ContactFunctions, VatRates, Users, Roles
+    -   **Botão "Editar"**: `v-if="hasPermission('module.update')"`
+        -   Todos os botões de edição nas tabelas
+    -   **Botão "Eliminar"**: `v-if="hasPermission('module.delete')"`
+        -   Todos os botões de eliminação nas tabelas
+
+-   ✅ **Benefícios UX**:
+    -   **Antes**: Botão visível → Clique → Erro 403 (má experiência)
+    -   **Depois**: Botão oculto → Zero frustração do utilizador
+    -   Interface limpa e sem elementos não funcionais
+    -   Comunicação clara: "Se vejo, posso usar"
+
+**Correções de Bugs**
+
+-   ✅ **Links Não Funcionavam**: Removido propriedade `current: false` dos arrays
+
+    -   Propriedade causava conflito com computed properties
+    -   Substituído por função `isActive(item.href)` dinâmica no template
+
+-   ✅ **Vite Manifest Error**: Executado `npm run build`
+
+    -   Recompilou todos os assets
+    -   Criou novo manifest com todos os componentes Vue
+    -   Users/Index.vue agora encontrado corretamente
+
+-   ✅ **`.forEach()` em Computed**: Removido código que tentava mutar computeds
+    -   Erro: `mainNavigationItems.forEach is not a function`
+    -   Solução: Usar `isActive()` diretamente no template em vez de modificar arrays
+
+**Fluxo de Proteção Completo**
+
+1. **User Faz Login**:
+
+    - Laravel autentica user
+    - `HandleInertiaRequests` carrega permissões via `getAllPermissions()`
+    - Frontend recebe `auth.permissions` array
+
+2. **Sidebar é Renderizada**:
+
+    - Cada menu verifica `hasAnyPermission(module)`
+    - Menus sem permissão não aparecem
+    - Seções vazias são ocultadas
+
+3. **User Clica em Menu**:
+
+    - Inertia.js faz request para rota
+    - Middleware `CheckPermission` verifica permissão
+    - Se não tiver: retorna 403 com página de erro
+    - Se tiver: Controller processa normalmente
+
+4. **User Tenta URL Direto**:
+    - Mesmo sem link visível, middleware bloqueia
+    - Retorna 403 Forbidden
+    - Previne acesso não autorizado
+
+**Impacto**
+
+-   ✅ **Segurança Real**: Permissões agora bloqueiam acesso efetivamente
+-   ✅ **Frontend Limpo**: Users só veem o que podem acessar
+-   ✅ **Backend Protegido**: Rotas verificam permissões antes de executar
+-   ✅ **UX Melhorada**: Mensagens de erro claras quando acesso negado
+-   ✅ **Consistência**: Nomenclatura padronizada em todo o sistema
+-   ✅ **Performance**: Permissões cached pelo Spatie Permission
+-   ✅ **Manutenibilidade**: Sistema organizado e documentado
+
+**Decisões Técnicas**
+
+-   ✅ Middleware aplicado por rota individual (mais granular que por grupo)
+-   ✅ Permissões compartilhadas via Inertia (evita requests adicionais)
+-   ✅ Computed properties para reatividade automática
+-   ✅ Validação dupla: frontend (UX) + backend (segurança)
+-   ✅ Logs sempre visível (não requer permissão específica)
+-   ✅ **UX First**: Botões ocultos em vez de erro 403 (melhor experiência)
+-   ✅ **Provide/Inject**: hasPermission() disponível globalmente via Vue composition API
+
+---
+
+## [0.8.1] — 2025-11-06
+
+### 🔐 Sistema de Permissões Granulares
+
+**Problema Identificado**
+
+-   Sistema anterior usava toggle único por módulo (ativava/desativava todas as 4 permissões)
+-   Impossível dar apenas permissões de leitura ou criar roles com acesso limitado
+-   UX não intuitiva para gestão granular de acessos
+
+**Solução Implementada**
+
+**Frontend - Roles/Create.vue e Roles/Edit.vue**
+
+-   ✅ **4 Checkboxes Individuais** por menu em vez de 1 toggle geral
+-   ✅ **Labels Traduzidas**: Criar, Visualizar, Editar, Eliminar
+-   ✅ **Color Coding** para identificação rápida:
+    -   🟢 Criar (verde): `text-green-600 dark:text-green-400`
+    -   🔵 Visualizar (azul): `text-blue-600 dark:text-blue-400`
+    -   🟡 Editar (amarelo): `text-yellow-600 dark:text-yellow-400`
+    -   🔴 Eliminar (vermelho): `text-red-600 dark:text-red-400`
+-   ✅ **Grid Responsivo**: 2 colunas mobile, 4 colunas desktop
+-   ✅ **Toggle Individual**: Método `togglePermission(permissionName)` substitui `toggleModule()`
+-   ✅ **Organização Sidebar**: Permissões ordenadas conforme ordem do menu lateral
+-   ✅ **Identificação Submenus**: Exibe grupo de origem (ex: "Países (Configurações → Entidades)")
+
+**Backend - RoleController**
+
+-   ✅ **Filtro de Ações**: Apenas create, read, update, delete (4 permissões por módulo)
+-   ✅ **Ordem Consistente**: Permissões sempre na mesma ordem (Criar → Visualizar → Editar → Eliminar)
+-   ✅ **Ordenação Inteligente**: Módulos ordenados conforme estrutura da sidebar:
+    1. Menus Principais (Clientes, Fornecedores, Contactos, Propostas)
+    2. Submenu Encomendas
+    3. Submenu Financeiro
+    4. Submenu Gestão de Acessos (Utilizadores, Permissões)
+    5. Submenu Configurações (Países, Funções Contacto, Artigos, Taxas IVA)
+-   ✅ **Metadata de Grupos**: Cada módulo identifica seu grupo pai
+    -   Ex: `'countries'` → `{name: 'Países', group: 'Configurações → Entidades', order: 40}`
+    -   Ex: `'users'` → `{name: 'Utilizadores', group: 'Gestão de Acessos', order: 30}`
+
+**Métodos Atualizados**
+
+```javascript
+// Antes (módulo completo)
+toggleModule(module); // Ativava/desativava todas as 4 permissões
+
+// Depois (permissão individual)
+togglePermission(permissionName); // Ativa/desativa 1 permissão específica
+isPermissionActive(permissionName); // Verifica se permissão está ativa
+getPermissionLabel(action); // Retorna label PT (Criar, Visualizar, etc.)
+getActionColor(action); // Retorna classe Tailwind para cor
+```
+
+**Template Atualizado**
+
+```vue
+<!-- Antes -->
+<Checkbox :checked="isModuleActive(module)" @update:checked="toggleModule(module)" />
+<span>{{ module.name }}</span>
+<span>Create, Read, Update, Delete</span>
+
+<!-- Depois -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+    <div v-for="(permission, action) in module.permissions">
+        <Checkbox :checked="isPermissionActive(permission.name)"
+                  @update:checked="togglePermission(permission.name)" />
+        <label :class="getActionColor(action)">
+            {{ getPermissionLabel(action) }}
+        </label>
+    </div>
+</div>
+<!-- Identificação do Submenu -->
+<span v-if="module.group" class="text-xs text-gray-500">
+    ({{ module.group }})
+</span>
+```
+
+**Casos de Uso Suportados**
+
+-   ✅ **Leitura Apenas**: Ativar só "Visualizar" para relatórios
+-   ✅ **Editor Sem Eliminação**: Criar + Visualizar + Editar (sem Eliminar)
+-   ✅ **Aprovador**: Apenas Visualizar + Editar (workflow aprovação)
+-   ✅ **Administrador Limitado**: Todas exceto Eliminar (segurança)
+
+**Backend Compatível**
+
+-   Sistema Spatie Permission já suportava permissões individuais
+-   Backend recebe array de nomes: `['clients.create', 'clients.read']`
+-   Apenas frontend precisou de refatoração
+
+**Impacto UX**
+
+-   ✅ Interface mais intuitiva e visual
+-   ✅ Controlo fino de acessos por grupo
+-   ✅ Cores facilitam identificação rápida do tipo de permissão
+-   ✅ Redução de erros ao configurar roles
+-   ✅ Organização espelha estrutura do menu lateral (facilita localização)
+-   ✅ Identificação clara de submenus e seus grupos pais
+-   ✅ **Ordem consistente**: Checkboxes sempre na sequência Criar → Visualizar → Editar → Eliminar
+
+---
+
 ## [0.8.0] — 2025-11-06
 
 ### 📊 Módulo Logs de Atividade

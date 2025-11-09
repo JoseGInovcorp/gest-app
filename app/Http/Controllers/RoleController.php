@@ -13,7 +13,7 @@ class RoleController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $roles = Role::with('permissions')->withCount('users')->get()->map(function ($role) {
             return [
@@ -21,12 +21,19 @@ class RoleController extends Controller
                 'name' => $role->name,
                 'users_count' => $role->users_count,
                 'permissions_count' => $role->permissions->count(),
+                'active' => $role->active, // Campo ativo adicionado
                 'created_at' => $role->created_at,
             ];
         });
 
         return Inertia::render('Roles/Index', [
-            'roles' => $roles
+            'roles' => $roles,
+            'can' => [
+                'create' => $request->user()->can('roles.create'),
+                'view' => $request->user()->can('roles.read'),
+                'edit' => $request->user()->can('roles.update'),
+                'delete' => $request->user()->can('roles.delete'),
+            ]
         ]);
     }
 
@@ -170,17 +177,39 @@ class RoleController extends Controller
      */
     private function getGroupedPermissions()
     {
+        // Apenas as 4 ações base permitidas (sempre nesta ordem)
+        $allowedActions = ['create', 'read', 'update', 'delete'];
+
         $permissions = Permission::all();
 
         $grouped = [];
 
         foreach ($permissions as $permission) {
+            // Verificar se o formato é correto (module.action)
+            if (!str_contains($permission->name, '.')) {
+                continue;
+            }
+
             [$module, $action] = explode('.', $permission->name);
+
+            // Ignorar ações que não sejam as 4 básicas
+            if (!in_array($action, $allowedActions)) {
+                continue;
+            }
+
+            // Obter label do módulo
+            $moduleData = $this->getModuleLabel($module);
+
+            if (!$moduleData) {
+                continue;
+            }
 
             if (!isset($grouped[$module])) {
                 $grouped[$module] = [
-                    'name' => $this->getModuleLabel($module),
+                    'name' => $moduleData['name'],
                     'key' => $module,
+                    'order' => $moduleData['order'],
+                    'group' => $moduleData['group'] ?? null,
                     'permissions' => []
                 ];
             }
@@ -191,29 +220,61 @@ class RoleController extends Controller
             ];
         }
 
+        // Ordenar módulos por order
+        usort($grouped, function ($a, $b) {
+            return $a['order'] <=> $b['order'];
+        });
+
+        // Garantir que as permissões de cada módulo seguem a ordem correta
+        foreach ($grouped as &$module) {
+            $orderedPermissions = [];
+            foreach ($allowedActions as $action) {
+                if (isset($module['permissions'][$action])) {
+                    $orderedPermissions[$action] = $module['permissions'][$action];
+                }
+            }
+            $module['permissions'] = $orderedPermissions;
+        }
+
         return array_values($grouped);
     }
 
     /**
-     * Labels dos módulos
+     * Labels dos módulos (ordem da sidebar)
      */
     private function getModuleLabel($module)
     {
+        // Organizado pela ordem da sidebar
         $labels = [
-            'clients' => 'Clientes',
-            'suppliers' => 'Fornecedores',
-            'contacts' => 'Contactos',
-            'articles' => 'Artigos',
-            'proposals' => 'Propostas',
-            'orders' => 'Encomendas',
-            'financial' => 'Financeiro',
-            'users' => 'Utilizadores',
-            'roles' => 'Permissões',
-            'countries' => 'Países',
-            'contact-functions' => 'Funções Contacto',
-            'vat-rates' => 'Taxas IVA',
+            // Menus Principais (ordem 1-6)
+            'clients' => ['name' => 'Clientes', 'order' => 2, 'group' => null],
+            'suppliers' => ['name' => 'Fornecedores', 'order' => 3, 'group' => null],
+            'contacts' => ['name' => 'Contactos', 'order' => 4, 'group' => null],
+            'proposals' => ['name' => 'Propostas', 'order' => 5, 'group' => null],
+
+            // Submenu Encomendas (ordem 10-12)
+            'orders' => ['name' => 'Encomendas', 'order' => 10, 'group' => 'Encomendas'],
+            'work-orders' => ['name' => 'Ordens de Trabalho', 'order' => 11, 'group' => 'Encomendas'],
+
+            // Submenu Financeiro (ordem 20-22)
+            'financial' => ['name' => 'Financeiro', 'order' => 20, 'group' => 'Financeiro'],
+
+            // Submenu Gestão de Acessos (ordem 30-31)
+            'users' => ['name' => 'Utilizadores', 'order' => 30, 'group' => 'Gestão de Acessos'],
+            'roles' => ['name' => 'Permissões', 'order' => 31, 'group' => 'Gestão de Acessos'],
+
+            // Submenu Configurações (ordem 40-47)
+            'countries' => ['name' => 'Países', 'order' => 40, 'group' => 'Configurações → Entidades'],
+            'contact-functions' => ['name' => 'Funções Contacto', 'order' => 41, 'group' => 'Configurações → Contactos'],
+            'articles' => ['name' => 'Artigos', 'order' => 42, 'group' => 'Configurações'],
+            'vat-rates' => ['name' => 'Taxas IVA', 'order' => 43, 'group' => 'Configurações → Financeiro'],
+
+            // Outros Menus (ordem 50-59)
+            'calendar' => ['name' => 'Calendário', 'order' => 50, 'group' => null],
+            'digital-archive' => ['name' => 'Arquivo Digital', 'order' => 51, 'group' => null],
+            'logs' => ['name' => 'Logs', 'order' => 52, 'group' => null],
         ];
 
-        return $labels[$module] ?? ucfirst($module);
+        return $labels[$module] ?? null;
     }
 }

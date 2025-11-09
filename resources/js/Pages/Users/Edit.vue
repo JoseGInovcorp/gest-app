@@ -29,23 +29,32 @@ const form = useForm({
 // Computed properties
 const isFormValid = computed(() => {
     const basicValid =
-        form.name.trim() !== "" && form.email.trim() !== "" && form.role !== "";
+        form.name.trim() !== "" &&
+        form.email.trim() !== "" &&
+        form.role &&
+        form.role.trim() !== "";
 
-    // Se password preenchida, validar confirmação
-    if (form.password) {
+    // Se password OU confirmação foram preenchidas, validar ambas
+    const passwordFilled = form.password && form.password.trim() !== "";
+    const confirmationFilled =
+        form.password_confirmation && form.password_confirmation.trim() !== "";
+
+    if (passwordFilled || confirmationFilled) {
         return (
             basicValid &&
             form.password.length >= 8 &&
+            form.password_confirmation.length >= 8 &&
             form.password === form.password_confirmation
         );
     }
 
+    // Se nenhuma password preenchida, apenas validar campos básicos
     return basicValid;
 });
 
 // Methods
 const handleSubmit = () => {
-    form.put(route("users.update", props.user.id));
+    form.patch(route("users.update", props.user.id));
 };
 </script>
 
@@ -163,14 +172,19 @@ const handleSubmit = () => {
                             id="password"
                             label="Nova Password"
                             :error="form.errors.password"
-                            description="Deixe em branco para manter a password atual"
                         >
                             <Input
                                 v-model="form.password"
                                 id="password"
                                 type="password"
-                                placeholder="••••••••"
+                                placeholder="Mínimo 8 caracteres"
                             />
+                            <p
+                                class="mt-1 text-xs text-gray-500 dark:text-gray-400"
+                            >
+                                Deixe em branco para manter a password atual.
+                                Mínimo 8 caracteres.
+                            </p>
                         </FormField>
 
                         <!-- Confirmar Password -->
@@ -183,8 +197,33 @@ const handleSubmit = () => {
                                 v-model="form.password_confirmation"
                                 id="password_confirmation"
                                 type="password"
-                                placeholder="••••••••"
+                                placeholder="Repita a password"
                             />
+                            <p
+                                v-if="form.password && form.password.length > 0"
+                                class="mt-1 text-xs"
+                                :class="
+                                    form.password ===
+                                        form.password_confirmation &&
+                                    form.password.length >= 8
+                                        ? 'text-green-600 dark:text-green-400'
+                                        : 'text-red-600 dark:text-red-400'
+                                "
+                            >
+                                <span v-if="form.password.length < 8">
+                                    ⚠️ Password deve ter pelo menos 8 caracteres
+                                    ({{ form.password.length }}/8)
+                                </span>
+                                <span
+                                    v-else-if="
+                                        form.password !==
+                                        form.password_confirmation
+                                    "
+                                >
+                                    ⚠️ As passwords não coincidem
+                                </span>
+                                <span v-else> ✓ Passwords coincidem </span>
+                            </p>
                         </FormField>
 
                         <!-- Estado Ativo -->

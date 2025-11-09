@@ -18,6 +18,7 @@
                     }}
                 </Badge>
                 <Button
+                    v-if="canCreate"
                     @click="$emit('create')"
                     class="bg-blue-600 hover:bg-blue-700"
                 >
@@ -111,6 +112,10 @@ const props = defineProps({
         type: String,
         required: true,
         validator: (value) => ["client", "supplier"].includes(value),
+    },
+    canCreate: {
+        type: Boolean,
+        default: false,
     },
     canView: {
         type: Boolean,

@@ -255,10 +255,11 @@ const getDeviceInfo = (userAgent) => {
                     class="flex items-center justify-between border-t border-gray-200 dark:border-gray-800 px-6 py-4"
                 >
                     <div class="flex items-center space-x-2">
-                        <Link
+                        <component
                             v-for="link in activities.links"
                             :key="link.label"
-                            :href="link.url"
+                            :is="link.url ? Link : 'span'"
+                            :href="link.url || undefined"
                             :class="[
                                 'px-3 py-1 rounded-md text-sm',
                                 link.active

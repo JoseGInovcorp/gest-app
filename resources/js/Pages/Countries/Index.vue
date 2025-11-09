@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, inject } from "vue";
 import { Head, Link, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Button from "@/Components/ui/Button.vue";
@@ -13,8 +13,20 @@ import Input from "@/Components/ui/Input.vue";
 import Badge from "@/Components/ui/Badge.vue";
 import { Plus, Search, Pencil, Trash2, Globe } from "lucide-vue-next";
 
+// Inject permission checker with fallback
+const hasPermission = inject("hasPermission", () => () => false);
+
 const props = defineProps({
     countries: Array,
+    can: {
+        type: Object,
+        default: () => ({
+            create: false,
+            view: true,
+            edit: false,
+            delete: false,
+        }),
+    },
 });
 
 const searchQuery = ref("");
@@ -83,7 +95,10 @@ const deleteCountry = (code) => {
                                 </div>
                             </div>
 
-                            <Link :href="route('countries.create')">
+                            <Link
+                                v-if="can.create"
+                                :href="route('countries.create')"
+                            >
                                 <Button
                                     class="ml-4 bg-blue-600 hover:bg-blue-700 text-white"
                                 >
@@ -183,6 +198,7 @@ const deleteCountry = (code) => {
                                                 class="flex items-center justify-end gap-2"
                                             >
                                                 <Link
+                                                    v-if="can.edit"
                                                     :href="
                                                         route(
                                                             'countries.edit',
@@ -200,6 +216,7 @@ const deleteCountry = (code) => {
                                                     </Button>
                                                 </Link>
                                                 <Button
+                                                    v-if="can.delete"
                                                     variant="ghost"
                                                     size="sm"
                                                     @click="
