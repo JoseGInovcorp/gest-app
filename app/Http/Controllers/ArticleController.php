@@ -41,17 +41,33 @@ class ArticleController extends Controller
             $query->where('estado', $request->estado);
         }
 
+        if ($request->filled('tipo')) {
+            $query->where('tipo', $request->tipo);
+        }
+
+        if ($request->filled('gama')) {
+            $query->where('gama', $request->gama);
+        }
+
         // Ordenação
-        $sortField = $request->get('sort', 'referencia');
-        $sortDirection = $request->get('direction', 'asc');
+        $sortField = $request->get('sort', 'created_at');
+        $sortDirection = $request->get('direction', 'desc');
         $query->orderBy($sortField, $sortDirection);
 
         $articles = $query->paginate(15)->withQueryString();
 
+        // Obter gamas únicas para o filtro
+        $gamas = Article::whereNotNull('gama')
+            ->distinct()
+            ->pluck('gama')
+            ->sort()
+            ->values();
+
         return Inertia::render('Articles/Index', [
             'articles' => $articles,
-            'filters' => $request->only(['search', 'estado']),
+            'filters' => $request->only(['search', 'estado', 'tipo', 'gama']),
             'sort' => $request->only(['sort', 'direction']),
+            'gamas' => $gamas,
             'can' => [
                 'create' => $request->user()->can('articles.create'),
                 'view' => $request->user()->can('articles.read'),
@@ -100,6 +116,9 @@ class ArticleController extends Controller
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'observacoes' => 'nullable|string',
             'estado' => 'required|in:ativo,inativo',
+            'tipo' => 'required|in:produto,servico',
+            'gama' => 'nullable|string|max:255',
+            'stock_quantidade' => 'nullable|numeric|min:0',
         ]);
 
         // Upload da foto se fornecida
@@ -166,6 +185,9 @@ class ArticleController extends Controller
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'observacoes' => 'nullable|string',
             'estado' => 'required|in:ativo,inativo',
+            'tipo' => 'required|in:produto,servico',
+            'gama' => 'nullable|string|max:255',
+            'stock_quantidade' => 'nullable|numeric|min:0',
         ]);
 
         // Upload da nova foto se fornecida

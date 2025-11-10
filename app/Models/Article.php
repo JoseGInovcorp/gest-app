@@ -18,13 +18,19 @@ class Article extends Model
         'preco_com_iva',
         'foto',
         'observacoes',
-        'estado'
+        'estado',
+        'tipo',
+        'gama',
+        'stock_quantidade',
+        'data_criacao'
     ];
 
     protected $casts = [
         'preco' => 'decimal:2',
         'iva_percentagem' => 'decimal:2',
         'preco_com_iva' => 'decimal:2',
+        'stock_quantidade' => 'decimal:2',
+        'data_criacao' => 'date',
     ];
 
     /**
@@ -33,6 +39,13 @@ class Article extends Model
     protected static function boot()
     {
         parent::boot();
+
+        static::creating(function ($article) {
+            // Definir data_criacao automaticamente
+            if (!$article->data_criacao) {
+                $article->data_criacao = now()->toDateString();
+            }
+        });
 
         static::saving(function ($article) {
             // Calcular preço com IVA automaticamente

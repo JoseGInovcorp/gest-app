@@ -4,15 +4,16 @@
 
 ## 📊 Status do Projeto
 
-**Versão:** v0.9.1  
-**Progresso:** 55% (11 de 20 módulos)  
+**Versão:** v0.11.0  
+**Progresso:** 65% (13 de 20 módulos)  
 **Entrega:** 18 Nov 2025  
 **BD:** ✅ MySQL configurado e funcionando  
 **Welcome:** ✅ Navegação funcional  
 **Segurança:** ✅ Sistema de permissões com controlo de UI  
 **Logs:** ✅ Histórico de atividades completo  
 **Branding:** ✅ Logo personalizado integrado  
-**UX:** ✅ Interface uniformizada em todos os módulos
+**UX:** ✅ Interface uniformizada em todos os módulos  
+**Financeiro:** ✅ Contas bancárias e conta corrente clientes operacionais
 
 ## 🛠️ Tecnologias
 
@@ -136,6 +137,55 @@
 -   **Acesso:** Menu → Configurações → Empresa
 -   **Storage:** Link simbólico criado para `storage/app/public/company/logos`
 
+### ✅ Módulo 10: Contas Bancárias
+
+-   **Gestão Financeira:** Controlo completo das contas bancárias da empresa
+-   **Campos Principais:** Nome conta, Banco, IBAN, SWIFT/BIC, Moeda (EUR/USD/GBP)
+-   **Tipos de Conta:** Conta Corrente, Conta Poupança, Conta Ordenados, Conta Investimentos
+-   **Estados:** Ativa, Inativa, Encerrada
+-   **Saldos Automáticos:** Saldo inicial e saldo atual calculado automaticamente
+-   **Movimentos Bancários:** Histórico de débitos e créditos com saldo após cada movimento
+-   **Categorias:** 9 categorias (Transferência, Pagamento, Recebimento, Juros, Comissões, etc.)
+-   **Validações:** IBAN único, SWIFT até 11 caracteres, valores mínimos
+-   **Formatação IBAN:** Display automático em blocos de 4 caracteres
+-   **Cálculo Automático:** Balance recalculado após cada transação (saldo_atual = saldo_inicial + sum(créditos) - sum(débitos))
+-   **Soft Deletes:** Contas podem ser restauradas
+-   **Filtros Avançados:** Por nome, banco, IBAN, tipo, estado
+-   **Permissões:** `bank-accounts.{create,read,update,delete}`
+-   **Acesso:** Menu → Financeiro → Contas Bancárias
+-   **Documentação:** Ver `docs/bank-accounts-module.md`
+
+### ✅ Módulo 11: Conta Corrente Clientes
+
+-   **Débitos e Créditos:** Sistema completo de movimentos financeiros por cliente
+-   **Conceitos Fundamentais:**
+    -   **Débito:** Dinheiro que cliente deve à empresa (aumenta saldo)
+    -   **Crédito:** Dinheiro que empresa recebe do cliente (diminui saldo)
+-   **Cálculo Automático de Saldos:**
+    -   Saldo calculado automaticamente após cada movimento
+    -   Atualização em cascata de movimentos subsequentes
+    -   Recálculo completo ao eliminar movimento
+-   **Métodos Avançados do Model:**
+    -   `calculateBalance()`: Calcula saldo baseado no movimento anterior
+    -   `updateSubsequentBalances()`: Atualiza todos os movimentos posteriores
+    -   `recalculateBalancesForEntity()`: Recalcula saldo completo do cliente
+    -   `getCurrentBalance($entityId)`: Retorna saldo atual do cliente
+    -   `getEntityStats($entityId)`: Estatísticas (total débitos, créditos, saldo)
+-   **Categorias de Movimento:** 7 categorias (Fatura, Pagamento, Nota Crédito, Nota Débito, Juros, Comissões, Ajuste)
+-   **Painel de Estatísticas:** Total de débitos, créditos e saldo atual por cliente
+-   **Filtros Avançados:** Por cliente, tipo, categoria, período (data início/fim), pesquisa
+-   **Validações:** Entity obrigatória, tipo enum, valor mínimo €0.01, categoria enum
+-   **Interface Intuitiva:**
+    -   Colunas separadas para Débito e Crédito
+    -   Saldo após cada movimento visível
+    -   Badges coloridos por categoria
+    -   Estatísticas destacadas quando cliente selecionado
+-   **Permissões:** `client-accounts.{create,read,update,delete}`
+-   **Acesso:** Menu → Financeiro → Conta Corrente Clientes
+-   **Documentação:** Ver `docs/client-accounts-module.md`
+-   **Performance:** Índices compostos para queries otimizadas
+-   **Segurança:** Validação em cascata, foreign keys com ON DELETE CASCADE
+
 ### ✅ Interface & UX - Uniformização Completa
 
 -   **Headers Padronizados:** Todos os módulos com ícone colorido, título e subtítulo
@@ -148,7 +198,9 @@
     -   Funções/Logs: Roxo
     -   Utilizadores: Âmbar
     -   Grupos Permissões: Vermelho
--   **Estrutura Consistente:** Layout uniformizado em 11 módulos
+    -   Contas Bancárias: Verde Esmeralda
+    -   Conta Corrente Clientes: Azul Celeste
+-   **Estrutura Consistente:** Layout uniformizado em 13 módulos
 -   **Código Limpo:** Remoção de templates antigos e divs desnecessárias
 
 ### ✅ Páginas e Navegação
@@ -321,6 +373,14 @@ Resultado → Botões só existem se houver permissão
 -   **Funções de Contacto**: 10 funções pré-definidas
 -   **Taxas de IVA**: 4 taxas configuráveis (0%, 6%, 13%, 23%)
 
+### Gestão Financeira
+
+-   **Contas Bancárias**: Gestão de contas da empresa com IBAN, SWIFT, multi-moeda
+-   **Movimentos Bancários**: Histórico de débitos/créditos com saldo automático
+-   **Conta Corrente Clientes**: Acompanhamento de débitos e créditos por cliente
+-   **Cálculos Automáticos**: Saldos calculados e atualizados em tempo real
+-   **Estatísticas**: Painel com totais de débitos, créditos e saldo atual
+
 ### Interface Moderna
 
 -   Menu accordion com submenus expandíveis
@@ -331,9 +391,9 @@ Resultado → Botões só existem se houver permissão
 
 ## 🚀 Próximos Módulos
 
+-   [ ] Faturas a Fornecedores
 -   [ ] Propostas/Orçamentos
 -   [ ] Encomendas/Vendas
--   [ ] Sistema Financeiro
 -   [ ] Dashboard Analytics
 -   [ ] Relatórios e Exports
 
@@ -341,6 +401,8 @@ Resultado → Botões só existem se houver permissão
 
 -   **Changelog Completo:** `docs/changelog.md`
 -   **Gestão de Acessos:** `docs/access-management.md` (v0.7.0)
+-   **Contas Bancárias:** `docs/bank-accounts-module.md` (v0.11.0)
+-   **Conta Corrente Clientes:** `docs/client-accounts-module.md` (v0.11.0)
 -   **Configuração BD:** `docs/database-config.md`
 -   **Arquitetura Modular:** `docs/modular-architecture.md`
 
@@ -376,11 +438,14 @@ Resultado → Botões só existem se houver permissão
 -   Base `gest_app` existe
 -   Credenciais corretas no `.env`
 
-## �📝 Documentação Adicional
+## 📝 Documentação Adicional
 
--   [📋 Changelog](docs/changelog.md)
+-   [📋 Changelog](docs/changelog.md) - v0.11.0
 -   [🏗️ Arquitetura](docs/modular-architecture.md)
 -   [💾 Configuração BD](docs/database-config.md)
+-   [🔐 Gestão de Acessos](docs/access-management.md)
+-   [🏦 Contas Bancárias](docs/bank-accounts-module.md)
+-   [💰 Conta Corrente Clientes](docs/client-accounts-module.md)
 
 ---
 

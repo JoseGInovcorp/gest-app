@@ -37,7 +37,9 @@
                     </Link>
                 </li>
                 <li>/</li>
-                <li class="text-gray-900 dark:text-white">Encomendas - Clientes</li>
+                <li class="text-gray-900 dark:text-white">
+                    Encomendas - Clientes
+                </li>
             </ol>
         </nav>
 

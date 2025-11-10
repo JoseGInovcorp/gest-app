@@ -1,21 +1,23 @@
 <template>
-    <Head title="Artigos" />
+    <Head title="Contas Bancárias" />
 
     <AuthenticatedLayout>
         <!-- Header -->
         <div class="mb-6">
             <div class="flex items-center space-x-3">
                 <div class="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-                    <Package class="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                    <CreditCard
+                        class="h-6 w-6 text-blue-600 dark:text-blue-400"
+                    />
                 </div>
                 <div>
                     <h1
                         class="text-2xl font-bold text-gray-900 dark:text-white"
                     >
-                        Artigos
+                        Contas Bancárias
                     </h1>
                     <p class="text-gray-500 dark:text-gray-400">
-                        Gerir produtos e serviços
+                        Gestão de contas bancárias da empresa
                     </p>
                 </div>
             </div>
@@ -35,7 +37,7 @@
                     </Link>
                 </li>
                 <li>/</li>
-                <li class="text-gray-900 dark:text-white">Artigos</li>
+                <li class="text-gray-900 dark:text-white">Contas Bancárias</li>
             </ol>
         </nav>
 
@@ -58,7 +60,7 @@
                                 <input
                                     v-model="searchForm.search"
                                     type="text"
-                                    placeholder="Pesquisar artigos..."
+                                    placeholder="Pesquisar contas..."
                                     class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                                     @keyup.enter="search"
                                 />
@@ -69,16 +71,16 @@
                         <div class="flex gap-2">
                             <Link
                                 v-if="can.create"
-                                :href="route('articles.create')"
+                                :href="route('bank-accounts.create')"
                                 class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-2"
                             >
                                 <Plus class="h-4 w-4" />
-                                Novo Artigo
+                                Nova Conta
                             </Link>
                         </div>
                     </div>
 
-                    <!-- Linha 2: Filtros Segmentados -->
+                    <!-- Linha 2: Filtros -->
                     <div class="flex flex-col sm:flex-row gap-3 flex-wrap">
                         <!-- Filtro Tipo -->
                         <select
@@ -87,24 +89,10 @@
                             class="pl-3 pr-8 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                         >
                             <option value="">Todos os Tipos</option>
-                            <option value="produto">Produto</option>
-                            <option value="servico">Serviço</option>
-                        </select>
-
-                        <!-- Filtro Gama -->
-                        <select
-                            v-model="searchForm.gama"
-                            @change="search"
-                            class="pl-3 pr-8 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                        >
-                            <option value="">Todas as Gamas</option>
-                            <option
-                                v-for="gama in gamas"
-                                :key="gama"
-                                :value="gama"
-                            >
-                                {{ gama }}
-                            </option>
+                            <option value="corrente">Corrente</option>
+                            <option value="poupanca">Poupança</option>
+                            <option value="credito">Crédito</option>
+                            <option value="investimento">Investimento</option>
                         </select>
 
                         <!-- Filtro Estado -->
@@ -114,127 +102,97 @@
                             class="pl-3 pr-8 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                         >
                             <option value="">Todos os Estados</option>
-                            <option value="ativo">Ativo</option>
-                            <option value="inativo">Inativo</option>
-                        </select>
-
-                        <!-- Ordenação -->
-                        <select
-                            v-model="searchForm.sort"
-                            @change="search"
-                            class="pl-3 pr-8 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                        >
-                            <option value="created_at-desc">
-                                Mais Recente
-                            </option>
-                            <option value="created_at-asc">Mais Antigo</option>
-                            <option value="stock_quantidade-desc">
-                                Maior Stock
-                            </option>
-                            <option value="stock_quantidade-asc">
-                                Menor Stock
-                            </option>
-                            <option value="preco-desc">Preço Maior</option>
-                            <option value="preco-asc">Preço Menor</option>
-                            <option value="nome-asc">Nome A-Z</option>
-                            <option value="nome-desc">Nome Z-A</option>
+                            <option value="ativa">Ativa</option>
+                            <option value="inativa">Inativa</option>
+                            <option value="encerrada">Encerrada</option>
                         </select>
                     </div>
                 </div>
             </div>
 
-            <!-- DataTable -->
+            <!-- Listagem -->
             <div class="overflow-x-auto p-6">
                 <div
-                    v-if="articles && articles.data"
+                    v-if="accounts && accounts.data && accounts.data.length > 0"
                     class="text-gray-700 dark:text-gray-300"
                 >
                     <p class="mb-4">
-                        {{ articles.data.length }} artigos encontrados
+                        {{ accounts.data.length }} contas encontradas
                     </p>
                     <div class="mt-4 space-y-2">
                         <div
-                            v-for="article in articles.data"
-                            :key="article.id"
+                            v-for="account in accounts.data"
+                            :key="account.id"
                             class="p-4 bg-gray-50 dark:bg-gray-700 rounded border flex items-center justify-between"
                         >
                             <div class="flex-1">
                                 <div class="flex items-center gap-2 mb-1">
                                     <h3 class="font-medium">
-                                        {{ article.referencia }} -
-                                        {{ article.nome }}
+                                        {{ account.nome }}
                                     </h3>
                                     <span
-                                        v-if="article.tipo"
                                         :class="[
                                             'px-2 py-0.5 text-xs rounded-full',
-                                            article.tipo === 'produto'
-                                                ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
-                                                : 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+                                            account.estado === 'ativa'
+                                                ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                                                : account.estado === 'inativa'
+                                                ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300'
+                                                : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
                                         ]"
                                     >
                                         {{
-                                            article.tipo === "produto"
-                                                ? "Produto"
-                                                : "Serviço"
+                                            account.estado
+                                                .charAt(0)
+                                                .toUpperCase() +
+                                            account.estado.slice(1)
                                         }}
-                                    </span>
-                                    <span
-                                        v-if="article.gama"
-                                        class="px-2 py-0.5 text-xs rounded-full bg-gray-200 text-gray-800 dark:bg-gray-600 dark:text-gray-200"
-                                    >
-                                        {{ article.gama }}
                                     </span>
                                 </div>
                                 <p
-                                    class="text-sm text-gray-600 dark:text-gray-400"
+                                    class="text-sm text-gray-600 dark:text-gray-400 mb-2"
                                 >
-                                    {{ article.descricao || "Sem descrição" }}
+                                    {{ account.banco }} - {{ account.iban }}
                                 </p>
                                 <div
-                                    class="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-2"
+                                    class="grid grid-cols-2 sm:grid-cols-4 gap-2"
                                 >
                                     <div class="text-sm">
                                         <span
                                             class="text-gray-600 dark:text-gray-400"
-                                            >Preço s/ IVA:</span
+                                            >Tipo:</span
                                         >
-                                        <span class="font-medium ml-1"
-                                            >{{ article.preco }}€</span
-                                        >
+                                        <span class="font-medium ml-1">{{
+                                            account.tipo
+                                        }}</span>
                                     </div>
                                     <div class="text-sm">
                                         <span
                                             class="text-gray-600 dark:text-gray-400"
-                                            >Preço c/ IVA:</span
-                                        >
-                                        <span
-                                            class="font-semibold text-green-600 dark:text-green-400 ml-1"
-                                            >{{ article.preco_com_iva }}€</span
-                                        >
-                                    </div>
-                                    <div
-                                        class="text-sm"
-                                        v-if="article.tipo === 'produto'"
-                                    >
-                                        <span
-                                            class="text-gray-600 dark:text-gray-400"
-                                            >Stock:</span
+                                            >Saldo Atual:</span
                                         >
                                         <span
                                             :class="[
-                                                'font-medium ml-1',
-                                                article.stock_quantidade > 10
+                                                'font-semibold ml-1',
+                                                account.saldo_atual >= 0
                                                     ? 'text-green-600 dark:text-green-400'
-                                                    : article.stock_quantidade >
-                                                      0
-                                                    ? 'text-orange-600 dark:text-orange-400'
                                                     : 'text-red-600 dark:text-red-400',
                                             ]"
                                             >{{
-                                                article.stock_quantidade
-                                            }}</span
+                                                Number(
+                                                    account.saldo_atual
+                                                ).toFixed(2)
+                                            }}
+                                            {{ account.moeda }}</span
                                         >
+                                    </div>
+                                    <div class="text-sm">
+                                        <span
+                                            class="text-gray-600 dark:text-gray-400"
+                                            >Movimentos:</span
+                                        >
+                                        <span class="font-medium ml-1">{{
+                                            account.transactions_count || 0
+                                        }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -242,8 +200,23 @@
                                 class="flex items-center gap-1 ml-4 flex-shrink-0"
                             >
                                 <Link
+                                    v-if="can.view"
+                                    :href="
+                                        route('bank-accounts.show', account.id)
+                                    "
+                                >
+                                    <button
+                                        class="p-1.5 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded transition-colors"
+                                        title="Ver Detalhes"
+                                    >
+                                        <Eye class="h-4 w-4" />
+                                    </button>
+                                </Link>
+                                <Link
                                     v-if="can.edit"
-                                    :href="route('articles.edit', article.id)"
+                                    :href="
+                                        route('bank-accounts.edit', account.id)
+                                    "
                                 >
                                     <button
                                         class="p-1.5 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
@@ -254,7 +227,7 @@
                                 </Link>
                                 <button
                                     v-if="can.delete"
-                                    @click="deleteArticle(article.id)"
+                                    @click="deleteAccount(account.id)"
                                     class="p-1.5 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
                                     title="Eliminar"
                                 >
@@ -265,19 +238,19 @@
                     </div>
                 </div>
                 <div v-else class="p-6 text-center text-gray-500">
-                    <p>Nenhum artigo encontrado ou erro ao carregar dados.</p>
+                    <p>Nenhuma conta bancária encontrada.</p>
                 </div>
             </div>
 
             <!-- Paginação -->
             <div
-                v-if="articles && articles.links && articles.links.length > 3"
+                v-if="accounts && accounts.links && accounts.links.length > 3"
                 class="p-6 border-t border-gray-200 dark:border-gray-700"
             >
                 <div class="flex flex-wrap gap-1 justify-center">
                     <component
                         :is="link.url ? Link : 'span'"
-                        v-for="(link, index) in articles.links"
+                        v-for="(link, index) in accounts.links"
                         :key="index"
                         :href="link.url || ''"
                         :class="[
@@ -298,23 +271,16 @@
 </template>
 
 <script setup>
-import { reactive, inject } from "vue";
-import { router, Head } from "@inertiajs/vue3";
+import { reactive } from "vue";
+import { router, Head, Link } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Link } from "@inertiajs/vue3";
-
-// Icons
-import { Package, Search, Plus, Pencil, Trash2 } from "lucide-vue-next";
-
-// Inject permission checker with fallback
-const hasPermission = inject("hasPermission", () => () => false);
+import { CreditCard, Search, Plus, Pencil, Trash2, Eye } from "lucide-vue-next";
 
 // Props
 const props = defineProps({
-    articles: Object,
+    accounts: Object,
     filters: Object,
     sort: Object,
-    gamas: Array,
     can: {
         type: Object,
         default: () => ({
@@ -331,27 +297,16 @@ const searchForm = reactive({
     search: props.filters?.search || "",
     estado: props.filters?.estado || "",
     tipo: props.filters?.tipo || "",
-    gama: props.filters?.gama || "",
-    sort:
-        props.sort?.sort && props.sort?.direction
-            ? `${props.sort.sort}-${props.sort.direction}`
-            : "created_at-desc",
 });
 
 // Funções
 const search = () => {
-    // Dividir sort em campo e direção
-    const [sortField, sortDirection] = searchForm.sort.split("-");
-
     router.get(
-        route("articles.index"),
+        route("bank-accounts.index"),
         {
             search: searchForm.search,
             estado: searchForm.estado,
             tipo: searchForm.tipo,
-            gama: searchForm.gama,
-            sort: sortField,
-            direction: sortDirection,
         },
         {
             preserveState: true,
@@ -361,9 +316,13 @@ const search = () => {
     );
 };
 
-const deleteArticle = (id) => {
-    if (confirm("Tem certeza que deseja eliminar este artigo?")) {
-        router.delete(route("articles.destroy", id), {
+const deleteAccount = (id) => {
+    if (
+        confirm(
+            "Tem certeza que deseja eliminar esta conta bancária? Esta ação não pode ser desfeita."
+        )
+    ) {
+        router.delete(route("bank-accounts.destroy", id), {
             preserveState: true,
         });
     }

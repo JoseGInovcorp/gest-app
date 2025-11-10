@@ -12,6 +12,8 @@ use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CustomerOrderController;
+use App\Http\Controllers\BankAccountController;
+use App\Http\Controllers\ClientAccountController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -118,6 +120,28 @@ Route::middleware('auth')->group(function () {
     Route::get('/vat-rates/{vatRate}/edit', [VatRateController::class, 'edit'])->name('vat-rates.edit')->middleware('permission:vat-rates.update');
     Route::patch('/vat-rates/{vatRate}', [VatRateController::class, 'update'])->name('vat-rates.update')->middleware('permission:vat-rates.update');
     Route::delete('/vat-rates/{vatRate}', [VatRateController::class, 'destroy'])->name('vat-rates.destroy')->middleware('permission:vat-rates.delete');
+
+    // Rotas das Contas Bancárias (Financeiro)
+    Route::get('/bank-accounts/create', [BankAccountController::class, 'create'])->name('bank-accounts.create')->middleware('permission:bank-accounts.create');
+    Route::middleware('permission:bank-accounts.read')->group(function () {
+        Route::get('/bank-accounts', [BankAccountController::class, 'index'])->name('bank-accounts.index');
+        Route::get('/bank-accounts/{bankAccount}', [BankAccountController::class, 'show'])->name('bank-accounts.show');
+    });
+    Route::post('/bank-accounts', [BankAccountController::class, 'store'])->name('bank-accounts.store')->middleware('permission:bank-accounts.create');
+    Route::get('/bank-accounts/{bankAccount}/edit', [BankAccountController::class, 'edit'])->name('bank-accounts.edit')->middleware('permission:bank-accounts.update');
+    Route::patch('/bank-accounts/{bankAccount}', [BankAccountController::class, 'update'])->name('bank-accounts.update')->middleware('permission:bank-accounts.update');
+    Route::delete('/bank-accounts/{bankAccount}', [BankAccountController::class, 'destroy'])->name('bank-accounts.destroy')->middleware('permission:bank-accounts.delete');
+
+    // Rotas da Conta Corrente de Clientes (Financeiro)
+    Route::get('/client-accounts/create', [ClientAccountController::class, 'create'])->name('client-accounts.create')->middleware('permission:client-accounts.create');
+    Route::middleware('permission:client-accounts.read')->group(function () {
+        Route::get('/client-accounts', [ClientAccountController::class, 'index'])->name('client-accounts.index');
+        Route::get('/client-accounts/{clientAccount}', [ClientAccountController::class, 'show'])->name('client-accounts.show');
+    });
+    Route::post('/client-accounts', [ClientAccountController::class, 'store'])->name('client-accounts.store')->middleware('permission:client-accounts.create');
+    Route::get('/client-accounts/{clientAccount}/edit', [ClientAccountController::class, 'edit'])->name('client-accounts.edit')->middleware('permission:client-accounts.update');
+    Route::patch('/client-accounts/{clientAccount}', [ClientAccountController::class, 'update'])->name('client-accounts.update')->middleware('permission:client-accounts.update');
+    Route::delete('/client-accounts/{clientAccount}', [ClientAccountController::class, 'destroy'])->name('client-accounts.destroy')->middleware('permission:client-accounts.delete');
 
     // Rotas de Configurações - Empresa
     Route::middleware('permission:company.read')->group(function () {

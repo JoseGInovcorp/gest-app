@@ -94,19 +94,19 @@ const allMainNavigationItems = [
     },
     {
         name: "Clientes",
-        href: "clients.index",
+        href: "clients",
         icon: Users,
         permission: "clients", // Verifica se tem qualquer permissão de clients
     },
     {
         name: "Fornecedores",
-        href: "suppliers.index",
+        href: "suppliers",
         icon: UserCheck,
         permission: "suppliers",
     },
     {
         name: "Contactos",
-        href: "contacts.index",
+        href: "contacts",
         icon: Phone,
         permission: "contacts",
     },
@@ -119,7 +119,7 @@ const allMainNavigationItems = [
     },
     {
         name: "Calendário",
-        href: "calendar.index", // Temporário até implementar
+        href: "dashboard", // Temporário até implementar
         icon: Calendar,
         disabled: true,
         permission: "calendar", // Requer permissões de calendário
@@ -137,13 +137,13 @@ const mainNavigationItems = computed(() => {
 const allOrdersNavigationItems = [
     {
         name: "Encomendas - Clientes",
-        href: "customer-orders.index",
+        href: "customer-orders",
         icon: ShoppingCart,
         permission: "customer-orders",
     },
     {
         name: "Encomendas - Fornecedores",
-        href: "supplier-orders.index",
+        href: "supplier-orders",
         icon: Truck,
         permission: "supplier-orders",
     },
@@ -166,17 +166,17 @@ const ordersNavigationItems = computed(() => {
 const allFinancialNavigationItems = [
     {
         name: "Contas Bancárias",
-        href: "dashboard", // Temporário até implementar
-        icon: Banknote,
-        disabled: true,
-        permission: "financial",
+        href: "bank-accounts",
+        icon: CreditCard,
+        disabled: false,
+        permission: "bank-accounts",
     },
     {
         name: "Conta Corrente Clientes",
-        href: "dashboard", // Temporário até implementar
+        href: "client-accounts",
         icon: DollarSign,
-        disabled: true,
-        permission: "financial",
+        disabled: false,
+        permission: "client-accounts",
     },
     {
         name: "Faturas Fornecedores",
@@ -214,7 +214,7 @@ const systemNavigationItems = computed(() => {
 const allAccessManagementItems = [
     {
         name: "Utilizadores",
-        href: "users.index",
+        href: "users",
         icon: UserCog,
         current: route().current("users.*"),
         disabled: false,
@@ -222,7 +222,7 @@ const allAccessManagementItems = [
     },
     {
         name: "Permissões",
-        href: "roles.index",
+        href: "roles",
         icon: Lock,
         current: route().current("roles.*"),
         disabled: false,
@@ -247,14 +247,14 @@ const allConfigurationItems = [
     },
     {
         name: "Entidades - Países",
-        href: "countries.index",
+        href: "countries",
         icon: Globe,
         disabled: false,
         permission: "countries",
     },
     {
         name: "Contactos - Funções",
-        href: "contact-functions.index",
+        href: "contact-functions",
         icon: UserCog,
         disabled: false,
         permission: "contact-functions",
@@ -275,21 +275,21 @@ const allConfigurationItems = [
     },
     {
         name: "Artigos",
-        href: "articles.index",
+        href: "articles",
         icon: Package,
         disabled: false,
         permission: "articles",
     },
     {
         name: "Financeiro - IVA",
-        href: "vat-rates.index",
+        href: "vat-rates",
         icon: DollarSign,
         disabled: false,
         permission: "vat-rates",
     },
     {
         name: "Logs",
-        href: "logs.index",
+        href: "logs",
         icon: Activity,
         current: route().current("logs.*"),
         disabled: false,
@@ -307,6 +307,25 @@ const configurationItems = computed(() => {
 // Check if route is current
 const isActive = (routeName) => {
     return route().current(routeName) || route().current(routeName + ".*");
+};
+
+// Get route for navigation (adds .index if needed)
+const getNavRoute = (href) => {
+    // Se for dashboard, não adiciona nada
+    if (href === "dashboard") {
+        return href;
+    }
+    // Se já tem .edit, .create, .show ou .index, não adiciona nada
+    if (
+        href.includes(".edit") ||
+        href.includes(".create") ||
+        href.includes(".show") ||
+        href.includes(".index")
+    ) {
+        return href;
+    }
+    // Caso contrário, adiciona .index
+    return href + ".index";
 };
 
 // Auto-expand menus based on current route
@@ -394,7 +413,11 @@ const logout = () => {
                                             :key="item.name"
                                         >
                                             <Link
-                                                :href="route(item.href)"
+                                                :href="
+                                                    route(
+                                                        getNavRoute(item.href)
+                                                    )
+                                                "
                                                 :class="[
                                                     isActive(item.href)
                                                         ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
@@ -425,7 +448,11 @@ const logout = () => {
                                             :key="item.name"
                                         >
                                             <Link
-                                                :href="route(item.href)"
+                                                :href="
+                                                    route(
+                                                        getNavRoute(item.href)
+                                                    )
+                                                "
                                                 :class="[
                                                     isActive(item.href)
                                                         ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
@@ -474,7 +501,11 @@ const logout = () => {
                                             :key="item.name"
                                         >
                                             <Link
-                                                :href="route(item.href)"
+                                                :href="
+                                                    route(
+                                                        getNavRoute(item.href)
+                                                    )
+                                                "
                                                 :class="[
                                                     isActive(item.href)
                                                         ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
@@ -505,7 +536,11 @@ const logout = () => {
                                             :key="item.name"
                                         >
                                             <Link
-                                                :href="route(item.href)"
+                                                :href="
+                                                    route(
+                                                        getNavRoute(item.href)
+                                                    )
+                                                "
                                                 :class="[
                                                     isActive(item.href)
                                                         ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
@@ -554,7 +589,11 @@ const logout = () => {
                                             :key="item.name"
                                         >
                                             <Link
-                                                :href="route(item.href)"
+                                                :href="
+                                                    route(
+                                                        getNavRoute(item.href)
+                                                    )
+                                                "
                                                 :class="[
                                                     isActive(item.href)
                                                         ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
@@ -604,7 +643,11 @@ const logout = () => {
                                         >
                                             <Link
                                                 v-if="!item.disabled"
-                                                :href="route(item.href)"
+                                                :href="
+                                                    route(
+                                                        getNavRoute(item.href)
+                                                    )
+                                                "
                                                 :class="[
                                                     isActive(item.href)
                                                         ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
@@ -696,7 +739,7 @@ const logout = () => {
                                     :key="item.name"
                                 >
                                     <Link
-                                        :href="route(item.href)"
+                                        :href="route(getNavRoute(item.href))"
                                         :class="[
                                             isActive(item.href)
                                                 ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
@@ -727,7 +770,7 @@ const logout = () => {
                                     :key="item.name"
                                 >
                                     <Link
-                                        :href="route(item.href)"
+                                        :href="route(getNavRoute(item.href))"
                                         :class="[
                                             isActive(item.href)
                                                 ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
@@ -774,7 +817,7 @@ const logout = () => {
                                     :key="item.name"
                                 >
                                     <Link
-                                        :href="route(item.href)"
+                                        :href="route(getNavRoute(item.href))"
                                         :class="[
                                             isActive(item.href)
                                                 ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
@@ -805,7 +848,7 @@ const logout = () => {
                                     :key="item.name"
                                 >
                                     <Link
-                                        :href="route(item.href)"
+                                        :href="route(getNavRoute(item.href))"
                                         :class="[
                                             isActive(item.href)
                                                 ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
@@ -854,7 +897,7 @@ const logout = () => {
                                     :key="item.name"
                                 >
                                     <Link
-                                        :href="route(item.href)"
+                                        :href="route(getNavRoute(item.href))"
                                         :class="[
                                             isActive(item.href)
                                                 ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
@@ -904,7 +947,7 @@ const logout = () => {
                                 >
                                     <Link
                                         v-if="!item.disabled"
-                                        :href="route(item.href)"
+                                        :href="route(getNavRoute(item.href))"
                                         :class="[
                                             isActive(item.href)
                                                 ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'

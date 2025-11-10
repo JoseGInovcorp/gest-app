@@ -23,6 +23,9 @@ const form = useForm({
     iva_percentagem: "",
     observacoes: "",
     estado: "ativo",
+    tipo: "produto",
+    gama: "",
+    stock_quantidade: 0,
     foto: null,
 });
 
@@ -255,6 +258,50 @@ const removeImage = () => {
                                     </button>
                                 </div>
                             </div>
+                        </FormField>
+
+                        <FormField
+                            id="tipo"
+                            label="Tipo"
+                            required
+                            :error="form.errors.tipo"
+                            description="Tipo de artigo"
+                        >
+                            <Select v-model="form.tipo" id="tipo" required>
+                                <option value="produto">Produto</option>
+                                <option value="servico">Serviço</option>
+                            </Select>
+                        </FormField>
+
+                        <FormField
+                            id="gama"
+                            label="Gama"
+                            :error="form.errors.gama"
+                            description="Categoria ou gama do produto (opcional)"
+                        >
+                            <Input
+                                v-model="form.gama"
+                                id="gama"
+                                type="text"
+                                placeholder="Ex: Premium, Standard, Básico"
+                            />
+                        </FormField>
+
+                        <FormField
+                            v-if="form.tipo === 'produto'"
+                            id="stock_quantidade"
+                            label="Quantidade em Stock"
+                            :error="form.errors.stock_quantidade"
+                            description="Quantidade disponível em stock"
+                        >
+                            <Input
+                                v-model="form.stock_quantidade"
+                                id="stock_quantidade"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                placeholder="0.00"
+                            />
                         </FormField>
 
                         <FormField

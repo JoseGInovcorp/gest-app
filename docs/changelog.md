@@ -2,6 +2,234 @@
 
 ---
 
+## [0.11.0] — 2025-11-10
+
+### 🏦 Módulo de Contas Bancárias
+
+**Gestão Completa de Contas Bancárias da Empresa**
+
+#### 🎯 Funcionalidades Implementadas
+
+**Gestão de Contas:**
+
+-   Cadastro de contas bancárias com IBAN, banco, SWIFT/BIC
+-   Tipos de conta: Corrente, Poupança, Crédito, Investimento
+-   Estados: Ativa, Inativa, Encerrada
+-   Controle de saldo inicial e saldo atual
+-   Suporte para múltiplas moedas (EUR, USD, GBP)
+
+**Tabela de Movimentos Bancários:**
+
+-   Registro de todas as transações (débitos e créditos)
+-   Categorização: Transferências, Pagamentos, Depósitos, Juros, etc.
+-   Cálculo automático de saldo após cada movimento
+-   Soft deletes para histórico completo
+
+#### 🗃️ Base de Dados
+
+**Tabelas Criadas:**
+
+-   `bank_accounts`: Dados das contas (IBAN único, saldos, tipo, estado)
+-   `bank_transactions`: Movimentos bancários com relacionamento cascade
+
+**Models:**
+
+-   `BankAccount.php`: Cálculo automático de saldo, IBAN formatado
+-   `BankTransaction.php`: Atualização automática do saldo da conta
+
+#### 🎨 Interface
+
+**Páginas:**
+
+-   **Index**: Listagem com filtros (tipo, estado), pesquisa, badges coloridos
+-   **Create**: Formulário completo para nova conta
+-   **Edit**: Edição com recálculo automático de saldo
+-   **Show**: Visualização detalhada com lista de movimentos
+
+**Recursos:**
+
+-   Pesquisa por nome, banco ou IBAN
+-   Filtros por tipo e estado
+-   Saldos coloridos (verde=positivo, vermelho=negativo)
+-   Contador de movimentos por conta
+-   Paginação (15 registos/página)
+
+#### 🔐 Permissões
+
+**Criadas:**
+
+-   `bank-accounts.create`
+-   `bank-accounts.read`
+-   `bank-accounts.update`
+-   `bank-accounts.delete`
+
+**Atribuição:**
+
+-   Super Admin: Todas
+-   Gestor Financeiro: Todas
+-   Visualizador: Apenas leitura
+
+#### 📍 Navegação
+
+**Menu Lateral:**
+
+-   Localização: **Financeiro > Contas Bancárias**
+-   Ícone: CreditCard
+-   Primeiro item do submenu Financeiro
+
+---
+
+### 💰 Módulo de Conta Corrente de Clientes
+
+**Acompanhamento de Débitos, Créditos e Saldos por Cliente**
+
+#### 🎯 Funcionalidades Implementadas
+
+**Gestão de Movimentos:**
+
+-   Registro de débitos (cliente deve) e créditos (cliente pagou)
+-   Categorias: Fatura, Pagamento, Nota Crédito/Débito, Juros, Ajuste
+-   Cálculo automático e em tempo real de saldos
+-   Atualização em cascata de movimentos subsequentes
+-   Referência a documentos (nº fatura, recibo)
+
+**Lógica de Saldo:**
+
+-   **Débito**: Aumenta saldo (cliente deve à empresa)
+-   **Crédito**: Diminui saldo (cliente pagou)
+-   **Saldo > 0**: Cliente em dívida
+-   **Saldo < 0**: Crédito a favor do cliente
+-   Recálculo automático ao criar/editar/eliminar
+
+#### 🗃️ Base de Dados
+
+**Tabela Criada:**
+
+-   `client_accounts`: Movimentos com saldo calculado, relacionamento com entities
+
+**Campos Principais:**
+
+-   `entity_id`: Cliente (FK para entities)
+-   `tipo`: debito/credito
+-   `valor`: Valor do movimento
+-   `saldo_apos`: Saldo após movimento (calculado)
+-   `categoria`: Tipo de operação
+-   `referencia`: Nº documento relacionado
+
+**Model:**
+
+-   `ClientAccount.php`: Lógica complexa de cálculo de saldos
+    -   `calculateBalance()`: Calcula saldo do movimento
+    -   `updateSubsequentBalances()`: Atualiza em cascata
+    -   `recalculateBalancesForEntity()`: Recalcula tudo do cliente
+    -   `getCurrentBalance()`: Retorna saldo atual
+    -   `getEntityStats()`: Estatísticas completas
+
+#### 🎨 Interface
+
+**Painel de Estatísticas:**
+
+-   Total Débitos (vermelho)
+-   Total Créditos (verde)
+-   Saldo Atual (colorido conforme positivo/negativo)
+-   Visível quando cliente selecionado
+
+**Listagem:**
+
+-   Filtros: Cliente, Tipo, Categoria, Período (data início/fim)
+-   Pesquisa: Descrição ou referência
+-   Colunas separadas para Débito e Crédito
+-   Saldo após cada movimento
+-   Badges coloridos por categoria
+-   Ordenação por data (mais recente primeiro)
+
+**Formulários:**
+
+-   **Create**: Novo movimento (tipo, valor, categoria, referência)
+-   **Edit**: Edição com recálculo automático
+-   **Show**: Visualização detalhada com sidebar de ações
+
+#### 🔐 Permissões
+
+**Criadas:**
+
+-   `client-accounts.create`
+-   `client-accounts.read`
+-   `client-accounts.update`
+-   `client-accounts.delete`
+
+**Atribuição:**
+
+-   Super Admin: Todas
+-   Gestor Financeiro: Todas
+-   Visualizador: Apenas leitura
+
+#### 📍 Navegação
+
+**Menu Lateral:**
+
+-   Localização: **Financeiro > Conta Corrente Clientes**
+-   Ícone: DollarSign
+-   Segundo item do submenu Financeiro
+
+#### 🔧 Lógica Técnica
+
+**Cálculo de Saldos:**
+
+```
+Movimento 1 (Débito 500€):  Saldo = 0 + 500 = 500€
+Movimento 2 (Crédito 300€): Saldo = 500 - 300 = 200€
+Movimento 3 (Débito 150€):  Saldo = 200 + 150 = 350€
+```
+
+**Recálculo em Cascata:**
+
+-   Ao editar Movimento 2 de 300€ para 400€:
+    -   Movimento 2: 500 - 400 = 100€
+    -   Movimento 3: 100 + 150 = 250€ (atualizado automaticamente)
+
+---
+
+### 📚 Documentação
+
+**Novos Documentos:**
+
+-   `docs/bank-accounts-module.md`: Documentação completa do módulo de Contas Bancárias
+-   `docs/client-accounts-module.md`: Documentação completa do módulo de Conta Corrente
+
+**Conteúdo:**
+
+-   Estrutura de base de dados
+-   Models e relacionamentos
+-   Controllers e rotas
+-   Interface e componentes
+-   Lógica de negócio
+-   Permissões e segurança
+-   Casos de uso
+-   Performance e otimizações
+-   Troubleshooting
+
+---
+
+### 🐛 Correções
+
+**Navegação:**
+
+-   Corrigido posicionamento de "Contas Bancárias" no menu (movido para submenu Financeiro)
+-   Removida entrada duplicada de banco de dados
+
+**Paginação:**
+
+-   Corrigido erro de `href` null em links de paginação
+-   Implementada renderização condicional (Link vs span)
+
+**Compilação:**
+
+-   Todos os componentes Vue compilados com sucesso
+-   Assets otimizados (gzip)
+
+---
+
 ## [0.10.1] — 2025-11-09
 
 ### 💰 Cálculo Automático de Preço com IVA nos Artigos

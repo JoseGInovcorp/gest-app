@@ -1,0 +1,534 @@
+<template>
+    <Head title="Conta Corrente Clientes" />
+
+    <AuthenticatedLayout>
+        <!-- Header -->
+        <div class="mb-6">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
+                    <DollarSign
+                        class="h-6 w-6 text-blue-600 dark:text-blue-400"
+                    />
+                </div>
+                <div>
+                    <h1
+                        class="text-2xl font-bold text-gray-900 dark:text-white"
+                    >
+                        Conta Corrente Clientes
+                    </h1>
+                    <p class="text-gray-500 dark:text-gray-400">
+                        Acompanhamento de débitos, créditos e saldos
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Breadcrumbs -->
+        <nav class="mb-6">
+            <ol
+                class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400"
+            >
+                <li>
+                    <Link
+                        :href="route('dashboard')"
+                        class="hover:text-gray-700 dark:hover:text-gray-200"
+                    >
+                        Dashboard
+                    </Link>
+                </li>
+                <li>/</li>
+                <li class="text-gray-900 dark:text-white">
+                    Conta Corrente Clientes
+                </li>
+            </ol>
+        </nav>
+
+        <!-- Estatísticas do Cliente (se selecionado) -->
+        <div v-if="stats" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div
+                class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700"
+            >
+                <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                    Cliente
+                </div>
+                <div
+                    class="text-lg font-semibold text-gray-900 dark:text-white"
+                >
+                    {{ stats.entity_name }}
+                </div>
+            </div>
+            <div
+                class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700"
+            >
+                <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                    Total Débitos
+                </div>
+                <div
+                    class="text-lg font-semibold text-red-600 dark:text-red-400"
+                >
+                    {{ formatCurrency(stats.total_debitos) }}
+                </div>
+            </div>
+            <div
+                class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700"
+            >
+                <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                    Total Créditos
+                </div>
+                <div
+                    class="text-lg font-semibold text-green-600 dark:text-green-400"
+                >
+                    {{ formatCurrency(stats.total_creditos) }}
+                </div>
+            </div>
+            <div
+                class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700"
+            >
+                <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                    Saldo Atual
+                </div>
+                <div
+                    :class="[
+                        'text-lg font-semibold',
+                        stats.saldo_atual > 0
+                            ? 'text-red-600 dark:text-red-400'
+                            : stats.saldo_atual < 0
+                            ? 'text-green-600 dark:text-green-400'
+                            : 'text-gray-600 dark:text-gray-400',
+                    ]"
+                >
+                    {{ formatCurrency(stats.saldo_atual) }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Card -->
+        <div
+            class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg"
+        >
+            <!-- Toolbar -->
+            <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex flex-col gap-4">
+                    <!-- Primeira linha: Cliente e Pesquisa -->
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <!-- Seleção de Cliente -->
+                        <div class="flex-1">
+                            <label
+                                for="entity_filter"
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                            >
+                                Cliente
+                            </label>
+                            <select
+                                id="entity_filter"
+                                v-model="filters.entity_id"
+                                @change="applyFilters"
+                                class="w-full pl-3 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                            >
+                                <option :value="null">Todos os Clientes</option>
+                                <option
+                                    v-for="entity in entities"
+                                    :key="entity.id"
+                                    :value="entity.id"
+                                >
+                                    {{ entity.name }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Pesquisa -->
+                        <div class="flex-1">
+                            <label
+                                for="search"
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                            >
+                                Pesquisar
+                            </label>
+                            <div class="relative">
+                                <Search
+                                    class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"
+                                />
+                                <input
+                                    id="search"
+                                    v-model="filters.search"
+                                    @input="debouncedSearch"
+                                    type="text"
+                                    placeholder="Descrição ou referência..."
+                                    class="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                                />
+                            </div>
+                        </div>
+
+                        <!-- Botão Novo Movimento -->
+                        <div class="flex items-end">
+                            <Link
+                                :href="route('client-accounts.create')"
+                                class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                            >
+                                <Plus class="h-4 w-4" />
+                                Novo Movimento
+                            </Link>
+                        </div>
+                    </div>
+
+                    <!-- Segunda linha: Filtros -->
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <!-- Tipo -->
+                        <div class="flex-1">
+                            <label
+                                for="tipo_filter"
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                            >
+                                Tipo
+                            </label>
+                            <select
+                                id="tipo_filter"
+                                v-model="filters.tipo"
+                                @change="applyFilters"
+                                class="w-full pl-3 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                            >
+                                <option :value="null">Todos</option>
+                                <option value="debito">Débito</option>
+                                <option value="credito">Crédito</option>
+                            </select>
+                        </div>
+
+                        <!-- Categoria -->
+                        <div class="flex-1">
+                            <label
+                                for="categoria_filter"
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                            >
+                                Categoria
+                            </label>
+                            <select
+                                id="categoria_filter"
+                                v-model="filters.categoria"
+                                @change="applyFilters"
+                                class="w-full pl-3 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                            >
+                                <option :value="null">Todas</option>
+                                <option value="fatura">Fatura</option>
+                                <option value="pagamento">Pagamento</option>
+                                <option value="nota_credito">
+                                    Nota Crédito
+                                </option>
+                                <option value="nota_debito">Nota Débito</option>
+                                <option value="juros">Juros</option>
+                                <option value="ajuste">Ajuste</option>
+                                <option value="outros">Outros</option>
+                            </select>
+                        </div>
+
+                        <!-- Data Início -->
+                        <div class="flex-1">
+                            <label
+                                for="start_date"
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                            >
+                                Data Início
+                            </label>
+                            <input
+                                id="start_date"
+                                v-model="filters.start_date"
+                                @change="applyFilters"
+                                type="date"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                            />
+                        </div>
+
+                        <!-- Data Fim -->
+                        <div class="flex-1">
+                            <label
+                                for="end_date"
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                            >
+                                Data Fim
+                            </label>
+                            <input
+                                id="end_date"
+                                v-model="filters.end_date"
+                                @change="applyFilters"
+                                type="date"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="overflow-x-auto">
+                <table
+                    class="w-full text-sm text-left text-gray-500 dark:text-gray-400"
+                >
+                    <thead
+                        class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
+                    >
+                        <tr>
+                            <th class="px-6 py-3">Data</th>
+                            <th class="px-6 py-3">Cliente</th>
+                            <th class="px-6 py-3">Descrição</th>
+                            <th class="px-6 py-3">Categoria</th>
+                            <th class="px-6 py-3">Referência</th>
+                            <th class="px-6 py-3 text-right">Débito</th>
+                            <th class="px-6 py-3 text-right">Crédito</th>
+                            <th class="px-6 py-3 text-right">Saldo</th>
+                            <th class="px-6 py-3 text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr
+                            v-for="movement in movements.data"
+                            :key="movement.id"
+                            class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+                        >
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {{ formatDate(movement.data_movimento) }}
+                            </td>
+                            <td class="px-6 py-4">
+                                {{ movement.entity.name }}
+                            </td>
+                            <td class="px-6 py-4">
+                                {{ movement.descricao }}
+                            </td>
+                            <td class="px-6 py-4">
+                                <span
+                                    :class="[
+                                        'px-2 py-1 text-xs rounded-full',
+                                        getCategoryBadgeClass(
+                                            movement.categoria
+                                        ),
+                                    ]"
+                                >
+                                    {{ formatCategory(movement.categoria) }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                {{ movement.referencia || "-" }}
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <span
+                                    v-if="movement.tipo === 'debito'"
+                                    class="text-red-600 dark:text-red-400 font-medium"
+                                >
+                                    {{ formatCurrency(movement.valor) }}
+                                </span>
+                                <span v-else class="text-gray-400">-</span>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <span
+                                    v-if="movement.tipo === 'credito'"
+                                    class="text-green-600 dark:text-green-400 font-medium"
+                                >
+                                    {{ formatCurrency(movement.valor) }}
+                                </span>
+                                <span v-else class="text-gray-400">-</span>
+                            </td>
+                            <td class="px-6 py-4 text-right font-medium">
+                                <span
+                                    :class="[
+                                        movement.saldo_apos > 0
+                                            ? 'text-red-600 dark:text-red-400'
+                                            : movement.saldo_apos < 0
+                                            ? 'text-green-600 dark:text-green-400'
+                                            : 'text-gray-600 dark:text-gray-400',
+                                    ]"
+                                >
+                                    {{ formatCurrency(movement.saldo_apos) }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div
+                                    class="flex items-center justify-center gap-1"
+                                >
+                                    <Link
+                                        :href="
+                                            route(
+                                                'client-accounts.show',
+                                                movement.id
+                                            )
+                                        "
+                                        class="p-1.5 text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
+                                        title="Ver detalhes"
+                                    >
+                                        <Eye class="h-4 w-4" />
+                                    </Link>
+                                    <Link
+                                        :href="
+                                            route(
+                                                'client-accounts.edit',
+                                                movement.id
+                                            )
+                                        "
+                                        class="p-1.5 text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
+                                        title="Editar"
+                                    >
+                                        <Pencil class="h-4 w-4" />
+                                    </Link>
+                                    <button
+                                        @click="deleteMovement(movement.id)"
+                                        class="p-1.5 text-gray-600 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
+                                        title="Eliminar"
+                                    >
+                                        <Trash2 class="h-4 w-4" />
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr
+                            v-if="movements.data.length === 0"
+                            class="bg-white dark:bg-gray-800"
+                        >
+                            <td
+                                colspan="9"
+                                class="px-6 py-8 text-center text-gray-500 dark:text-gray-400"
+                            >
+                                Nenhum movimento encontrado.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div
+                v-if="movements.data.length > 0"
+                class="p-6 border-t border-gray-200 dark:border-gray-700"
+            >
+                <div class="flex items-center justify-between">
+                    <div class="text-sm text-gray-700 dark:text-gray-300">
+                        Mostrando {{ movements.from }} a {{ movements.to }} de
+                        {{ movements.total }} movimentos
+                    </div>
+                    <div class="flex gap-2">
+                        <template
+                            v-for="link in movements.links"
+                            :key="link.label"
+                        >
+                            <Link
+                                v-if="link.url"
+                                :href="link.url"
+                                :class="[
+                                    'px-3 py-1 rounded-lg text-sm',
+                                    link.active
+                                        ? 'bg-blue-600 text-white'
+                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600',
+                                ]"
+                                v-html="link.label"
+                            />
+                            <span
+                                v-else
+                                :class="[
+                                    'px-3 py-1 rounded-lg text-sm',
+                                    'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-600 cursor-not-allowed',
+                                ]"
+                                v-html="link.label"
+                            />
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </AuthenticatedLayout>
+</template>
+
+<script setup>
+import { ref, computed } from "vue";
+import { Head, Link, router } from "@inertiajs/vue3";
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import { DollarSign, Search, Plus, Eye, Pencil, Trash2 } from "lucide-vue-next";
+
+const props = defineProps({
+    movements: Object,
+    entities: Array,
+    stats: Object,
+    filters: Object,
+});
+
+const filters = ref({
+    entity_id: props.filters.entity_id,
+    tipo: props.filters.tipo,
+    categoria: props.filters.categoria,
+    start_date: props.filters.start_date,
+    end_date: props.filters.end_date,
+    search: props.filters.search,
+});
+
+let searchTimeout;
+const debouncedSearch = () => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        applyFilters();
+    }, 300);
+};
+
+const applyFilters = () => {
+    router.get(
+        route("client-accounts.index"),
+        {
+            entity_id: filters.value.entity_id,
+            tipo: filters.value.tipo,
+            categoria: filters.value.categoria,
+            start_date: filters.value.start_date,
+            end_date: filters.value.end_date,
+            search: filters.value.search,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+        }
+    );
+};
+
+const deleteMovement = (id) => {
+    if (confirm("Tem a certeza que deseja eliminar este movimento?")) {
+        router.delete(route("client-accounts.destroy", id), {
+            preserveScroll: true,
+        });
+    }
+};
+
+const formatDate = (date) => {
+    return new Date(date).toLocaleDateString("pt-PT");
+};
+
+const formatCurrency = (value) => {
+    return new Intl.NumberFormat("pt-PT", {
+        style: "currency",
+        currency: "EUR",
+    }).format(value);
+};
+
+const formatCategory = (category) => {
+    const categories = {
+        fatura: "Fatura",
+        pagamento: "Pagamento",
+        nota_credito: "Nota Crédito",
+        nota_debito: "Nota Débito",
+        juros: "Juros",
+        ajuste: "Ajuste",
+        outros: "Outros",
+    };
+    return categories[category] || category;
+};
+
+const getCategoryBadgeClass = (category) => {
+    const classes = {
+        fatura: "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400",
+        pagamento:
+            "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400",
+        nota_credito:
+            "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400",
+        nota_debito:
+            "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400",
+        juros: "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400",
+        ajuste: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400",
+        outros: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400",
+    };
+    return (
+        classes[category] ||
+        "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400"
+    );
+};
+</script>
