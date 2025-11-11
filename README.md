@@ -4,8 +4,8 @@
 
 ## 📊 Status do Projeto
 
-**Versão:** v0.11.0  
-**Progresso:** 65% (13 de 20 módulos)  
+**Versão:** v0.12.0  
+**Progresso:** 70% (14 de 20 módulos)  
 **Entrega:** 18 Nov 2025  
 **BD:** ✅ MySQL configurado e funcionando  
 **Welcome:** ✅ Navegação funcional  
@@ -13,7 +13,9 @@
 **Logs:** ✅ Histórico de atividades completo  
 **Branding:** ✅ Logo personalizado integrado  
 **UX:** ✅ Interface uniformizada em todos os módulos  
-**Financeiro:** ✅ Contas bancárias e conta corrente clientes operacionais
+**Financeiro:** ✅ Contas bancárias, conta corrente e faturas fornecedores operacionais  
+**Email:** ✅ Sistema de envio configurado e testado (MailHog)  
+**Testes:** ✅ Suite automatizada implementada (9 testes, 17 asserções)
 
 ## 🛠️ Tecnologias
 
@@ -22,6 +24,8 @@
 -   **UI:** Tailwind CSS + Shadcn/ui
 -   **BD:** MySQL
 -   **ACL:** Spatie Laravel Permission v6.23.0
+-   **Email:** Laravel Mail + MailHog (dev)
+-   **Testes:** PHPUnit + Laravel Testing
 
 ## 📦 Módulos Implementados
 
@@ -186,6 +190,52 @@
 -   **Performance:** Índices compostos para queries otimizadas
 -   **Segurança:** Validação em cascata, foreign keys com ON DELETE CASCADE
 
+### ✅ Módulo 13: Faturas de Fornecedores 🆕
+
+-   **CRUD Completo:** Criar, visualizar, editar e eliminar faturas recebidas de fornecedores
+-   **Numeração Automática:** FF-YYYY-#### (Fatura Fornecedor) com verificação de duplicados
+-   **Campos Principais:**
+    -   Data fatura e data vencimento
+    -   Fornecedor (relação com entities)
+    -   Encomenda fornecedor (opcional, relação com supplier_orders)
+    -   Valor total
+    -   Upload documento da fatura (PDF/JPG/PNG até 5MB)
+    -   Upload comprovativo de pagamento (quando marcada como paga)
+    -   Estado: Pendente ou Paga
+-   **Sistema de Comprovativos:**
+    -   Modal automático quando fatura muda de "Pendente" para "Paga"
+    -   3 opções: Cancelar (reverte), Não Enviar (salva sem email), Enviar (upload + email)
+    -   Validação de ficheiros: Apenas PDF/JPG/PNG
+    -   Armazenamento em `supplier_invoices/proofs/`
+-   **Envio Automático de Emails:**
+    -   Email personalizado com logo e dados da empresa
+    -   Assunto: "Comprovativo de Pagamento - Fatura {numero}"
+    -   Template HTML responsivo com detalhes da fatura
+    -   Anexo: PDF do comprovativo
+    -   Destinatário: Email do fornecedor
+    -   Mailable: `PaymentProofMail.php`
+-   **Interface Vue:**
+    -   **Index.vue:** DataTable com 8 colunas, 5 filtros, badges coloridos
+    -   **Create.vue:** Formulário com dropdown de encomendas filtrado por fornecedor
+    -   **Edit.vue:** Watch automático no estado, modal personalizado para comprovativo
+-   **Sistema de Email:**
+    -   MailHog configurado para desenvolvimento (localhost:1025)
+    -   Interface web em http://localhost:8025
+    -   Configuração no `.env` documentada
+    -   Templates blade customizados com branding
+-   **Testes Automatizados:**
+    -   Suite completa: `SupplierInvoiceEmailTest.php`
+    -   10 métodos de teste, 17 asserções
+    -   100% de cobertura no fluxo de emails
+    -   Técnicas: Mail::fake(), Storage::fake(), RefreshDatabase
+-   **Permissões:** `supplier-invoices.{create,read,update,delete}`
+-   **Acesso:** Menu → Financeiro → Faturas Fornecedores
+-   **Documentação:**
+    -   Sistema de email: `docs/mailhog-setup.md`
+    -   Guia completo com instalação, configuração e troubleshooting
+-   **Bugs Corrigidos:** 5 correções aplicadas (campos nome/number, modal customizado, método PATCH)
+-   **Status:** ✅ Testado e validado (email recebido no MailHog com anexo)
+
 ### ✅ Interface & UX - Uniformização Completa
 
 -   **Headers Padronizados:** Todos os módulos com ícone colorido, título e subtítulo
@@ -285,6 +335,25 @@ npm run dev
 -   **Aplicação:** `https://gest-app.test`
 -   **phpMyAdmin:** `http://localhost/phpmyadmin`
 -   **Base de Dados:** `gest_app`
+-   **MailHog (Email Testing):** `http://localhost:8025`
+
+### **Configuração de Email (Desenvolvimento)**
+
+Para testar o envio de emails localmente:
+
+1. **Iniciar MailHog:**
+    ```bash
+    C:\MailHog\mailhog.exe
+    ```
+2. **Acessar interface:** `http://localhost:8025`
+3. **Verificar `.env`:**
+    ```env
+    MAIL_MAILER=smtp
+    MAIL_HOST=127.0.0.1
+    MAIL_PORT=1025
+    MAIL_ENCRYPTION=null
+    ```
+4. **Documentação completa:** Ver `docs/mailhog-setup.md`
 
 ## 📋 Funcionalidades Principais
 
@@ -378,7 +447,17 @@ Resultado → Botões só existem se houver permissão
 -   **Contas Bancárias**: Gestão de contas da empresa com IBAN, SWIFT, multi-moeda
 -   **Movimentos Bancários**: Histórico de débitos/créditos com saldo automático
 -   **Conta Corrente Clientes**: Acompanhamento de débitos e créditos por cliente
+-   **Faturas Fornecedores**: Gestão completa com upload de documentos e comprovativos
+-   **Envio Automático de Emails**: Comprovativos de pagamento enviados por email ao fornecedor
 -   **Cálculos Automáticos**: Saldos calculados e atualizados em tempo real
+
+### Sistema de Email
+
+-   **MailHog Configurado**: Captura emails localmente sem enviar para destinatários reais
+-   **Templates Personalizados**: Emails com logo e branding da empresa
+-   **Anexos Suportados**: PDF de comprovativos anexado automaticamente
+-   **Testes Automatizados**: Suite completa validando todo o fluxo de envio
+-   **Documentação**: Guia completo em `docs/mailhog-setup.md`
 -   **Estatísticas**: Painel com totais de débitos, créditos e saldo atual
 
 ### Interface Moderna
@@ -391,7 +470,8 @@ Resultado → Botões só existem se houver permissão
 
 ## 🚀 Próximos Módulos
 
--   [ ] Faturas a Fornecedores
+-   [x] ~~Faturas a Fornecedores~~ ✅ Concluído (v0.12.0)
+-   [ ] Faturas a Clientes
 -   [ ] Propostas/Orçamentos
 -   [ ] Encomendas/Vendas
 -   [ ] Dashboard Analytics
@@ -403,13 +483,28 @@ Resultado → Botões só existem se houver permissão
 -   **Gestão de Acessos:** `docs/access-management.md` (v0.7.0)
 -   **Contas Bancárias:** `docs/bank-accounts-module.md` (v0.11.0)
 -   **Conta Corrente Clientes:** `docs/client-accounts-module.md` (v0.11.0)
+-   **Faturas Fornecedores & Email:** `docs/mailhog-setup.md` (v0.12.0) 🆕
 -   **Configuração BD:** `docs/database-config.md`
 -   **Arquitetura Modular:** `docs/modular-architecture.md`
 
+## 🧪 Testes
+
+-   **Framework:** PHPUnit + Laravel Testing
+-   **Testes Implementados:** 9 testes automatizados
+-   **Asserções:** 17 asserções totais
+-   **Cobertura:** 100% no fluxo de emails
+-   **Suite Atual:** `SupplierInvoiceEmailTest.php`
+-   **Executar Testes:**
+    ```bash
+    php artisan test
+    # Ou específico:
+    php artisan test --filter=SupplierInvoiceEmailTest
+    ```
+
 ## 🔒 Segurança
 
--   ✅ Validação de inputs em todos os formulários
--   ✅ Sistema de permissões granular (64 permissões em 16 módulos)
+-   ✅ Validação de inputs em todos os formulários (frontend + backend)
+-   ✅ Sistema de permissões granular (68 permissões em 17 módulos)
 -   ✅ Controlo de UI baseado em permissões (botões adaptáveis)
 -   ✅ Proteção CSRF (Laravel)
 -   ✅ Password hashing (bcrypt)
@@ -417,6 +512,9 @@ Resultado → Botões só existem se houver permissão
 -   ✅ Proteção contra auto-eliminação
 -   ✅ Validação de roles hierárquicos
 -   ✅ Zero erros 403 desnecessários (UI inteligente)
+-   ✅ Upload de ficheiros com validação de tipo e tamanho
+-   ✅ Sanitização de dados antes de armazenamento
+-   ✅ Foreign keys com integridade referencial
 
 ## 🛠️ Resolução de Problemas
 
@@ -438,9 +536,17 @@ Resultado → Botões só existem se houver permissão
 -   Base `gest_app` existe
 -   Credenciais corretas no `.env`
 
+### **Emails não aparecem no MailHog**
+
+-   Verificar se MailHog está a correr: `Get-Process -Name "mailhog"`
+-   Iniciar MailHog: `C:\MailHog\mailhog.exe`
+-   Verificar `.env`: `MAIL_MAILER=smtp`, `MAIL_PORT=1025`
+-   Limpar cache: `php artisan config:clear`
+-   Ver guia completo: `docs/mailhog-setup.md`
+
 ## 📝 Documentação Adicional
 
--   [📋 Changelog](docs/changelog.md) - v0.11.0
+-   [📋 Changelog](docs/changelog.md) - v0.12.0
 -   [🏗️ Arquitetura](docs/modular-architecture.md)
 -   [💾 Configuração BD](docs/database-config.md)
 -   [🔐 Gestão de Acessos](docs/access-management.md)

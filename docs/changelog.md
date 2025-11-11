@@ -2,6 +2,190 @@
 
 ---
 
+## [0.12.0] — 2025-11-11
+
+### 💰 Módulo de Faturas de Fornecedores
+
+**Sistema Completo de Gestão de Faturas de Fornecedores com Envio Automático de Comprovativos**
+
+#### 🎯 Funcionalidades Implementadas
+
+**Gestão de Faturas:**
+
+-   Numeração automática: FF-YYYY-#### (Fatura Fornecedor)
+-   Campos completos: Data fatura, data vencimento, fornecedor, encomenda (opcional), valor total
+-   Upload de documento da fatura (PDF/JPG/PNG até 5MB)
+-   Estados: Pendente, Paga
+-   Associação com fornecedor (entities) e encomenda de fornecedor (supplier_orders)
+
+**Sistema de Comprovativos de Pagamento:**
+
+-   Upload de comprovativo quando fatura é marcada como "Paga"
+-   Modal automático com 3 opções:
+    -   ❌ Cancelar: Reverte estado para pendente
+    -   ⚠️ Não Enviar: Salva como paga sem enviar email
+    -   ✅ Enviar: Faz upload e envia email com comprovativo ao fornecedor
+-   Armazenamento em `supplier_invoices/proofs/`
+
+**Envio Automático de Emails:**
+
+-   Email personalizado com logo e dados da empresa
+-   Assunto: "Comprovativo de Pagamento - Fatura {numero}"
+-   Detalhes da fatura formatados (número, data, valor, encomenda)
+-   Anexo: PDF do comprovativo de pagamento
+-   Destinatário: Email do fornecedor
+-   Integração com MailHog para testes locais
+
+#### 🗃️ Base de Dados
+
+**Tabela Criada:**
+
+-   `supplier_invoices`:
+    -   Campos: numero (único), data_fatura, data_vencimento, supplier_id (FK), supplier_order_id (FK nullable), valor_total, documento, comprovativo_pagamento, estado
+    -   Índices: data_fatura, estado, composto (supplier_id, data_fatura)
+    -   Soft deletes habilitado
+
+**Model:**
+
+-   `SupplierInvoice.php`:
+    -   Método `generateNumber()`: Gera FF-YYYY-#### com verificação withTrashed()
+    -   Scopes: pendente(), paga(), vencidas(), supplier()
+    -   Accessors: getValorTotalFormatadoAttribute, getEstadoBadgeClassAttribute
+    -   Boot event: Auto-geração de número na criação
+
+#### 🎨 Interface
+
+**Páginas Vue:**
+
+-   **Index.vue** (556 linhas):
+    -   DataTable com 8 colunas: Data, Número, Fornecedor, Encomenda, Documento, Valor Total, Estado, Ações
+    -   5 filtros: pesquisa, fornecedor, estado, data início, data fim
+    -   Badges coloridos por estado (verde=paga, amarelo=pendente)
+    -   Botão de download para documentos
+    -   Ações com controle de permissões
+-   **Create.vue** (347 linhas):
+    -   Formulário completo com validação
+    -   Dropdown de encomendas filtrado por fornecedor selecionado
+    -   Upload de documento da fatura
+-   **Edit.vue** (559 linhas):
+    -   Watch automático no campo estado
+    -   Modal personalizado para envio de comprovativo
+    -   Upload via axios com FormData
+    -   Tratamento de erros e mensagens de sucesso
+
+#### 📧 Sistema de Email
+
+**Mailable:**
+
+-   `PaymentProofMail.php`:
+    -   Construtor: SupplierInvoice, Company, proofPath
+    -   Envelope: Assunto dinâmico com número da fatura
+    -   Conteúdo: View emails.payment-proof
+    -   Anexo: PDF do comprovativo com nome formatado
+
+**Template:**
+
+-   `payment-proof.blade.php`:
+    -   HTML responsivo com logo da empresa
+    -   Saudação personalizada ao fornecedor
+    -   Box com detalhes da fatura
+    -   Assinatura com dados da empresa (NIF, morada)
+
+#### 🔐 Permissões
+
+**Seeder Criado:**
+
+-   `SupplierInvoicesPermissionsSeeder.php`:
+    -   4 permissões: supplier-invoices.{create, read, update, delete}
+    -   Atribuídas a: Super Admin (todas), Gestor Financeiro (todas), Visualizador (read)
+
+**Rotas Protegidas:**
+
+-   8 rotas com middleware de permissões
+-   Rota especial POST para envio de comprovativo
+
+#### 🧪 Testes Automatizados
+
+**Arquivo Criado:**
+
+-   `SupplierInvoiceEmailTest.php` (345 linhas):
+    -   10 métodos de teste
+    -   17 asserções totais
+    -   Cobertura completa do fluxo de email
+
+**Testes Implementados:**
+
+1. ✅ Email enviado quando comprovativo é carregado
+2. ✅ Email contém dados corretos da fatura
+3. ✅ Email tem anexo PDF
+4. ✅ Email tem assunto correto
+5. ✅ Ficheiro guardado no storage
+6. ✅ Validação: email não enviado sem ficheiro
+7. ✅ Validação: apenas PDF/JPG/PNG aceites
+8. ✅ Email inclui encomenda quando existe
+9. ✅ Controle de permissões (403 sem permissão)
+
+**Técnicas Utilizadas:**
+
+-   `Mail::fake()` para interceptar emails
+-   `Storage::fake()` para simular armazenamento
+-   `RefreshDatabase` para testes isolados
+-   Criação manual de fixtures (User, Entity, Company)
+
+#### 📚 Documentação
+
+**Arquivo Criado:**
+
+-   `docs/mailhog-setup.md` (500+ linhas):
+    -   Guia completo de instalação do MailHog
+    -   Configuração do Laravel (.env)
+    -   Comandos úteis para gestão
+    -   Resolução de 5 problemas comuns
+    -   Alternativas (Mailtrap, Gmail, Log)
+    -   Checklist de funcionamento
+    -   Exemplos de código
+
+#### 🐛 Correções Aplicadas
+
+**Bugs Corrigidos:**
+
+1. **Campo nome → name**: Corrigidas 8 referências em controller, views e email template
+2. **Campo order_number → number**: Corrigidas 5 referências em supplier_orders
+3. **AlertDialog removido**: Substituído por modal personalizado (componente não existia)
+4. **Campo comprovativo_pagamento → comprovativo**: Corrigido em Edit.vue e testes
+5. **Método PATCH**: Adicionado `_method: 'PATCH'` no formulário de edição
+
+#### 🎨 Menu
+
+**Navegação Atualizada:**
+
+-   Menu: Financeiro → Faturas Fornecedores
+-   Ícone: FileText (vermelho)
+-   Rota: supplier-invoices
+-   Permissão: supplier-invoices
+
+#### ✅ Validação Completa
+
+**Status:**
+
+-   ✅ Migration executada com sucesso
+-   ✅ Seeder de permissões executado
+-   ✅ Frontend compilado (2494 módulos, 6.37s)
+-   ✅ 9 testes passaram (17 asserções)
+-   ✅ Email testado e validado no MailHog
+-   ✅ Workflow completo funcionando
+
+**Fluxo Testado:**
+
+1. ✅ Criar fatura com documento
+2. ✅ Marcar como paga
+3. ✅ Modal aparece automaticamente
+4. ✅ Upload de comprovativo
+5. ✅ Email enviado com anexo
+6. ✅ Recepção confirmada no MailHog
+
+---
+
 ## [0.11.0] — 2025-11-10
 
 ### 🏦 Módulo de Contas Bancárias

@@ -180,10 +180,10 @@ const allFinancialNavigationItems = [
     },
     {
         name: "Faturas Fornecedores",
-        href: "dashboard", // Temporário até implementar
-        icon: Receipt,
-        disabled: true,
-        permission: "financial",
+        href: "supplier-invoices",
+        icon: FileText,
+        disabled: false,
+        permission: "supplier-invoices",
     },
 ];
 

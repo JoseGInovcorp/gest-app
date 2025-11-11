@@ -14,6 +14,7 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CustomerOrderController;
 use App\Http\Controllers\BankAccountController;
 use App\Http\Controllers\ClientAccountController;
+use App\Http\Controllers\SupplierInvoiceController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -142,6 +143,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/client-accounts/{clientAccount}/edit', [ClientAccountController::class, 'edit'])->name('client-accounts.edit')->middleware('permission:client-accounts.update');
     Route::patch('/client-accounts/{clientAccount}', [ClientAccountController::class, 'update'])->name('client-accounts.update')->middleware('permission:client-accounts.update');
     Route::delete('/client-accounts/{clientAccount}', [ClientAccountController::class, 'destroy'])->name('client-accounts.destroy')->middleware('permission:client-accounts.delete');
+
+    // Rotas de Faturas de Fornecedores (Financeiro)
+    Route::get('/supplier-invoices/create', [SupplierInvoiceController::class, 'create'])->name('supplier-invoices.create')->middleware('permission:supplier-invoices.create');
+    Route::middleware('permission:supplier-invoices.read')->group(function () {
+        Route::get('/supplier-invoices', [SupplierInvoiceController::class, 'index'])->name('supplier-invoices.index');
+        Route::get('/supplier-invoices/{supplierInvoice}', [SupplierInvoiceController::class, 'show'])->name('supplier-invoices.show');
+    });
+    Route::post('/supplier-invoices', [SupplierInvoiceController::class, 'store'])->name('supplier-invoices.store')->middleware('permission:supplier-invoices.create');
+    Route::get('/supplier-invoices/{supplierInvoice}/edit', [SupplierInvoiceController::class, 'edit'])->name('supplier-invoices.edit')->middleware('permission:supplier-invoices.update');
+    Route::patch('/supplier-invoices/{supplierInvoice}', [SupplierInvoiceController::class, 'update'])->name('supplier-invoices.update')->middleware('permission:supplier-invoices.update');
+    Route::delete('/supplier-invoices/{supplierInvoice}', [SupplierInvoiceController::class, 'destroy'])->name('supplier-invoices.destroy')->middleware('permission:supplier-invoices.delete');
+    Route::post('/supplier-invoices/{supplierInvoice}/send-payment-proof', [SupplierInvoiceController::class, 'sendPaymentProof'])->name('supplier-invoices.send-payment-proof')->middleware('permission:supplier-invoices.update');
 
     // Rotas de Configurações - Empresa
     Route::middleware('permission:company.read')->group(function () {
