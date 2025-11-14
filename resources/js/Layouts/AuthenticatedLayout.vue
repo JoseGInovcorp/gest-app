@@ -32,6 +32,7 @@ import {
     DollarSign,
     Archive,
     Building,
+    ListChecks,
 } from "lucide-vue-next";
 
 const showingNavigationDropdown = ref(false);
@@ -119,10 +120,10 @@ const allMainNavigationItems = [
     },
     {
         name: "Calendário",
-        href: "dashboard", // Temporário até implementar
+        href: "calendar.index",
         icon: Calendar,
-        disabled: true,
-        permission: "calendar", // Requer permissões de calendário
+        disabled: false,
+        permission: "calendar-events", // Requer permissões de calendar-events
     },
 ];
 
@@ -261,17 +262,17 @@ const allConfigurationItems = [
     },
     {
         name: "Calendário - Tipos",
-        href: "dashboard", // Temporário até implementar
+        href: "calendar-event-types",
         icon: Calendar,
-        disabled: true,
-        permission: "calendar", // Requer permissões de calendário
+        disabled: false,
+        permission: "calendar-event-types",
     },
     {
-        name: "Calendário - Acções",
-        href: "dashboard", // Temporário até implementar
-        icon: Zap,
-        disabled: true,
-        permission: "calendar", // Requer permissões de calendário
+        name: "Calendário - Ações",
+        href: "calendar-event-actions",
+        icon: ListChecks,
+        disabled: false,
+        permission: "calendar-event-actions",
     },
     {
         name: "Artigos",

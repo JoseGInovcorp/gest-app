@@ -2,7 +2,7 @@
 import { router } from "@inertiajs/vue3";
 import { Head, Link } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import EntitiesDataTable from "@/Components/EntitiesDataTableNew.vue";
+import EntitiesDataTable from "@/Components/ui/EntitiesDataTable.vue";
 import { Package } from "lucide-vue-next";
 
 const props = defineProps({
@@ -82,12 +82,10 @@ const handleDelete = (entity) => {
 
         <!-- Data Table -->
         <EntitiesDataTable
-            :entities="entities.data || []"
-            :can-create="can.create"
-            :can-view="can.view"
-            :can-edit="can.edit"
-            :can-delete="can.delete"
+            :entities="entities"
+            :can="can"
             entity-type="supplier"
+            route-prefix="suppliers"
             @create="handleCreate"
             @view="handleView"
             @edit="handleEdit"

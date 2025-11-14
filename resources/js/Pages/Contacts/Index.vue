@@ -41,11 +41,14 @@
 
         <!-- Data Table -->
         <ContactsDataTable
-            :contacts="contacts.data"
+            :contacts="contacts"
+            :entities="entities"
+            :filters="filters"
             :can-create="can.create"
             :can-view="can.view"
             :can-edit="can.edit"
             :can-delete="can.delete"
+            @view="handleView"
             @edit="handleEdit"
             @delete="handleDelete"
             @create="handleCreate"
@@ -103,7 +106,7 @@
 import { ref } from "vue";
 import { Head, Link, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import ContactsDataTable from "@/Components/ContactsDataTableNew.vue";
+import ContactsDataTable from "@/Components/ui/ContactsDataTable.vue";
 import Modal from "@/Components/Modal.vue";
 import Button from "@/Components/ui/Button.vue";
 import { Users, Trash2, Loader2 } from "lucide-vue-next";

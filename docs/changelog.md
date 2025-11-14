@@ -2,6 +2,400 @@
 
 ---
 
+## [0.14.1] — 2025-11-12
+
+### 🐛 Correções de Bugs - Módulo Calendário
+
+**Problema de Permissões:**
+
+-   🔧 Corrigida verificação de permissões no `Show.vue` (usava sintaxe incorreta `$page.props.auth.can['permission']`)
+-   ✅ Implementada sintaxe correta: `$page.props.auth.permissions.includes('permission')`
+
+**Conflito de Nomes de Propriedades Vue:**
+
+-   🔧 Renomeados campos do formulário em `Create.vue` para evitar conflito com propriedades internas do Vue
+-   ✅ `form.data` → `form.event_date` (com transformação no submit para manter compatibilidade com backend)
+-   ✅ `form.hora` → `form.event_time`
+-   📝 Razão: `data` é palavra reservada em Vue e causava erro "modelValue expected String|Number, got Function"
+
+**Sistema de Permissões:**
+
+-   🔧 Atribuídas permissões `calendar-events.*` aos roles que tinham apenas `calendar.*`
+-   ✅ Roles atualizados: Gestor Comercial, Gestor Financeiro, Editor (full access), Visualizador (read only)
+-   ✅ Menu Calendário agora visível para todos os utilizadores com permissões corretas
+
+**Scripts de Diagnóstico Criados:**
+
+-   `check_user_permissions.php` - Verificar permissões de utilizador
+-   `check_calendar_permissions.php` - Listar permissões de calendário na BD
+-   `assign_calendar_permissions.php` - Atribuir permissões a role específico
+-   `update_calendar_permissions.php` - Atualizar permissões em massa
+
+---
+
+## [0.14.0] — 2025-11-12
+
+### 📅 Módulo Principal do Calendário
+
+**Sistema de Gestão de Eventos com FullCalendar integrado**
+
+#### 🎯 Funcionalidades Implementadas
+
+**Calendário Principal:**
+
+-   ✅ Interface FullCalendar com visualizações: Mês, Semana, Dia, Lista
+-   ✅ Criação rápida de eventos clicando no calendário
+-   ✅ Drag & drop para reagendar eventos
+-   ✅ Click em evento para visualizar detalhes
+-   ✅ Filtros: Utilizador e Entidade (cliente/fornecedor)
+-   ✅ Eventos coloridos por tipo (cor configurada em Calendário - Tipos)
+-   ✅ Localização em português (pt-BR)
+
+**Gestão de Eventos:**
+
+-   ✅ CRUD completo: Criar, Visualizar, Editar, Eliminar
+-   ✅ Campos: Data, Hora, Duração (minutos), Partilha (boolean), Conhecimento, Entidade, Tipo, Ação, Descrição, Estado
+-   ✅ Estados: Agendado, Em Curso, Concluído, Cancelado
+-   ✅ Relacionamentos: user, entity, calendar_event_type, calendar_event_action
+-   ✅ Soft deletes habilitado
+
+#### 🗃️ Base de Dados
+
+**Tabela: `calendar_events`**
+
+-   Campos principais:
+    -   `user_id` (FK users, cascade)
+    -   `entity_id` (FK entities, nullable, set null)
+    -   `calendar_event_type_id` (FK calendar_event_types, cascade)
+    -   `calendar_event_action_id` (FK calendar_event_actions, nullable, set null)
+    -   `data` (date)
+    -   `hora` (time)
+    -   `duracao` (integer, minutes)
+    -   `partilha` (boolean, default false)
+    -   `conhecimento` (text, nullable)
+    -   `descricao` (text, nullable)
+    -   `estado` (enum: agendado, em_curso, concluido, cancelado)
+-   Índices: data, estado, [user_id, data], [entity_id, data]
+-   Soft deletes, timestamps
+
+**Model: `CalendarEvent.php`**
+
+-   Relationships: user(), entity(), eventType(), eventAction()
+-   Scopes: agendado(), emCurso(), concluido(), cancelado(), byUser($userId), byEntity($entityId)
+-   Accessors: estadoBadgeClass, estadoLabel
+-   Casts: data (date), hora (datetime:H:i), duracao (integer), partilha (boolean)
+
+#### 🔒 Segurança & Permissões
+
+**Permissões criadas:**
+
+-   `calendar-events.create`
+-   `calendar-events.read`
+-   `calendar-events.update`
+-   `calendar-events.delete`
+
+**Policy: `CalendarEventPolicy.php`**
+
+-   Métodos: viewAny, view, create, update, delete, restore, forceDelete
+-   Autorização baseada em permissões Spatie
+
+**Distribuição:**
+
+-   Super Admin: todas as permissões
+-   Admin: todas as permissões
+-   User: create, read, update (sem delete)
+
+#### 🌐 Backend
+
+**Controller: `CalendarEventController.php`**
+
+-   `index()`: Renderiza página Index.vue com listas de tipos/ações/users/entities
+-   `events()`: Endpoint JSON para FullCalendar
+    -   Aceita query params: start, end (ISO dates), user_id, entity_id
+    -   Retorna eventos no formato FullCalendar (id, title, start, end, color, extendedProps)
+-   `create()`: Renderiza página Create com listas
+-   `store(Request)`: Validação e criação de evento
+-   `show(CalendarEvent)`: Renderiza Show com evento carregado
+-   `edit(CalendarEvent)`: Renderiza Edit com evento e listas
+-   `update(Request, CalendarEvent)`: Validação e atualização
+-   `destroy(CalendarEvent)`: Soft delete
+
+**Rotas (`routes/web.php`):**
+
+-   `GET /calendar` → calendar.index (middleware: permission:calendar-events.read)
+-   `GET /calendar/events-json` → calendar.events.json (JSON endpoint)
+-   `GET /calendar-events/create` → calendar-events.create (middleware: permission:calendar-events.create)
+-   `GET /calendar-events` → calendar-events.index
+-   `GET /calendar-events/{calendarEvent}` → calendar-events.show
+-   `POST /calendar-events` → calendar-events.store
+-   `GET /calendar-events/{calendarEvent}/edit` → calendar-events.edit
+-   `PATCH /calendar-events/{calendarEvent}` → calendar-events.update
+-   `DELETE /calendar-events/{calendarEvent}` → calendar-events.destroy
+
+#### 🎨 Frontend
+
+**FullCalendar Integração:**
+
+-   Packages instalados: `@fullcalendar/{core, vue3, daygrid, timegrid, interaction, list}`
+-   Plugins: dayGrid, timeGrid, interaction, list
+-   Configuração: PT locale, editable, selectable
+
+**Pages Vue:**
+
+-   **Calendar/Index.vue** (Main Calendar):
+
+    -   FullCalendar component com toolbar (prev/next/today, view switchers)
+    -   Filtros: select Utilizador, select Entidade, botão Limpar Filtros
+    -   Button: Criar Evento
+    -   Handlers:
+        -   `select`: navega para Create com data/hora pré-preenchidas
+        -   `eventClick`: navega para Show
+        -   `eventDrop/eventResize`: atualiza evento via PATCH (se can.update)
+    -   Refetch events quando filtros mudam
+    -   Dark mode CSS overrides
+
+-   **Calendar/Create.vue**:
+
+    -   Formulário: user_id, entity_id, calendar_event_type_id, calendar_event_action_id, data, hora, duracao, estado, partilha (checkbox), conhecimento, descricao
+    -   Selects populados com dados do backend
+    -   Validação: campos obrigatórios (user, type, data, hora, duracao), formato hora (H:i)
+    -   Props: types, actions, entities, users, data?, hora?
+
+-   **Calendar/Edit.vue**:
+
+    -   Formulário idêntico ao Create, pré-preenchido com dados do evento
+    -   Props: event, types, actions, entities, users
+
+-   **Calendar/Show.vue**:
+    -   Display somente-leitura: data/hora/duração, utilizador, entidade, tipo (com cor), ação, partilha (badge), conhecimento, descrição, estado (badge), timestamps
+    -   Buttons: Editar (se can.update), Eliminar (se can.delete)
+    -   Ícones: Clock, User, Building2, Tag, Zap
+    -   Confirmação antes de eliminar
+
+#### 🧪 Migrações & Seeders
+
+-   Migration: `2025_11_12_160239_create_calendar_events_table.php` ✅ Run
+-   Seeder: `CalendarEventsPermissionsSeeder.php` ✅ Run
+
+#### 📐 Menu & Navegação
+
+-   Menu principal atualizado: "Calendário" agora ativa (href: `calendar.index`, permission: `calendar-events`)
+-   Submenu Configurações: "Calendário - Tipos" e "Calendário - Ações" (já implementados em v0.13.0)
+
+#### 📚 Observações
+
+-   Utilizadores podem ver apenas eventos que têm permissão (filtro via permissions)
+-   Entidades podem ser clientes ou fornecedores (FK para `entities`)
+-   Campo `conhecimento` destina-se a armazenar lições aprendidas ou informação relevante
+-   Soft deletes permitem restaurar eventos eliminados se necessário
+-   FullCalendar refetch via API endpoint garante filtros dinâmicos sem reload da página
+
+---
+
+## [0.13.0] — 2025-11-12
+
+### ⚙️ Módulos de Configuração do Calendário
+
+**Sistema de Configuração de Tipos e Ações para Eventos de Calendário**
+
+#### 🎯 Funcionalidades Implementadas
+
+**Calendário - Tipos de Eventos:**
+
+-   Definição de tipos de eventos (Visita, Reunião, Intervenção Técnica, Auditoria, Formação, Apresentação)
+-   Personalização visual com cores (hex color picker)
+-   Atribuição de ícones Lucide para identificação visual
+-   Ativação/desativação de tipos
+-   Validação de cores hexadecimais (#RRGGBB)
+-   CRUD completo com pesquisa e filtros
+
+**Calendário - Ações de Eventos:**
+
+-   Definição de ações de workflow (Confirmar, Reagendar, Aprovar, Concluir, Cancelar, Adiar)
+-   Padronização do fluxo de cada tipo de evento
+-   Ativação/desativação de ações
+-   CRUD completo com pesquisa e filtros
+
+#### 🗃️ Base de Dados
+
+**Tabelas Criadas:**
+
+-   `calendar_event_types`:
+
+    -   Campos: name (único), description, color (7 chars hex), icon (50 chars), is_active
+    -   Índices: is_active, name
+    -   Soft deletes habilitado
+    -   Validação: color regex `/^#[0-9A-Fa-f]{6}$/`
+
+-   `calendar_event_actions`:
+    -   Campos: name (único), description, is_active
+    -   Índices: is_active, name
+    -   Soft deletes habilitado
+
+**Models:**
+
+-   `CalendarEventType.php`:
+
+    -   Scopes: active(), inactive()
+    -   Accessor: getStatusBadgeClassAttribute
+    -   Fillable: name, description, color, icon, is_active
+
+-   `CalendarEventAction.php`:
+    -   Scopes: active(), inactive()
+    -   Accessor: getStatusBadgeClassAttribute
+    -   Fillable: name, description, is_active
+
+#### 🎨 Interface
+
+**Calendário - Tipos (3 páginas Vue):**
+
+-   **Index.vue**:
+
+    -   DataTable com 6 colunas: Nome, Descrição, Cor, Ícone, Estado, Ações
+    -   Pesquisa em tempo real
+    -   Display visual de cor (quadrado colorido + código hex)
+    -   Display de ícone Lucide
+    -   Badges coloridos por estado
+
+-   **Create.vue**:
+
+    -   Formulário com color picker nativo HTML5
+    -   Input duplo para cor (picker visual + texto hex)
+    -   Campo de ícone com link para documentação Lucide
+    -   Validação de formato hexadecimal
+    -   Checkbox de ativação
+
+-   **Edit.vue**:
+    -   Mesmas funcionalidades do Create
+    -   Pré-preenchimento com dados existentes
+    -   Validação unique excluindo o próprio registro
+
+**Calendário - Ações (3 páginas Vue):**
+
+-   **Index.vue**:
+
+    -   DataTable com 4 colunas: Nome, Descrição, Estado, Ações
+    -   Pesquisa em tempo real
+    -   Badges coloridos por estado
+    -   Ícone ListChecks para identificação
+
+-   **Create.vue**:
+
+    -   Formulário simples (nome, descrição, estado)
+    -   Validação de campos obrigatórios
+    -   Checkbox de ativação
+
+-   **Edit.vue**:
+    -   Mesmas funcionalidades do Create
+    -   Validação unique excluindo o próprio registro
+
+#### 🌱 Seeders
+
+**Dados Pré-carregados:**
+
+**CalendarEventTypesSeeder:**
+
+1. Visita (Azul #3B82F6, ícone Users)
+2. Reunião (Roxo #8B5CF6, ícone Calendar)
+3. Intervenção Técnica (Vermelho #EF4444, ícone Wrench)
+4. Auditoria (Âmbar #F59E0B, ícone ClipboardCheck)
+5. Formação (Verde #10B981, ícone GraduationCap)
+6. Apresentação (Rosa #EC4899, ícone Presentation)
+
+**CalendarEventActionsSeeder:**
+
+1. Confirmar - Confirmar a realização do evento
+2. Reagendar - Alterar data/hora do evento
+3. Aprovar - Aprovar o evento
+4. Concluir - Marcar evento como concluído
+5. Cancelar - Cancelar o evento
+6. Adiar - Adiar evento sem data definida
+
+#### 🔐 Permissões
+
+**Seeders Criados:**
+
+-   `CalendarEventTypesPermissionsSeeder.php`:
+
+    -   4 permissões: calendar-event-types.{create, read, update, delete}
+    -   Atribuídas a: Super Admin, Administrator
+
+-   `CalendarEventActionsPermissionsSeeder.php`:
+    -   4 permissões: calendar-event-actions.{create, read, update, delete}
+    -   Atribuídas a: Super Admin, Administrator
+
+#### 🛣️ Rotas
+
+**14 Rotas Criadas:**
+
+-   `calendar-event-types.*`: 7 rotas CRUD com middleware de permissões
+-   `calendar-event-actions.*`: 7 rotas CRUD com middleware de permissões
+
+#### 🧩 Controllers
+
+**CalendarEventTypeController:**
+
+-   Métodos: index, create, store, show, edit, update, destroy
+-   Pesquisa por nome e descrição
+-   Filtro por estado (ativo/inativo)
+-   Validações completas (color regex, icon max length)
+-   Mensagens de sucesso em português
+
+**CalendarEventActionController:**
+
+-   Métodos: index, create, store, show, edit, update, destroy
+-   Pesquisa por nome e descrição
+-   Filtro por estado (ativo/inativo)
+-   Ordenação customizável
+-   Mensagens de sucesso em português
+
+#### 🎨 Design System
+
+**Ícones Lucide:**
+
+-   Tipos: Calendar (azul)
+-   Ações: ListChecks (verde)
+-   Interface consistente com resto da aplicação
+
+**Color Picker:**
+
+-   Input type="color" nativo HTML5
+-   Sincronização com input de texto hexadecimal
+-   Validação em tempo real do formato
+
+#### 📍 Menu de Navegação
+
+**Localização:** Configurações > Calendário
+
+-   Calendário - Tipos (ícone Calendar, cor azul)
+-   Calendário - Ações (ícone ListChecks, cor verde)
+-   Controle de permissões por item
+-   Badges disabled removidos (módulos ativos)
+
+#### ✅ Validações
+
+**Tipos de Eventos:**
+
+-   Nome: obrigatório, único, max 255
+-   Cor: obrigatório, 7 caracteres, formato hex válido
+-   Ícone: opcional, max 50 caracteres
+-   Descrição: opcional
+
+**Ações de Eventos:**
+
+-   Nome: obrigatório, único, max 255
+-   Descrição: opcional
+
+#### 🔄 Preparação para Módulo Calendário
+
+Estes módulos foram criados como **dependências de configuração** para o futuro módulo de Calendário, que utilizará:
+
+-   Tipos de eventos para categorização visual
+-   Ações para workflow e gestão do ciclo de vida dos eventos
+-   Cores e ícones para interface rica e intuitiva
+
+---
+
 ## [0.12.0] — 2025-11-11
 
 ### 💰 Módulo de Faturas de Fornecedores

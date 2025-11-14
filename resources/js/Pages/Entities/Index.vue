@@ -2,7 +2,7 @@
 import { router } from "@inertiajs/vue3";
 import { Head, Link } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import EntitiesDataTable from "@/Components/EntitiesDataTableNew.vue";
+import EntitiesDataTable from "@/Components/ui/EntitiesDataTable.vue";
 import { Users } from "lucide-vue-next";
 
 const props = defineProps({
@@ -62,7 +62,9 @@ const handleDelete = (entity) => {
         <EntitiesDataTable
             :entities="entities"
             :filters="filters"
+            :can="can"
             :entity-type="entityType || 'all'"
+            route-prefix="entities"
             @create="handleCreate"
             @view="handleView"
             @edit="handleEdit"

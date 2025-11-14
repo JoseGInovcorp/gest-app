@@ -15,6 +15,9 @@ use App\Http\Controllers\CustomerOrderController;
 use App\Http\Controllers\BankAccountController;
 use App\Http\Controllers\ClientAccountController;
 use App\Http\Controllers\SupplierInvoiceController;
+use App\Http\Controllers\CalendarEventTypeController;
+use App\Http\Controllers\CalendarEventActionController;
+use App\Http\Controllers\CalendarEventController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -213,6 +216,28 @@ Route::middleware('auth')->group(function () {
     Route::delete('/supplier-orders/{supplierOrder}', [\App\Http\Controllers\SupplierOrderController::class, 'destroy'])->name('supplier-orders.destroy')->middleware('permission:supplier-orders.delete');
     Route::get('/supplier-orders/{supplierOrder}/pdf', [\App\Http\Controllers\SupplierOrderController::class, 'generatePDF'])->name('supplier-orders.pdf')->middleware('permission:supplier-orders.read');
 
+    // Rotas de Tipos de Eventos do Calendário (Configurações)
+    Route::get('/calendar-event-types/create', [CalendarEventTypeController::class, 'create'])->name('calendar-event-types.create')->middleware('permission:calendar-event-types.create');
+    Route::middleware('permission:calendar-event-types.read')->group(function () {
+        Route::get('/calendar-event-types', [CalendarEventTypeController::class, 'index'])->name('calendar-event-types.index');
+        Route::get('/calendar-event-types/{calendarEventType}', [CalendarEventTypeController::class, 'show'])->name('calendar-event-types.show');
+    });
+    Route::post('/calendar-event-types', [CalendarEventTypeController::class, 'store'])->name('calendar-event-types.store')->middleware('permission:calendar-event-types.create');
+    Route::get('/calendar-event-types/{calendarEventType}/edit', [CalendarEventTypeController::class, 'edit'])->name('calendar-event-types.edit')->middleware('permission:calendar-event-types.update');
+    Route::patch('/calendar-event-types/{calendarEventType}', [CalendarEventTypeController::class, 'update'])->name('calendar-event-types.update')->middleware('permission:calendar-event-types.update');
+    Route::delete('/calendar-event-types/{calendarEventType}', [CalendarEventTypeController::class, 'destroy'])->name('calendar-event-types.destroy')->middleware('permission:calendar-event-types.delete');
+
+    // Rotas de Ações de Eventos do Calendário (Configurações)
+    Route::get('/calendar-event-actions/create', [CalendarEventActionController::class, 'create'])->name('calendar-event-actions.create')->middleware('permission:calendar-event-actions.create');
+    Route::middleware('permission:calendar-event-actions.read')->group(function () {
+        Route::get('/calendar-event-actions', [CalendarEventActionController::class, 'index'])->name('calendar-event-actions.index');
+        Route::get('/calendar-event-actions/{calendarEventAction}', [CalendarEventActionController::class, 'show'])->name('calendar-event-actions.show');
+    });
+    Route::post('/calendar-event-actions', [CalendarEventActionController::class, 'store'])->name('calendar-event-actions.store')->middleware('permission:calendar-event-actions.create');
+    Route::get('/calendar-event-actions/{calendarEventAction}/edit', [CalendarEventActionController::class, 'edit'])->name('calendar-event-actions.edit')->middleware('permission:calendar-event-actions.update');
+    Route::patch('/calendar-event-actions/{calendarEventAction}', [CalendarEventActionController::class, 'update'])->name('calendar-event-actions.update')->middleware('permission:calendar-event-actions.update');
+    Route::delete('/calendar-event-actions/{calendarEventAction}', [CalendarEventActionController::class, 'destroy'])->name('calendar-event-actions.destroy')->middleware('permission:calendar-event-actions.delete');
+
     Route::get('/proposals', function () {
         return redirect()->route('dashboard')->with('info', 'Módulo Propostas em desenvolvimento');
     })->name('proposals.index');
@@ -222,9 +247,34 @@ Route::middleware('auth')->group(function () {
     Route::get('/financial', function () {
         return redirect()->route('dashboard')->with('info', 'Módulo Financeiro em desenvolvimento');
     })->name('financial.index');
-    Route::get('/calendar', function () {
-        return redirect()->route('dashboard')->with('info', 'Módulo Calendário em desenvolvimento');
-    })->name('calendar.index');
+    // Calendário - aplicação principal
+    Route::get('/calendar', [\App\Http\Controllers\CalendarEventController::class, 'index'])
+        ->name('calendar.index')->middleware('permission:calendar-events.read');
+
+    // JSON endpoint usado pelo FullCalendar (events)
+    Route::get('/calendar/events-json', [\App\Http\Controllers\CalendarEventController::class, 'events'])
+        ->name('calendar.events.json');
+
+    // Rotas CRUD para eventos do calendário
+    Route::get('/calendar-events/create', [\App\Http\Controllers\CalendarEventController::class, 'create'])
+        ->name('calendar-events.create')->middleware('permission:calendar-events.create');
+
+    Route::middleware('permission:calendar-events.read')->group(function () {
+        Route::get('/calendar-events', [\App\Http\Controllers\CalendarEventController::class, 'index'])->name('calendar-events.index');
+        Route::get('/calendar-events/{calendarEvent}', [\App\Http\Controllers\CalendarEventController::class, 'show'])->name('calendar-events.show');
+    });
+
+    Route::post('/calendar-events', [\App\Http\Controllers\CalendarEventController::class, 'store'])
+        ->name('calendar-events.store')->middleware('permission:calendar-events.create');
+
+    Route::get('/calendar-events/{calendarEvent}/edit', [\App\Http\Controllers\CalendarEventController::class, 'edit'])
+        ->name('calendar-events.edit')->middleware('permission:calendar-events.update');
+
+    Route::patch('/calendar-events/{calendarEvent}', [\App\Http\Controllers\CalendarEventController::class, 'update'])
+        ->name('calendar-events.update')->middleware('permission:calendar-events.update');
+
+    Route::delete('/calendar-events/{calendarEvent}', [\App\Http\Controllers\CalendarEventController::class, 'destroy'])
+        ->name('calendar-events.destroy')->middleware('permission:calendar-events.delete');
     Route::get('/settings', function () {
         return redirect()->route('dashboard')->with('info', 'Módulo Configurações em desenvolvimento');
     })->name('settings.index');

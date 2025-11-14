@@ -4,8 +4,8 @@
 
 ## 📊 Status do Projeto
 
-**Versão:** v0.12.0  
-**Progresso:** 70% (14 de 20 módulos)  
+**Versão:** v0.14.0  
+**Progresso:** 80% (16 de 20 módulos)  
 **Entrega:** 18 Nov 2025  
 **BD:** ✅ MySQL configurado e funcionando  
 **Welcome:** ✅ Navegação funcional  
@@ -15,7 +15,8 @@
 **UX:** ✅ Interface uniformizada em todos os módulos  
 **Financeiro:** ✅ Contas bancárias, conta corrente e faturas fornecedores operacionais  
 **Email:** ✅ Sistema de envio configurado e testado (MailHog)  
-**Testes:** ✅ Suite automatizada implementada (9 testes, 17 asserções)
+**Testes:** ✅ Suite automatizada implementada (9 testes, 17 asserções)  
+**Calendário:** ✅ FullCalendar integrado com gestão completa de eventos
 
 ## 🛠️ Tecnologias
 
@@ -190,7 +191,133 @@
 -   **Performance:** Índices compostos para queries otimizadas
 -   **Segurança:** Validação em cascata, foreign keys com ON DELETE CASCADE
 
-### ✅ Módulo 13: Faturas de Fornecedores 🆕
+### ✅ Módulo 13: Faturas de Fornecedores
+
+-   **CRUD Completo:** Criar, visualizar, editar e eliminar faturas recebidas de fornecedores
+-   **Numeração Automática:** FF-YYYY-#### (Fatura Fornecedor) com verificação de duplicados
+-   **Campos Principais:**
+    -   Data fatura e data vencimento
+    -   Fornecedor (relação com entities)
+    -   Encomenda fornecedor (opcional, relação com supplier_orders)
+    -   Valor total
+    -   Upload documento da fatura (PDF/JPG/PNG até 5MB)
+    -   Upload comprovativo de pagamento (quando marcada como paga)
+    -   Estado: Pendente ou Paga
+-   **Sistema de Comprovativos:**
+    -   Modal automático quando fatura muda de "Pendente" para "Paga"
+    -   3 opções: Cancelar (reverte), Não Enviar (salva sem email), Enviar (upload + email)
+    -   Validação de ficheiros: Apenas PDF/JPG/PNG
+    -   Armazenamento em `supplier_invoices/proofs/`
+-   **Envio Automático de Emails:**
+    -   Email personalizado com logo e dados da empresa
+    -   Assunto: "Comprovativo de Pagamento - Fatura {numero}"
+    -   Template HTML responsivo com detalhes da fatura
+    -   Anexo: PDF do comprovativo
+    -   Destinatário: Email do fornecedor
+    -   Mailable: `PaymentProofMail.php`
+-   **Interface Vue:**
+    -   **Index.vue:** DataTable com 8 colunas, 5 filtros, badges coloridos
+    -   **Create.vue:** Formulário com dropdown de encomendas filtrado por fornecedor
+    -   **Edit.vue:** Watch automático no estado, modal personalizado para comprovativo
+
+### ✅ Módulo 14: Calendário - Tipos de Eventos (Configurações) 🆕
+
+-   **CRUD Completo:** Gestão de tipos de eventos para o futuro módulo Calendário
+-   **Campos Principais:**
+    -   Nome único (ex: Visita, Reunião, Intervenção Técnica)
+    -   Descrição opcional
+    -   **Cor personalizada:** Color picker HTML5 + input texto hexadecimal (#RRGGBB)
+    -   **Ícone Lucide:** Campo opcional com link para documentação (max 50 caracteres)
+    -   Estado: Ativo/Inativo
+-   **Validações:**
+    -   Cor obrigatória com regex `/^#[0-9A-Fa-f]{6}$/`
+    -   Nome único na base de dados
+    -   Sincronização automática entre color picker e campo de texto
+-   **Dados Pré-carregados (Seeder):**
+    -   6 tipos prontos: Visita (azul), Reunião (roxo), Intervenção Técnica (vermelho), Auditoria (âmbar), Formação (verde), Apresentação (rosa)
+    -   Cada tipo com cor e ícone apropriado
+-   **Interface Vue:**
+    -   **Index.vue:** DataTable com display visual de cores (quadrado colorido + código hex)
+    -   **Create/Edit.vue:** Color picker integrado com validação em tempo real
+-   **Propósito:** Alimentar categorização visual de eventos no módulo Calendário
+
+### ✅ Módulo 15: Calendário - Ações de Eventos (Configurações) 🆕
+
+-   **CRUD Completo:** Gestão de ações de workflow para eventos
+-   **Campos Principais:**
+    -   Nome único (ex: Confirmar, Reagendar, Aprovar, Concluir)
+    -   Descrição opcional
+    -   Estado: Ativo/Inativo
+-   **Dados Pré-carregados (Seeder):**
+    -   6 ações prontas: Confirmar, Reagendar, Aprovar, Concluir, Cancelar, Adiar
+    -   Cada ação com descrição do seu propósito
+-   **Interface Vue:**
+    -   **Index.vue:** DataTable simples com pesquisa e filtros
+    -   **Create/Edit.vue:** Formulário minimalista (nome, descrição, estado)
+-   **Propósito:** Padronizar workflow e gestão do ciclo de vida dos eventos no módulo Calendário
+-   **Integração Futura:** Permitirá definir ações específicas por tipo de evento
+
+### ✅ Módulo 16: Calendário - Gestão de Eventos 🆕
+
+-   **Interface FullCalendar:** Visualização interativa de eventos com múltiplas vistas (Mês, Semana, Dia, Lista)
+-   **Criação Rápida:** Clicar em data/hora no calendário para criar evento automaticamente
+-   **Drag & Drop:** Arrastar eventos para reagendar datas e horas
+-   **Filtros Dinâmicos:**
+    -   Por Utilizador (responsável pelo evento)
+    -   Por Entidade (cliente/fornecedor associado)
+    -   Refetch automático de eventos ao alterar filtros
+-   **Campos Principais:**
+    -   **Data e Hora:** Date picker + time picker
+    -   **Duração:** Em minutos (padrão 60 min, step 15 min)
+    -   **Utilizador:** Responsável pelo evento (obrigatório)
+    -   **Entidade:** Cliente/Fornecedor associado (opcional)
+    -   **Tipo:** Dropdown carregado de Calendário - Tipos (cores visuais)
+    -   **Ação:** Dropdown carregado de Calendário - Ações (opcional)
+    -   **Estado:** Agendado, Em Curso, Concluído, Cancelado
+    -   **Partilha:** Checkbox (evento partilhado com equipa)
+    -   **Conhecimento:** Campo texto para lições aprendidas (opcional)
+    -   **Descrição:** Campo texto para detalhes do evento (opcional)
+-   **Visualização de Eventos:**
+    -   Cores baseadas no tipo de evento (configurado em Calendário - Tipos)
+    -   Título composto: "Tipo - Entidade"
+    -   Click no evento abre página de detalhes
+    -   Badges visuais para estado e partilha
+-   **Sistema de Estados:**
+    -   **Agendado:** Azul (evento ainda não iniciado)
+    -   **Em Curso:** Amarelo (evento em execução)
+    -   **Concluído:** Verde (evento finalizado)
+    -   **Cancelado:** Vermelho (evento cancelado)
+-   **CRUD Completo:**
+    -   **Index:** Calendário interativo com filtros e botão "Criar Evento"
+    -   **Create:** Formulário completo com todos os campos
+    -   **Show:** Visualização detalhada com badges e formatação
+    -   **Edit:** Formulário pré-preenchido para alterações
+    -   **Delete:** Soft delete com confirmação
+-   **Backend Robusto:**
+    -   **Controller:** CalendarEventController com 7 métodos
+    -   **Model:** CalendarEvent com 4 relações (user, entity, eventType, eventAction)
+    -   **Scopes:** agendado(), emCurso(), concluido(), cancelado(), byUser(), byEntity()
+    -   **Accessors:** estadoBadgeClass, estadoLabel
+    -   **Policy:** CalendarEventPolicy com autorização completa
+-   **JSON API Endpoint:**
+    -   `/calendar/events-json` retorna eventos no formato FullCalendar
+    -   Aceita query params: start, end (ISO dates), user_id, entity_id
+    -   Cálculo automático de end datetime baseado em duração
+-   **Packages FullCalendar:**
+    -   @fullcalendar/core, vue3, daygrid, timegrid, interaction, list
+    -   Localização portuguesa (pt-BR)
+    -   Dark mode suportado com CSS overrides
+-   **Base de Dados:**
+    -   Tabela: `calendar_events`
+    -   FKs: user_id, entity_id, calendar_event_type_id, calendar_event_action_id
+    -   Índices: data, estado, [user_id, data], [entity_id, data]
+    -   Soft deletes habilitado
+-   **Permissões:** `calendar-events.{create,read,update,delete}`
+-   **Acesso:** Menu → Calendário (ativado e funcional)
+-   **Integração:** Relacionado com módulos Utilizadores, Entidades, Calendário - Tipos/Ações
+-   **Status:** ✅ Totalmente implementado e testado
+
+### ✅ Módulo 13: Faturas de Fornecedores
 
 -   **CRUD Completo:** Criar, visualizar, editar e eliminar faturas recebidas de fornecedores
 -   **Numeração Automática:** FF-YYYY-#### (Fatura Fornecedor) com verificação de duplicados
