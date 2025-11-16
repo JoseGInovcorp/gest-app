@@ -259,136 +259,108 @@
 
             <!-- Table -->
             <div class="overflow-x-auto">
-                <table
-                    class="w-full text-sm text-left text-gray-500 dark:text-gray-400"
+                <DataTable
+                    :columns="columns"
+                    :data="movements?.data || []"
+                    :loading="false"
                 >
-                    <thead
-                        class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
-                    >
-                        <tr>
-                            <th class="px-6 py-3">Data</th>
-                            <th class="px-6 py-3">Cliente</th>
-                            <th class="px-6 py-3">Descrição</th>
-                            <th class="px-6 py-3">Categoria</th>
-                            <th class="px-6 py-3">Referência</th>
-                            <th class="px-6 py-3 text-right">Débito</th>
-                            <th class="px-6 py-3 text-right">Crédito</th>
-                            <th class="px-6 py-3 text-right">Saldo</th>
-                            <th class="px-6 py-3 text-center">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr
-                            v-for="movement in movements.data"
-                            :key="movement.id"
-                            class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    <template #cell-data_movimento="{ item }">
+                        <span class="whitespace-nowrap">{{ formatDate(item.data_movimento) }}</span>
+                    </template>
+
+                    <template #cell-cliente="{ item }">
+                        <span>{{ item.entity?.name }}</span>
+                    </template>
+
+                    <template #cell-descricao="{ item }">
+                        <span>{{ item.descricao }}</span>
+                    </template>
+
+                    <template #cell-categoria="{ item }">
+                        <span
+                            :class="[
+                                'px-2 py-1 text-xs rounded-full',
+                                getCategoryBadgeClass(item.categoria),
+                            ]"
                         >
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                {{ formatDate(movement.data_movimento) }}
-                            </td>
-                            <td class="px-6 py-4">
-                                {{ movement.entity.name }}
-                            </td>
-                            <td class="px-6 py-4">
-                                {{ movement.descricao }}
-                            </td>
-                            <td class="px-6 py-4">
-                                <span
-                                    :class="[
-                                        'px-2 py-1 text-xs rounded-full',
-                                        getCategoryBadgeClass(
-                                            movement.categoria
-                                        ),
-                                    ]"
-                                >
-                                    {{ formatCategory(movement.categoria) }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4">
-                                {{ movement.referencia || "-" }}
-                            </td>
-                            <td class="px-6 py-4 text-right">
-                                <span
-                                    v-if="movement.tipo === 'debito'"
-                                    class="text-red-600 dark:text-red-400 font-medium"
-                                >
-                                    {{ formatCurrency(movement.valor) }}
-                                </span>
-                                <span v-else class="text-gray-400">-</span>
-                            </td>
-                            <td class="px-6 py-4 text-right">
-                                <span
-                                    v-if="movement.tipo === 'credito'"
-                                    class="text-green-600 dark:text-green-400 font-medium"
-                                >
-                                    {{ formatCurrency(movement.valor) }}
-                                </span>
-                                <span v-else class="text-gray-400">-</span>
-                            </td>
-                            <td class="px-6 py-4 text-right font-medium">
-                                <span
-                                    :class="[
-                                        movement.saldo_apos > 0
-                                            ? 'text-red-600 dark:text-red-400'
-                                            : movement.saldo_apos < 0
-                                            ? 'text-green-600 dark:text-green-400'
-                                            : 'text-gray-600 dark:text-gray-400',
-                                    ]"
-                                >
-                                    {{ formatCurrency(movement.saldo_apos) }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <div
-                                    class="flex items-center justify-center gap-1"
-                                >
-                                    <Link
-                                        :href="
-                                            route(
-                                                'client-accounts.show',
-                                                movement.id
-                                            )
-                                        "
-                                        class="p-1.5 text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
-                                        title="Ver detalhes"
-                                    >
-                                        <Eye class="h-4 w-4" />
-                                    </Link>
-                                    <Link
-                                        :href="
-                                            route(
-                                                'client-accounts.edit',
-                                                movement.id
-                                            )
-                                        "
-                                        class="p-1.5 text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
-                                        title="Editar"
-                                    >
-                                        <Pencil class="h-4 w-4" />
-                                    </Link>
-                                    <button
-                                        @click="deleteMovement(movement.id)"
-                                        class="p-1.5 text-gray-600 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
-                                        title="Eliminar"
-                                    >
-                                        <Trash2 class="h-4 w-4" />
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr
-                            v-if="movements.data.length === 0"
-                            class="bg-white dark:bg-gray-800"
+                            {{ formatCategory(item.categoria) }}
+                        </span>
+                    </template>
+
+                    <template #cell-referencia="{ item }">
+                        <span>{{ item.referencia || "-" }}</span>
+                    </template>
+
+                    <template #cell-debito="{ item }">
+                        <span
+                            v-if="item.tipo === 'debito'"
+                            class="text-red-600 dark:text-red-400 font-medium"
                         >
-                            <td
-                                colspan="9"
-                                class="px-6 py-8 text-center text-gray-500 dark:text-gray-400"
+                            {{ formatCurrency(item.valor) }}
+                        </span>
+                        <span v-else class="text-gray-400">-</span>
+                    </template>
+
+                    <template #cell-credito="{ item }">
+                        <span
+                            v-if="item.tipo === 'credito'"
+                            class="text-green-600 dark:text-green-400 font-medium"
+                        >
+                            {{ formatCurrency(item.valor) }}
+                        </span>
+                        <span v-else class="text-gray-400">-</span>
+                    </template>
+
+                    <template #cell-saldo="{ item }">
+                        <span
+                            :class="[
+                                'font-medium',
+                                item.saldo_apos > 0
+                                    ? 'text-red-600 dark:text-red-400'
+                                    : item.saldo_apos < 0
+                                    ? 'text-green-600 dark:text-green-400'
+                                    : 'text-gray-600 dark:text-gray-400',
+                            ]"
+                        >
+                            {{ formatCurrency(item.saldo_apos) }}
+                        </span>
+                    </template>
+
+                    <template #cell-acoes="{ item }">
+                        <div class="flex items-center justify-center gap-1">
+                            <Link
+                                :href="route('client-accounts.show', item.id)"
+                                class="p-1.5 text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
+                                title="Ver detalhes"
                             >
+                                <Eye class="h-4 w-4" />
+                            </Link>
+                            <Link
+                                :href="route('client-accounts.edit', item.id)"
+                                class="p-1.5 text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
+                                title="Editar"
+                            >
+                                <Pencil class="h-4 w-4" />
+                            </Link>
+                            <button
+                                @click="deleteMovement(item.id)"
+                                class="p-1.5 text-gray-600 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
+                                title="Eliminar"
+                            >
+                                <Trash2 class="h-4 w-4" />
+                            </button>
+                        </div>
+                    </template>
+
+                    <template #empty>
+                        <div class="text-center py-12">
+                            <DollarSign class="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                            <p class="text-gray-500 dark:text-gray-400">
                                 Nenhum movimento encontrado.
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                            </p>
+                        </div>
+                    </template>
+                </DataTable>
             </div>
 
             <!-- Pagination -->
@@ -437,6 +409,7 @@
 import { ref, computed } from "vue";
 import { Head, Link, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import DataTable from "@/Components/ui/DataTable.vue";
 import { DollarSign, Search, Plus, Eye, Pencil, Trash2 } from "lucide-vue-next";
 
 const props = defineProps({
@@ -454,6 +427,19 @@ const filters = ref({
     end_date: props.filters.end_date,
     search: props.filters.search,
 });
+
+// Colunas da tabela
+const columns = computed(() => [
+    { key: "data_movimento", title: "Data", sortable: true },
+    { key: "cliente", title: "Cliente", sortable: true },
+    { key: "descricao", title: "Descrição", sortable: false },
+    { key: "categoria", title: "Categoria", sortable: true },
+    { key: "referencia", title: "Referência", sortable: false },
+    { key: "debito", title: "Débito", sortable: false, class: "text-right" },
+    { key: "credito", title: "Crédito", sortable: false, class: "text-right" },
+    { key: "saldo", title: "Saldo", sortable: false, class: "text-right" },
+    { key: "acoes", title: "Ações", sortable: false, class: "text-center" },
+]);
 
 let searchTimeout;
 const debouncedSearch = () => {

@@ -54,7 +54,7 @@
         <div
             class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg"
         >
-            <form @submit.prevent="submit" class="p-6">
+            <Form @submit="submit" class="p-6">
                 <!-- Informações Básicas -->
                 <div class="mb-8">
                     <h2
@@ -64,19 +64,17 @@
                     </h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Nome da Conta -->
-                        <div>
+                        <FormField v-slot="{ field }" name="nome">
                             <label
-                                for="nome"
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
                             >
                                 Nome da Conta
                                 <span class="text-red-500">*</span>
                             </label>
-                            <input
-                                id="nome"
+                            <Input
+                                v-bind="field"
                                 v-model="form.nome"
                                 type="text"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                                 required
                             />
                             <p
@@ -85,22 +83,20 @@
                             >
                                 {{ form.errors.nome }}
                             </p>
-                        </div>
+                        </FormField>
 
                         <!-- Banco -->
-                        <div>
+                        <FormField v-slot="{ field }" name="banco">
                             <label
-                                for="banco"
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
                             >
                                 Banco
                                 <span class="text-red-500">*</span>
                             </label>
-                            <input
-                                id="banco"
+                            <Input
+                                v-bind="field"
                                 v-model="form.banco"
                                 type="text"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                                 required
                             />
                             <p
@@ -109,22 +105,20 @@
                             >
                                 {{ form.errors.banco }}
                             </p>
-                        </div>
+                        </FormField>
 
                         <!-- IBAN -->
-                        <div>
+                        <FormField v-slot="{ field }" name="iban">
                             <label
-                                for="iban"
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
                             >
                                 IBAN
                                 <span class="text-red-500">*</span>
                             </label>
-                            <input
-                                id="iban"
+                            <Input
+                                v-bind="field"
                                 v-model="form.iban"
                                 type="text"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                                 placeholder="PT50 0000 0000 0000 0000 0000 0"
                                 required
                             />
@@ -134,21 +128,19 @@
                             >
                                 {{ form.errors.iban }}
                             </p>
-                        </div>
+                        </FormField>
 
                         <!-- SWIFT/BIC -->
-                        <div>
+                        <FormField v-slot="{ field }" name="swift_bic">
                             <label
-                                for="swift_bic"
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
                             >
                                 SWIFT/BIC
                             </label>
-                            <input
-                                id="swift_bic"
+                            <Input
+                                v-bind="field"
                                 v-model="form.swift_bic"
                                 type="text"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                                 maxlength="11"
                             />
                             <p
@@ -157,7 +149,7 @@
                             >
                                 {{ form.errors.swift_bic }}
                             </p>
-                        </div>
+                        </FormField>
                     </div>
                 </div>
 
@@ -170,20 +162,18 @@
                     </h2>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <!-- Saldo Inicial -->
-                        <div>
+                        <FormField v-slot="{ field }" name="saldo_inicial">
                             <label
-                                for="saldo_inicial"
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
                             >
                                 Saldo Inicial
                                 <span class="text-red-500">*</span>
                             </label>
-                            <input
-                                id="saldo_inicial"
+                            <Input
+                                v-bind="field"
                                 v-model="form.saldo_inicial"
                                 type="number"
                                 step="0.01"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                                 required
                             />
                             <p
@@ -192,48 +182,44 @@
                             >
                                 {{ form.errors.saldo_inicial }}
                             </p>
-                        </div>
+                        </FormField>
 
                         <!-- Moeda -->
-                        <div>
+                        <FormField v-slot="{ field }" name="moeda">
                             <label
-                                for="moeda"
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
                             >
                                 Moeda
                                 <span class="text-red-500">*</span>
                             </label>
-                            <select
-                                id="moeda"
+                            <Select
+                                v-bind="field"
                                 v-model="form.moeda"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                                 required
                             >
                                 <option value="EUR">EUR (€)</option>
                                 <option value="USD">USD ($)</option>
                                 <option value="GBP">GBP (£)</option>
-                            </select>
+                            </Select>
                             <p
                                 v-if="form.errors.moeda"
                                 class="mt-1 text-sm text-red-600 dark:text-red-400"
                             >
                                 {{ form.errors.moeda }}
                             </p>
-                        </div>
+                        </FormField>
 
                         <!-- Tipo de Conta -->
-                        <div>
+                        <FormField v-slot="{ field }" name="tipo">
                             <label
-                                for="tipo"
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
                             >
                                 Tipo de Conta
                                 <span class="text-red-500">*</span>
                             </label>
-                            <select
-                                id="tipo"
+                            <Select
+                                v-bind="field"
                                 v-model="form.tipo"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                                 required
                             >
                                 <option value="corrente">Corrente</option>
@@ -242,14 +228,14 @@
                                 <option value="investimento">
                                     Investimento
                                 </option>
-                            </select>
+                            </Select>
                             <p
                                 v-if="form.errors.tipo"
                                 class="mt-1 text-sm text-red-600 dark:text-red-400"
                             >
                                 {{ form.errors.tipo }}
                             </p>
-                        </div>
+                        </FormField>
                     </div>
                 </div>
 
@@ -262,53 +248,49 @@
                     </h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Estado -->
-                        <div>
+                        <FormField v-slot="{ field }" name="estado">
                             <label
-                                for="estado"
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
                             >
                                 Estado
                                 <span class="text-red-500">*</span>
                             </label>
-                            <select
-                                id="estado"
+                            <Select
+                                v-bind="field"
                                 v-model="form.estado"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                                 required
                             >
                                 <option value="ativa">Ativa</option>
                                 <option value="inativa">Inativa</option>
                                 <option value="encerrada">Encerrada</option>
-                            </select>
+                            </Select>
                             <p
                                 v-if="form.errors.estado"
                                 class="mt-1 text-sm text-red-600 dark:text-red-400"
                             >
                                 {{ form.errors.estado }}
                             </p>
-                        </div>
+                        </FormField>
 
                         <!-- Observações -->
-                        <div class="md:col-span-2">
+                        <FormField v-slot="{ field }" name="observacoes" class="md:col-span-2">
                             <label
-                                for="observacoes"
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
                             >
                                 Observações
                             </label>
-                            <textarea
-                                id="observacoes"
+                            <Textarea
+                                v-bind="field"
                                 v-model="form.observacoes"
                                 rows="3"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                            ></textarea>
+                            />
                             <p
                                 v-if="form.errors.observacoes"
                                 class="mt-1 text-sm text-red-600 dark:text-red-400"
                             >
                                 {{ form.errors.observacoes }}
                             </p>
-                        </div>
+                        </FormField>
                     </div>
                 </div>
 
@@ -322,16 +304,16 @@
                     >
                         Cancelar
                     </Link>
-                    <button
+                    <Button
                         type="submit"
                         :disabled="form.processing"
-                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        variant="default"
                     >
                         <span v-if="form.processing">A guardar...</span>
                         <span v-else>Criar Conta</span>
-                    </button>
+                    </Button>
                 </div>
-            </form>
+            </Form>
         </div>
     </AuthenticatedLayout>
 </template>
@@ -339,6 +321,12 @@
 <script setup>
 import { Head, Link, useForm } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import Form from "@/Components/ui/Form.vue";
+import FormField from "@/Components/ui/FormField.vue";
+import Input from "@/Components/ui/Input.vue";
+import Select from "@/Components/ui/Select.vue";
+import Textarea from "@/Components/ui/Textarea.vue";
+import Button from "@/Components/ui/Button.vue";
 import { CreditCard } from "lucide-vue-next";
 
 const form = useForm({

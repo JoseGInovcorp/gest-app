@@ -111,135 +111,95 @@
             </div>
 
             <!-- Listagem -->
-            <div class="overflow-x-auto p-6">
-                <div
-                    v-if="accounts && accounts.data && accounts.data.length > 0"
-                    class="text-gray-700 dark:text-gray-300"
+            <div class="overflow-x-auto">
+                <DataTable
+                    :columns="columns"
+                    :data="accounts?.data || []"
+                    :loading="false"
                 >
-                    <p class="mb-4">
-                        {{ accounts.data.length }} contas encontradas
-                    </p>
-                    <div class="mt-4 space-y-2">
-                        <div
-                            v-for="account in accounts.data"
-                            :key="account.id"
-                            class="p-4 bg-gray-50 dark:bg-gray-700 rounded border flex items-center justify-between"
+                    <template #cell-nome="{ item }">
+                        <span class="font-medium">{{ item.nome }}</span>
+                    </template>
+
+                    <template #cell-banco="{ item }">
+                        <span>{{ item.banco }}</span>
+                    </template>
+
+                    <template #cell-iban="{ item }">
+                        <span class="font-mono text-sm">{{ item.iban }}</span>
+                    </template>
+
+                    <template #cell-tipo="{ item }">
+                        <span class="capitalize">{{ item.tipo }}</span>
+                    </template>
+
+                    <template #cell-saldo_atual="{ item }">
+                        <span
+                            :class="[
+                                'font-semibold',
+                                item.saldo_atual >= 0
+                                    ? 'text-green-600 dark:text-green-400'
+                                    : 'text-red-600 dark:text-red-400',
+                            ]"
                         >
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <h3 class="font-medium">
-                                        {{ account.nome }}
-                                    </h3>
-                                    <span
-                                        :class="[
-                                            'px-2 py-0.5 text-xs rounded-full',
-                                            account.estado === 'ativa'
-                                                ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-                                                : account.estado === 'inativa'
-                                                ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300'
-                                                : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
-                                        ]"
-                                    >
-                                        {{
-                                            account.estado
-                                                .charAt(0)
-                                                .toUpperCase() +
-                                            account.estado.slice(1)
-                                        }}
-                                    </span>
-                                </div>
-                                <p
-                                    class="text-sm text-gray-600 dark:text-gray-400 mb-2"
-                                >
-                                    {{ account.banco }} - {{ account.iban }}
-                                </p>
-                                <div
-                                    class="grid grid-cols-2 sm:grid-cols-4 gap-2"
-                                >
-                                    <div class="text-sm">
-                                        <span
-                                            class="text-gray-600 dark:text-gray-400"
-                                            >Tipo:</span
-                                        >
-                                        <span class="font-medium ml-1">{{
-                                            account.tipo
-                                        }}</span>
-                                    </div>
-                                    <div class="text-sm">
-                                        <span
-                                            class="text-gray-600 dark:text-gray-400"
-                                            >Saldo Atual:</span
-                                        >
-                                        <span
-                                            :class="[
-                                                'font-semibold ml-1',
-                                                account.saldo_atual >= 0
-                                                    ? 'text-green-600 dark:text-green-400'
-                                                    : 'text-red-600 dark:text-red-400',
-                                            ]"
-                                            >{{
-                                                Number(
-                                                    account.saldo_atual
-                                                ).toFixed(2)
-                                            }}
-                                            {{ account.moeda }}</span
-                                        >
-                                    </div>
-                                    <div class="text-sm">
-                                        <span
-                                            class="text-gray-600 dark:text-gray-400"
-                                            >Movimentos:</span
-                                        >
-                                        <span class="font-medium ml-1">{{
-                                            account.transactions_count || 0
-                                        }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div
-                                class="flex items-center gap-1 ml-4 flex-shrink-0"
+                            {{ formatCurrency(item.saldo_atual) }}
+                            {{ item.moeda }}
+                        </span>
+                    </template>
+
+                    <template #cell-estado="{ item }">
+                        <span
+                            :class="[
+                                'px-2 py-0.5 text-xs rounded-full',
+                                item.estado === 'ativa'
+                                    ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                                    : item.estado === 'inativa'
+                                    ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300'
+                                    : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+                            ]"
+                        >
+                            {{ item.estado.charAt(0).toUpperCase() + item.estado.slice(1) }}
+                        </span>
+                    </template>
+
+                    <template #cell-acoes="{ item }">
+                        <div class="flex items-center gap-1">
+                            <Link
+                                v-if="can.view"
+                                :href="route('bank-accounts.show', item.id)"
+                                class="p-1.5 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded transition-colors"
+                                title="Ver Detalhes"
                             >
-                                <Link
-                                    v-if="can.view"
-                                    :href="
-                                        route('bank-accounts.show', account.id)
-                                    "
-                                >
-                                    <button
-                                        class="p-1.5 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded transition-colors"
-                                        title="Ver Detalhes"
-                                    >
-                                        <Eye class="h-4 w-4" />
-                                    </button>
-                                </Link>
-                                <Link
-                                    v-if="can.edit"
-                                    :href="
-                                        route('bank-accounts.edit', account.id)
-                                    "
-                                >
-                                    <button
-                                        class="p-1.5 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
-                                        title="Editar"
-                                    >
-                                        <Pencil class="h-4 w-4" />
-                                    </button>
-                                </Link>
-                                <button
-                                    v-if="can.delete"
-                                    @click="deleteAccount(account.id)"
-                                    class="p-1.5 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
-                                    title="Eliminar"
-                                >
-                                    <Trash2 class="h-4 w-4" />
-                                </button>
-                            </div>
+                                <Eye class="h-4 w-4" />
+                            </Link>
+                            <Link
+                                v-if="can.edit"
+                                :href="route('bank-accounts.edit', item.id)"
+                                class="p-1.5 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
+                                title="Editar"
+                            >
+                                <Pencil class="h-4 w-4" />
+                            </Link>
+                            <button
+                                v-if="can.delete"
+                                @click="deleteAccount(item.id)"
+                                class="p-1.5 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                                title="Eliminar"
+                            >
+                                <Trash2 class="h-4 w-4" />
+                            </button>
                         </div>
-                    </div>
-                </div>
-                <div v-else class="p-6 text-center text-gray-500">
-                    <p>Nenhuma conta bancária encontrada.</p>
-                </div>
+                    </template>
+
+                    <template #empty>
+                        <div class="text-center py-12">
+                            <CreditCard class="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                            <p class="text-gray-500 dark:text-gray-400">
+                                Nenhuma conta bancária encontrada.
+                            </p>
+                        </div>
+                    </template>
+                </DataTable>
             </div>
 
             <!-- Paginação -->
@@ -271,9 +231,10 @@
 </template>
 
 <script setup>
-import { reactive } from "vue";
+import { reactive, computed } from "vue";
 import { router, Head, Link } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import DataTable from "@/Components/ui/DataTable.vue";
 import { CreditCard, Search, Plus, Pencil, Trash2, Eye } from "lucide-vue-next";
 
 // Props
@@ -299,7 +260,22 @@ const searchForm = reactive({
     tipo: props.filters?.tipo || "",
 });
 
+// Colunas da tabela
+const columns = computed(() => [
+    { key: "nome", title: "Nome", sortable: true },
+    { key: "banco", title: "Banco", sortable: true },
+    { key: "iban", title: "IBAN", sortable: false },
+    { key: "tipo", title: "Tipo", sortable: true },
+    { key: "saldo_atual", title: "Saldo Atual", sortable: true, class: "text-right" },
+    { key: "estado", title: "Estado", sortable: true },
+    { key: "acoes", title: "Ações", sortable: false, class: "text-right" },
+]);
+
 // Funções
+const formatCurrency = (value) => {
+    return Number(value).toFixed(2);
+};
+
 const search = () => {
     router.get(
         route("bank-accounts.index"),
