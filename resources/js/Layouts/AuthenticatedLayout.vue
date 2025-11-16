@@ -113,9 +113,9 @@ const allMainNavigationItems = [
     },
     {
         name: "Propostas",
-        href: "dashboard", // Temporário até implementar
+        href: "proposals.index",
         icon: FileText,
-        disabled: true,
+        disabled: false,
         permission: "proposals",
     },
     {

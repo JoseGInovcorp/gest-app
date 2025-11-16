@@ -1,12 +1,12 @@
 <template>
-    <Head title="Encomendas - Clientes" />
+    <Head title="Propostas" />
 
     <AuthenticatedLayout>
         <!-- Header -->
         <div class="mb-6">
             <div class="flex items-center space-x-3">
                 <div class="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-                    <ShoppingCart
+                    <FileText
                         class="h-6 w-6 text-blue-600 dark:text-blue-400"
                     />
                 </div>
@@ -14,10 +14,10 @@
                     <h1
                         class="text-2xl font-bold text-gray-900 dark:text-white"
                     >
-                        Encomendas - Clientes
+                        Propostas
                     </h1>
                     <p class="text-gray-500 dark:text-gray-400">
-                        Gerir encomendas de clientes
+                        Gerir propostas de clientes
                     </p>
                 </div>
             </div>
@@ -37,9 +37,7 @@
                     </Link>
                 </li>
                 <li>/</li>
-                <li class="text-gray-900 dark:text-white">
-                    Encomendas - Clientes
-                </li>
+                <li class="text-gray-900 dark:text-white">Propostas</li>
             </ol>
         </nav>
 
@@ -59,7 +57,7 @@
                             <input
                                 type="text"
                                 v-model="search"
-                                @input="filterOrders"
+                                @input="filterProposals"
                                 placeholder="Pesquisar por número, cliente..."
                                 class="pl-10 w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             />
@@ -67,13 +65,13 @@
 
                         <!-- Filtro de Estado -->
                         <select
-                            v-model="statusFilter"
-                            @change="filterOrders"
+                            v-model="estadoFilter"
+                            @change="filterProposals"
                             class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                         >
                             <option value="">Todos os estados</option>
-                            <option value="draft">Rascunho</option>
-                            <option value="closed">Fechado</option>
+                            <option value="rascunho">Rascunho</option>
+                            <option value="fechado">Fechado</option>
                         </select>
                     </div>
 
@@ -81,14 +79,14 @@
                     <Link
                         v-if="
                             $page.props.auth.permissions.includes(
-                                'customer-orders.create'
+                                'proposals.create'
                             )
                         "
-                        :href="route('customer-orders.create')"
+                        :href="route('proposals.create')"
                         class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm transition duration-150"
                     >
                         <Plus class="h-5 w-5 mr-2" />
-                        Nova Encomenda
+                        Nova Proposta
                     </Link>
                 </div>
             </div>
@@ -140,7 +138,7 @@
                     <tbody
                         class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"
                     >
-                        <tr v-if="orders.data.length === 0">
+                        <tr v-if="proposals.data.length === 0">
                             <td
                                 colspan="7"
                                 class="px-6 py-12 text-center text-gray-500 dark:text-gray-400"
@@ -149,108 +147,103 @@
                                     class="mx-auto h-12 w-12 mb-4 opacity-50"
                                 />
                                 <p class="text-lg font-medium">
-                                    Nenhuma encomenda encontrada
+                                    Nenhuma proposta encontrada
                                 </p>
                                 <p class="text-sm mt-1">
-                                    {{
-                                        search
-                                            ? "Tente ajustar os filtros de pesquisa"
-                                            : "Comece criando a primeira encomenda"
-                                    }}
+                                    Comece por criar uma nova proposta
                                 </p>
                             </td>
                         </tr>
                         <tr
-                            v-for="order in orders.data"
-                            :key="order.id"
-                            class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                            v-for="proposal in proposals.data"
+                            :key="proposal.id"
+                            class="hover:bg-gray-50 dark:hover:bg-gray-700 transition"
                         >
                             <td
-                                class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"
+                                class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white"
                             >
-                                {{ formatDate(order.proposal_date) }}
+                                {{ formatDate(proposal.data_proposta) }}
+                            </td>
+                            <td
+                                class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white"
+                            >
+                                {{ proposal.numero }}
+                            </td>
+                            <td
+                                class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white"
+                            >
+                                {{ formatDate(proposal.validade) }}
+                            </td>
+                            <td
+                                class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white"
+                            >
+                                {{ proposal.entity?.name || "-" }}
+                            </td>
+                            <td
+                                class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white"
+                            >
+                                {{ formatCurrency(proposal.valor_total) }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span
-                                    class="text-sm font-medium text-gray-900 dark:text-gray-100"
-                                >
-                                    {{ order.number }}
-                                </span>
-                            </td>
-                            <td
-                                class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"
-                            >
-                                {{ formatDate(order.validity_date) }}
-                            </td>
-                            <td
-                                class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"
-                            >
-                                {{ order.customer.name }}
-                            </td>
-                            <td
-                                class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100"
-                            >
-                                {{ formatCurrency(order.total_value) }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span
-                                    :class="{
-                                        'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400':
-                                            order.status === 'draft',
-                                        'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400':
-                                            order.status === 'closed',
-                                    }"
-                                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                    :class="[
+                                        'px-2 py-1 text-xs font-semibold rounded-full',
+                                        proposal.estado === 'fechado'
+                                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                                            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+                                    ]"
                                 >
                                     {{
-                                        order.status === "draft"
-                                            ? "Rascunho"
-                                            : "Fechado"
+                                        proposal.estado === "fechado"
+                                            ? "Fechado"
+                                            : "Rascunho"
                                     }}
                                 </span>
                             </td>
                             <td
-                                class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2"
+                                class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
                             >
-                                <a
-                                    v-if="
-                                        $page.props.auth.permissions.includes(
-                                            'customer-orders.read'
-                                        )
-                                    "
-                                    :href="
-                                        route('customer-orders.pdf', order.id)
-                                    "
-                                    target="_blank"
-                                    class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 inline-flex items-center"
-                                    title="Download PDF"
-                                >
-                                    <FileText class="h-4 w-4" />
-                                </a>
-                                <Link
-                                    v-if="
-                                        $page.props.auth.permissions.includes(
-                                            'customer-orders.update'
-                                        )
-                                    "
-                                    :href="
-                                        route('customer-orders.edit', order.id)
-                                    "
-                                    class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 inline-flex items-center"
-                                >
-                                    <Pencil class="h-4 w-4" />
-                                </Link>
-                                <button
-                                    v-if="
-                                        $page.props.auth.permissions.includes(
-                                            'customer-orders.delete'
-                                        )
-                                    "
-                                    @click="confirmDelete(order)"
-                                    class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 inline-flex items-center"
-                                >
-                                    <Trash2 class="h-4 w-4" />
-                                </button>
+                                <div class="flex justify-end gap-2">
+                                    <a
+                                        v-if="
+                                            $page.props.auth.permissions.includes(
+                                                'proposals.read'
+                                            )
+                                        "
+                                        :href="
+                                            route('proposals.pdf', proposal.id)
+                                        "
+                                        target="_blank"
+                                        class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+                                        title="Download PDF"
+                                    >
+                                        <FileText class="h-4 w-4" />
+                                    </a>
+                                    <Link
+                                        v-if="
+                                            $page.props.auth.permissions.includes(
+                                                'proposals.update'
+                                            )
+                                        "
+                                        :href="
+                                            route('proposals.edit', proposal.id)
+                                        "
+                                        class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200"
+                                    >
+                                        <Pencil class="h-4 w-4" />
+                                    </Link>
+                                    <button
+                                        v-if="
+                                            $page.props.auth.permissions.includes(
+                                                'proposals.delete'
+                                            )
+                                        "
+                                        @click="confirmDelete(proposal)"
+                                        class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-200"
+                                    >
+                                        <Trash2 class="h-4 w-4" />
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
@@ -259,17 +252,17 @@
 
             <!-- Pagination -->
             <div
-                v-if="orders.data.length > 0"
+                v-if="proposals.data.length > 0"
                 class="px-6 py-4 border-t border-gray-200 dark:border-gray-700"
             >
                 <div class="flex items-center justify-between">
                     <div class="text-sm text-gray-500 dark:text-gray-400">
-                        Mostrando {{ orders.from }} a {{ orders.to }} de
-                        {{ orders.total }} registos
+                        Mostrando {{ proposals.from }} a {{ proposals.to }} de
+                        {{ proposals.total }} registos
                     </div>
                     <div class="flex gap-2">
                         <template
-                            v-for="link in orders.links"
+                            v-for="link in proposals.links"
                             :key="link.label"
                         >
                             <Link
@@ -300,23 +293,15 @@
 import { ref } from "vue";
 import { Head, Link, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import {
-    ShoppingCart,
-    Search,
-    Plus,
-    Pencil,
-    Trash2,
-    FileX,
-    FileText,
-} from "lucide-vue-next";
+import { FileText, Search, Plus, Pencil, Trash2, FileX } from "lucide-vue-next";
 
 const props = defineProps({
-    orders: Object,
+    proposals: Object,
     filters: Object,
 });
 
 const search = ref(props.filters?.search || "");
-const statusFilter = ref(props.filters?.status || "");
+const estadoFilter = ref(props.filters?.estado || "");
 
 const formatDate = (date) => {
     if (!date) return "-";
@@ -328,27 +313,27 @@ const formatCurrency = (value) => {
     return new Intl.NumberFormat("pt-PT", {
         style: "currency",
         currency: "EUR",
-    }).format(value);
+    }).format(value || 0);
 };
 
-const confirmDelete = (order) => {
+const confirmDelete = (proposal) => {
     if (
         confirm(
-            `Tem a certeza que pretende eliminar a encomenda ${order.number}?`
+            `Tem a certeza que pretende eliminar a proposta ${proposal.numero}?`
         )
     ) {
-        router.delete(route("customer-orders.destroy", order.id), {
+        router.delete(route("proposals.destroy", proposal.id), {
             preserveScroll: true,
         });
     }
 };
 
-const filterOrders = () => {
+const filterProposals = () => {
     router.get(
-        route("customer-orders.index"),
+        route("proposals.index"),
         {
             search: search.value,
-            status: statusFilter.value,
+            estado: estadoFilter.value,
         },
         {
             preserveState: true,

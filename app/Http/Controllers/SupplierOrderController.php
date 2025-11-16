@@ -6,9 +6,11 @@ use App\Models\SupplierOrder;
 use App\Models\SupplierOrderItem;
 use App\Models\Entity;
 use App\Models\Article;
+use App\Models\Company;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class SupplierOrderController extends Controller
 {
@@ -224,7 +226,22 @@ class SupplierOrderController extends Controller
      */
     public function generatePDF(SupplierOrder $supplierOrder)
     {
-        // TODO: Implementar geração de PDF
-        return response()->json(['message' => 'Funcionalidade em desenvolvimento']);
+        // Carregar relações necessárias
+        $order = $supplierOrder->load([
+            'supplier',
+            'items.article'
+        ]);
+
+        // Obter informações da empresa
+        $company = Company::first();
+
+        // Gerar PDF
+        $pdf = Pdf::loadView('supplier_orders.pdf', [
+            'order' => $order,
+            'company' => $company
+        ]);
+
+        // Retornar PDF para download
+        return $pdf->download('encomenda-fornecedor-' . $order->number . '.pdf');
     }
 }

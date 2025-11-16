@@ -18,6 +18,7 @@ use App\Http\Controllers\SupplierInvoiceController;
 use App\Http\Controllers\CalendarEventTypeController;
 use App\Http\Controllers\CalendarEventActionController;
 use App\Http\Controllers\CalendarEventController;
+use App\Http\Controllers\ProposalController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -159,6 +160,19 @@ Route::middleware('auth')->group(function () {
     Route::delete('/supplier-invoices/{supplierInvoice}', [SupplierInvoiceController::class, 'destroy'])->name('supplier-invoices.destroy')->middleware('permission:supplier-invoices.delete');
     Route::post('/supplier-invoices/{supplierInvoice}/send-payment-proof', [SupplierInvoiceController::class, 'sendPaymentProof'])->name('supplier-invoices.send-payment-proof')->middleware('permission:supplier-invoices.update');
 
+    // Rotas de Propostas
+    Route::get('/proposals/create', [ProposalController::class, 'create'])->name('proposals.create')->middleware('permission:proposals.create');
+    Route::middleware('permission:proposals.read')->group(function () {
+        Route::get('/proposals', [ProposalController::class, 'index'])->name('proposals.index');
+        Route::get('/proposals/{proposal}', [ProposalController::class, 'show'])->name('proposals.show');
+        Route::get('/proposals/{proposal}/pdf', [ProposalController::class, 'downloadPdf'])->name('proposals.pdf');
+    });
+    Route::post('/proposals', [ProposalController::class, 'store'])->name('proposals.store')->middleware('permission:proposals.create');
+    Route::post('/proposals/{proposal}/convert-to-order', [ProposalController::class, 'convertToOrder'])->name('proposals.convert-to-order')->middleware('permission:proposals.update');
+    Route::get('/proposals/{proposal}/edit', [ProposalController::class, 'edit'])->name('proposals.edit')->middleware('permission:proposals.update');
+    Route::patch('/proposals/{proposal}', [ProposalController::class, 'update'])->name('proposals.update')->middleware('permission:proposals.update');
+    Route::delete('/proposals/{proposal}', [ProposalController::class, 'destroy'])->name('proposals.destroy')->middleware('permission:proposals.delete');
+
     // Rotas de Configurações - Empresa
     Route::middleware('permission:company.read')->group(function () {
         Route::get('/company/settings', [CompanyController::class, 'edit'])->name('company.edit');
@@ -238,9 +252,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/calendar-event-actions/{calendarEventAction}', [CalendarEventActionController::class, 'update'])->name('calendar-event-actions.update')->middleware('permission:calendar-event-actions.update');
     Route::delete('/calendar-event-actions/{calendarEventAction}', [CalendarEventActionController::class, 'destroy'])->name('calendar-event-actions.destroy')->middleware('permission:calendar-event-actions.delete');
 
-    Route::get('/proposals', function () {
-        return redirect()->route('dashboard')->with('info', 'Módulo Propostas em desenvolvimento');
-    })->name('proposals.index');
+    // (Removido: rota placeholder proposals.index)
     Route::get('/orders', function () {
         return redirect()->route('dashboard')->with('info', 'Módulo Encomendas em desenvolvimento');
     })->name('orders.index');

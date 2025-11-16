@@ -70,6 +70,13 @@
             </div>
 
             <div class="flex justify-end gap-4">
+                <a
+                    :href="route('supplier-orders.pdf', order.id)"
+                    class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg inline-flex items-center gap-2"
+                >
+                    <FileText class="h-5 w-5" />
+                    Descarregar PDF
+                </a>
                 <Link :href="route('supplier-orders.index')" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold rounded-lg">Cancelar</Link>
                 <button type="submit" :disabled="form.processing" class="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white font-semibold rounded-lg">
                     <span v-if="form.processing">Guardando...</span>
@@ -84,6 +91,7 @@
 import { computed } from 'vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import { FileText } from 'lucide-vue-next';
 
 const props = defineProps({
     order: Object,

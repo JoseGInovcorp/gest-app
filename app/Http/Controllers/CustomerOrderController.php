@@ -321,8 +321,16 @@ class CustomerOrderController extends Controller
      */
     public function generatePDF(CustomerOrder $customerOrder)
     {
-        // TODO: Implementar geração de PDF
+        $customerOrder->load(['customer', 'items.article', 'items.supplier']);
 
-        return back()->with('info', 'Funcionalidade em desenvolvimento');
+        // Obter dados da empresa
+        $company = \App\Models\Company::first();
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('customer_orders.pdf', [
+            'order' => $customerOrder,
+            'company' => $company,
+        ]);
+
+        return $pdf->download("encomenda-{$customerOrder->number}.pdf");
     }
 }

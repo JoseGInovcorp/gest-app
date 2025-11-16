@@ -186,6 +186,18 @@
                                 class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
                             >
                                 <div class="flex justify-end gap-2">
+                                    <a
+                                        :href="
+                                            route(
+                                                'supplier-orders.pdf',
+                                                order.id
+                                            )
+                                        "
+                                        class="text-purple-600 dark:text-purple-400 hover:text-purple-900 dark:hover:text-purple-300"
+                                        title="Descarregar PDF"
+                                    >
+                                        <FileText class="h-5 w-5" />
+                                    </a>
                                     <Link
                                         v-if="
                                             $page.props.auth.permissions.includes(
@@ -279,7 +291,14 @@
 import { ref } from "vue";
 import { Head, Link, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Search, Plus, Pencil, Trash2, Package } from "lucide-vue-next";
+import {
+    Search,
+    Plus,
+    Pencil,
+    Trash2,
+    Package,
+    FileText,
+} from "lucide-vue-next";
 
 const props = defineProps({
     orders: Object,

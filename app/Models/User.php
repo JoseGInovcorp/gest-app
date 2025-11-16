@@ -91,6 +91,34 @@ class User extends Authenticatable
     }
 
     /**
+     * Get permissions only from active roles
+     */
+    public function getActiveRolePermissions()
+    {
+        // Obter apenas roles ativos
+        $activeRoles = $this->roles()->where('active', true)->get();
+
+        // Coletar permissões de todos os roles ativos
+        $permissions = collect();
+        foreach ($activeRoles as $role) {
+            $permissions = $permissions->merge($role->permissions);
+        }
+
+        // Adicionar permissões diretas do usuário
+        $permissions = $permissions->merge($this->permissions);
+
+        return $permissions->unique('id');
+    }
+
+    /**
+     * Override Spatie's getAllPermissions to only use active roles
+     */
+    public function getAllPermissions()
+    {
+        return $this->getActiveRolePermissions();
+    }
+
+    /**
      * Check if user can access module
      */
     public function canAccessModule(string $module): bool

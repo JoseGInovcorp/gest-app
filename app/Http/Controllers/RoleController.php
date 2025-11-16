@@ -96,7 +96,11 @@ class RoleController extends Controller
         $rolePermissions = $role->permissions->pluck('name')->toArray();
 
         return Inertia::render('Roles/Edit', [
-            'role' => $role,
+            'role' => [
+                'id' => $role->id,
+                'name' => $role->name,
+                'active' => (bool) $role->active, // Cast explícito para boolean
+            ],
             'permissions' => $permissions,
             'rolePermissions' => $rolePermissions,
         ]);
@@ -253,11 +257,16 @@ class RoleController extends Controller
             'proposals' => ['name' => 'Propostas', 'order' => 5, 'group' => null],
 
             // Submenu Encomendas (ordem 10-12)
-            'orders' => ['name' => 'Encomendas', 'order' => 10, 'group' => 'Encomendas'],
-            'work-orders' => ['name' => 'Ordens de Trabalho', 'order' => 11, 'group' => 'Encomendas'],
+            'orders' => ['name' => 'Encomendas (Geral)', 'order' => 10, 'group' => 'Encomendas'],
+            'customer-orders' => ['name' => 'Encomendas Cliente', 'order' => 11, 'group' => 'Encomendas'],
+            'supplier-orders' => ['name' => 'Encomendas Fornecedor', 'order' => 12, 'group' => 'Encomendas'],
+            'work-orders' => ['name' => 'Ordens de Trabalho', 'order' => 13, 'group' => 'Encomendas'],
 
-            // Submenu Financeiro (ordem 20-22)
-            'financial' => ['name' => 'Financeiro', 'order' => 20, 'group' => 'Financeiro'],
+            // Submenu Financeiro (ordem 20-29)
+            'financial' => ['name' => 'Financeiro (Geral)', 'order' => 20, 'group' => 'Financeiro'],
+            'bank-accounts' => ['name' => 'Contas Bancárias', 'order' => 21, 'group' => 'Financeiro'],
+            'client-accounts' => ['name' => 'Contas Correntes Cliente', 'order' => 22, 'group' => 'Financeiro'],
+            'supplier-invoices' => ['name' => 'Faturas Fornecedor', 'order' => 23, 'group' => 'Financeiro'],
 
             // Submenu Gestão de Acessos (ordem 30-31)
             'users' => ['name' => 'Utilizadores', 'order' => 30, 'group' => 'Gestão de Acessos'],
@@ -270,10 +279,15 @@ class RoleController extends Controller
             'articles' => ['name' => 'Artigos', 'order' => 42, 'group' => 'Configurações'],
             'vat-rates' => ['name' => 'Taxas IVA', 'order' => 43, 'group' => 'Configurações → Financeiro'],
 
-            // Outros Menus (ordem 50-59)
-            'calendar' => ['name' => 'Calendário', 'order' => 50, 'group' => null],
-            'digital-archive' => ['name' => 'Arquivo Digital', 'order' => 51, 'group' => null],
-            'logs' => ['name' => 'Logs', 'order' => 52, 'group' => null],
+            // Calendário (ordem 50-52)
+            'calendar' => ['name' => 'Calendário', 'order' => 50, 'group' => 'Calendário'],
+            'calendar-events' => ['name' => 'Eventos', 'order' => 51, 'group' => 'Calendário'],
+            'calendar-event-types' => ['name' => 'Tipos de Eventos', 'order' => 52, 'group' => 'Calendário'],
+            'calendar-event-actions' => ['name' => 'Ações de Eventos', 'order' => 53, 'group' => 'Calendário'],
+
+            // Outros Menus (ordem 60-69)
+            'digital-archive' => ['name' => 'Arquivo Digital', 'order' => 60, 'group' => null],
+            'logs' => ['name' => 'Logs', 'order' => 61, 'group' => null],
         ];
 
         return $labels[$module] ?? null;

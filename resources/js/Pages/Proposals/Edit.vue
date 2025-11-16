@@ -1,5 +1,5 @@
 <template>
-    <Head title="Editar Encomenda" />
+    <Head title="Editar Proposta" />
 
     <AuthenticatedLayout>
         <!-- Header -->
@@ -7,7 +7,7 @@
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-3">
                     <div class="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-                        <ShoppingCart
+                        <FileText
                             class="h-6 w-6 text-blue-600 dark:text-blue-400"
                         />
                     </div>
@@ -15,19 +15,19 @@
                         <h1
                             class="text-2xl font-bold text-gray-900 dark:text-white"
                         >
-                            Editar Encomenda
+                            Editar Proposta
                         </h1>
                         <p class="text-gray-500 dark:text-gray-400">
-                            {{ order.number }}
+                            {{ proposal.numero }}
                         </p>
                     </div>
                 </div>
 
-                <!-- Botões de Ação -->
+                <!-- Botão Converter para Encomenda -->
                 <div class="flex gap-3">
                     <!-- Botão Download PDF -->
                     <a
-                        :href="route('customer-orders.pdf', order.id)"
+                        :href="route('proposals.pdf', proposal.id)"
                         target="_blank"
                         class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm transition duration-150"
                     >
@@ -37,14 +37,14 @@
 
                     <!-- Botão Converter (só aparece se fechado) -->
                     <button
-                        v-if="form.status === 'closed'"
-                        @click="convertToSupplierOrders"
+                        v-if="form.estado === 'fechado'"
+                        @click="convertToOrder"
                         :disabled="converting"
                         class="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white font-semibold rounded-lg shadow-sm transition duration-150"
                     >
                         <Truck class="h-4 w-4" />
                         <span v-if="converting">Convertendo...</span>
-                        <span v-else>Converter para Encomendas Fornecedor</span>
+                        <span v-else>Converter para Encomenda</span>
                     </button>
                 </div>
             </div>
@@ -66,10 +66,10 @@
                 <li>/</li>
                 <li>
                     <Link
-                        :href="route('customer-orders.index')"
+                        :href="route('proposals.index')"
                         class="hover:text-gray-700 dark:hover:text-gray-200"
                     >
-                        Encomendas
+                        Propostas
                     </Link>
                 </li>
                 <li>/</li>
@@ -93,43 +93,43 @@
                         <!-- Número -->
                         <div>
                             <label
-                                for="number"
+                                for="numero"
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                             >
                                 Número *
                             </label>
                             <input
-                                id="number"
-                                v-model="form.number"
+                                id="numero"
+                                v-model="form.numero"
                                 type="text"
                                 readonly
                                 class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white bg-gray-50 shadow-sm"
                             />
                             <p
-                                v-if="form.errors.number"
+                                v-if="form.errors.numero"
                                 class="mt-1 text-sm text-red-600 dark:text-red-400"
                             >
-                                {{ form.errors.number }}
+                                {{ form.errors.numero }}
                             </p>
                         </div>
 
                         <!-- Cliente -->
                         <div>
                             <label
-                                for="customer_id"
+                                for="entity_id"
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                             >
                                 Cliente *
                             </label>
                             <select
-                                id="customer_id"
-                                v-model="form.customer_id"
+                                id="entity_id"
+                                v-model="form.entity_id"
                                 required
                                 class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             >
                                 <option value="">Selecione um cliente</option>
                                 <option
-                                    v-for="customer in customers"
+                                    v-for="customer in clients"
                                     :key="customer.id"
                                     :value="customer.id"
                                 >
@@ -137,93 +137,93 @@
                                 </option>
                             </select>
                             <p
-                                v-if="form.errors.customer_id"
+                                v-if="form.errors.entity_id"
                                 class="mt-1 text-sm text-red-600 dark:text-red-400"
                             >
-                                {{ form.errors.customer_id }}
+                                {{ form.errors.entity_id }}
                             </p>
                         </div>
 
                         <!-- Data da Proposta -->
                         <div>
                             <label
-                                for="proposal_date"
+                                for="data_proposta"
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                             >
                                 Data da Proposta
                             </label>
                             <input
-                                id="proposal_date"
-                                v-model="form.proposal_date"
+                                id="data_proposta"
+                                v-model="form.data_proposta"
                                 type="date"
                                 class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             />
                             <p
-                                v-if="form.errors.proposal_date"
+                                v-if="form.errors.data_proposta"
                                 class="mt-1 text-sm text-red-600 dark:text-red-400"
                             >
-                                {{ form.errors.proposal_date }}
+                                {{ form.errors.data_proposta }}
                             </p>
                         </div>
 
                         <!-- Validade -->
                         <div>
                             <label
-                                for="validity_date"
+                                for="validade"
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                             >
                                 Validade
                             </label>
                             <input
-                                id="validity_date"
-                                v-model="form.validity_date"
+                                id="validade"
+                                v-model="form.validade"
                                 type="date"
                                 class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             />
                             <p
-                                v-if="form.errors.validity_date"
+                                v-if="form.errors.validade"
                                 class="mt-1 text-sm text-red-600 dark:text-red-400"
                             >
-                                {{ form.errors.validity_date }}
+                                {{ form.errors.validade }}
                             </p>
                         </div>
 
                         <!-- Estado -->
                         <div>
                             <label
-                                for="status"
+                                for="estado"
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                             >
                                 Estado *
                             </label>
                             <select
-                                id="status"
-                                v-model="form.status"
+                                id="estado"
+                                v-model="form.estado"
                                 required
                                 class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             >
-                                <option value="draft">Rascunho</option>
-                                <option value="closed">Fechado</option>
+                                <option value="rascunho">Rascunho</option>
+                                <option value="fechado">Fechado</option>
                             </select>
                             <p
-                                v-if="form.errors.status"
+                                v-if="form.errors.estado"
                                 class="mt-1 text-sm text-red-600 dark:text-red-400"
                             >
-                                {{ form.errors.status }}
+                                {{ form.errors.estado }}
                             </p>
                         </div>
 
-                        <!-- Notas -->
+                        <!-- Observações -->
                         <div class="md:col-span-2">
                             <label
-                                for="notes"
+                                for="observacoes"
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                             >
-                                Notas
+                                Observações
                             </label>
                             <textarea
-                                id="notes"
-                                v-model="form.notes"
+                                id="observacoes"
+                                v-model="form.observacoes"
                                 rows="3"
                                 class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             ></textarea>
@@ -254,15 +254,15 @@
                     </div>
 
                     <p
-                        v-if="form.errors.items"
+                        v-if="form.errors.lines"
                         class="mb-4 text-sm text-red-600 dark:text-red-400"
                     >
-                        {{ form.errors.items }}
+                        {{ form.errors.lines }}
                     </p>
 
                     <div class="space-y-4">
                         <div
-                            v-for="(item, index) in form.items"
+                            v-for="(item, index) in form.lines"
                             :key="index"
                             class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
                         >
@@ -312,14 +312,14 @@
                                     <p
                                         v-if="
                                             form.errors[
-                                                `items.${index}.article_id`
+                                                `lines.${index}.article_id`
                                             ]
                                         "
                                         class="mt-1 text-sm text-red-600 dark:text-red-400"
                                     >
                                         {{
                                             form.errors[
-                                                `items.${index}.article_id`
+                                                `lines.${index}.article_id`
                                             ]
                                         }}
                                     </p>
@@ -335,7 +335,7 @@
                                     </label>
                                     <select
                                         :id="'supplier_' + index"
-                                        v-model="item.supplier_id"
+                                        v-model="item.entity_id"
                                         class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                     >
                                         <option value="">Sem fornecedor</option>
@@ -352,14 +352,14 @@
                                 <!-- Quantidade -->
                                 <div>
                                     <label
-                                        :for="'quantity_' + index"
+                                        :for="'quantidade_' + index"
                                         class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                                     >
                                         Quantidade *
                                     </label>
                                     <input
-                                        :id="'quantity_' + index"
-                                        v-model.number="item.quantity"
+                                        :id="'quantidade_' + index"
+                                        v-model.number="item.quantidade"
                                         @input="calculateItemTotal(index)"
                                         type="number"
                                         step="0.01"
@@ -370,14 +370,14 @@
                                     <p
                                         v-if="
                                             form.errors[
-                                                `items.${index}.quantity`
+                                                `lines.${index}.quantidade`
                                             ]
                                         "
                                         class="mt-1 text-sm text-red-600 dark:text-red-400"
                                     >
                                         {{
                                             form.errors[
-                                                `items.${index}.quantity`
+                                                `lines.${index}.quantidade`
                                             ]
                                         }}
                                     </p>
@@ -386,14 +386,14 @@
                                 <!-- Preço Unitário -->
                                 <div>
                                     <label
-                                        :for="'unit_price_' + index"
+                                        :for="'preco_custo_' + index"
                                         class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                                     >
                                         Preço Unit. *
                                     </label>
                                     <input
-                                        :id="'unit_price_' + index"
-                                        v-model.number="item.unit_price"
+                                        :id="'preco_custo_' + index"
+                                        v-model.number="item.preco_custo"
                                         @input="calculateItemTotal(index)"
                                         type="number"
                                         step="0.01"
@@ -404,14 +404,14 @@
                                     <p
                                         v-if="
                                             form.errors[
-                                                `items.${index}.unit_price`
+                                                `lines.${index}.preco_custo`
                                             ]
                                         "
                                         class="mt-1 text-sm text-red-600 dark:text-red-400"
                                     >
                                         {{
                                             form.errors[
-                                                `items.${index}.unit_price`
+                                                `lines.${index}.preco_custo`
                                             ]
                                         }}
                                     </p>
@@ -429,7 +429,8 @@
                                     >
                                         {{
                                             formatCurrency(
-                                                item.quantity * item.unit_price
+                                                item.quantidade *
+                                                    item.preco_custo
                                             )
                                         }}
                                     </div>
@@ -438,7 +439,7 @@
                         </div>
 
                         <div
-                            v-if="form.items.length === 0"
+                            v-if="form.lines.length === 0"
                             class="text-center py-8 text-gray-500 dark:text-gray-400"
                         >
                             <Package
@@ -453,7 +454,7 @@
 
                     <!-- Total Geral -->
                     <div
-                        v-if="form.items.length > 0"
+                        v-if="form.lines.length > 0"
                         class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700"
                     >
                         <div class="flex justify-end">
@@ -477,7 +478,7 @@
             <!-- Botões de Ação -->
             <div class="flex justify-end gap-4">
                 <Link
-                    :href="route('customer-orders.index')"
+                    :href="route('proposals.index')"
                     class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-150"
                 >
                     Cancelar
@@ -488,7 +489,7 @@
                     class="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold rounded-lg shadow-sm transition duration-150"
                 >
                     <span v-if="form.processing">Guardando...</span>
-                    <span v-else>Atualizar Encomenda</span>
+                    <span v-else>Atualizar Proposta</span>
                 </button>
             </div>
         </form>
@@ -499,18 +500,11 @@
 import { ref, computed } from "vue";
 import { Head, Link, useForm, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import {
-    ShoppingCart,
-    Plus,
-    Trash2,
-    Package,
-    Truck,
-    FileText,
-} from "lucide-vue-next";
+import { FileText, Plus, Trash2, Package, Truck } from "lucide-vue-next";
 
 const props = defineProps({
-    order: Object,
-    customers: Array,
+    proposal: Object,
+    clients: Array,
     articles: Array,
     suppliers: Array,
 });
@@ -518,33 +512,33 @@ const props = defineProps({
 const converting = ref(false);
 
 const form = useForm({
-    number: props.order.number,
-    proposal_date: props.order.proposal_date,
-    validity_date: props.order.validity_date,
-    customer_id: props.order.customer_id,
-    status: props.order.status,
-    notes: props.order.notes,
-    items: props.order.items || [],
+    numero: props.proposal.numero,
+    data_proposta: props.proposal.data_proposta,
+    validade: props.proposal.validade,
+    entity_id: props.proposal.entity_id,
+    estado: props.proposal.estado,
+    observacoes: props.proposal.observacoes,
+    lines: props.proposal.lines || [],
 });
 
 const addItem = () => {
-    form.items.push({
+    form.lines.push({
         article_id: "",
-        supplier_id: "",
-        quantity: 1,
-        unit_price: 0,
+        entity_id: "",
+        quantidade: 1,
+        preco_custo: 0,
     });
 };
 
 const removeItem = (index) => {
-    form.items.splice(index, 1);
+    form.lines.splice(index, 1);
 };
 
 const updateArticlePrice = (index) => {
-    const item = form.items[index];
+    const item = form.lines[index];
     const article = props.articles.find((a) => a.id === item.article_id);
     if (article) {
-        item.unit_price = article.sale_price || 0;
+        item.preco_custo = article.sale_price || 0;
     }
 };
 
@@ -552,15 +546,15 @@ const calculateItemTotal = (index) => {
     // Reactivity will handle this automatically
 };
 
-const convertToSupplierOrders = () => {
+const convertToOrder = () => {
     if (
         confirm(
-            "Deseja converter esta encomenda em encomendas de fornecedor? Serão criadas encomendas para cada fornecedor associado aos artigos."
+            "Deseja converter esta proposta em encomenda de cliente? A encomenda será criada no estado Rascunho."
         )
     ) {
         converting.value = true;
         router.post(
-            route("customer-orders.convert", props.order.id),
+            route("proposals.convert-to-order", props.proposal.id),
             {},
             {
                 onFinish: () => {
@@ -572,8 +566,8 @@ const convertToSupplierOrders = () => {
 };
 
 const totalValue = computed(() => {
-    return form.items.reduce((sum, item) => {
-        return sum + item.quantity * item.unit_price;
+    return form.lines.reduce((sum, item) => {
+        return sum + item.quantidade * item.preco_custo;
     }, 0);
 });
 
@@ -585,6 +579,6 @@ const formatCurrency = (value) => {
 };
 
 const submit = () => {
-    form.patch(route("customer-orders.update", props.order.id));
+    form.patch(route("proposals.update", props.proposal.id));
 };
 </script>
