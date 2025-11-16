@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\ClientAccount;
 use App\Models\Entity;
+use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ClientAccountController extends Controller
 {
@@ -24,7 +26,7 @@ class ClientAccountController extends Controller
         $search = $request->input('search');
 
         // Query base
-        $query = ClientAccount::with('entity');
+        $query = ClientAccount::with(['entity', 'invoice']);
 
         // Filtrar por cliente se especificado
         if ($entityId) {
@@ -119,6 +121,24 @@ class ClientAccountController extends Controller
             'observacoes' => 'nullable|string',
         ]);
 
+        // Se for um pagamento (crédito), gerar fatura automaticamente
+        if ($validated['tipo'] === 'credito' && $validated['categoria'] === 'pagamento') {
+            // Criar a fatura
+            $invoice = Invoice::create([
+                'entity_id' => $validated['entity_id'],
+                'data_fatura' => $validated['data_movimento'],
+                'data_vencimento' => null, // Pagamento imediato
+                'valor_total' => $validated['valor'],
+                'valor_pago' => $validated['valor'],
+                'estado' => 'paga',
+                'observacoes' => $validated['observacoes'] ?? null,
+            ]);
+
+            // Adicionar invoice_id ao movimento
+            $validated['invoice_id'] = $invoice->id;
+            $validated['referencia'] = $invoice->numero;
+        }
+
         $clientAccount = ClientAccount::create($validated);
 
         activity()
@@ -131,7 +151,7 @@ class ClientAccountController extends Controller
             ->log('created');
 
         return redirect()->route('client-accounts.index', ['entity_id' => $validated['entity_id']])
-            ->with('success', 'Movimento registado com sucesso.');
+            ->with('success', 'Movimento registado com sucesso.' . (isset($invoice) ? ' Fatura gerada: ' . $invoice->numero : ''));
     }
 
     /**
@@ -223,5 +243,28 @@ class ClientAccountController extends Controller
 
         return redirect()->route('client-accounts.index', ['entity_id' => $entityId])
             ->with('success', 'Movimento eliminado com sucesso.');
+    }
+
+    /**
+     * Download PDF da fatura associada ao movimento
+     */
+    public function downloadPdf(string $id)
+    {
+        $movement = ClientAccount::with(['entity', 'invoice'])->findOrFail($id);
+
+        // Verificar se existe fatura associada
+        if (!$movement->invoice) {
+            return redirect()->back()->with('error', 'Este movimento não possui fatura associada.');
+        }
+
+        $invoice = $movement->invoice;
+        $company = \App\Models\Company::first();
+
+        $pdf = Pdf::loadView('invoices.pdf', [
+            'invoice' => $invoice,
+            'company' => $company,
+        ]);
+
+        return $pdf->download("fatura-{$invoice->numero}.pdf");
     }
 }

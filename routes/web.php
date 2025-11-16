@@ -142,6 +142,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('permission:client-accounts.read')->group(function () {
         Route::get('/client-accounts', [ClientAccountController::class, 'index'])->name('client-accounts.index');
         Route::get('/client-accounts/{clientAccount}', [ClientAccountController::class, 'show'])->name('client-accounts.show');
+        Route::get('/client-accounts/{clientAccount}/pdf', [ClientAccountController::class, 'downloadPdf'])->name('client-accounts.pdf');
     });
     Route::post('/client-accounts', [ClientAccountController::class, 'store'])->name('client-accounts.store')->middleware('permission:client-accounts.create');
     Route::get('/client-accounts/{clientAccount}/edit', [ClientAccountController::class, 'edit'])->name('client-accounts.edit')->middleware('permission:client-accounts.update');

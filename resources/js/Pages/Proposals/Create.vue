@@ -154,10 +154,7 @@
                             label="Estado"
                             required
                         >
-                            <Select
-                                v-bind="field"
-                                v-model="form.estado"
-                            >
+                            <Select v-bind="field" v-model="form.estado">
                                 <option value="Rascunho">Rascunho</option>
                                 <option value="Fechado">Fechado</option>
                             </Select>
@@ -291,7 +288,9 @@
                                             v-bind="field"
                                             v-model="item.entity_id"
                                         >
-                                            <option value="">Sem fornecedor</option>
+                                            <option value="">
+                                                Sem fornecedor
+                                            </option>
                                             <option
                                                 v-for="supplier in suppliers"
                                                 :key="supplier.id"
@@ -340,7 +339,9 @@
                                 <div>
                                     <FormField
                                         v-slot="{ field }"
-                                        :name="'lines.' + index + '.preco_custo'"
+                                        :name="
+                                            'lines.' + index + '.preco_custo'
+                                        "
                                         label="Preço Unit."
                                         required
                                     >

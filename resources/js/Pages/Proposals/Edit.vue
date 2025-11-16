@@ -118,10 +118,7 @@
                             label="Cliente"
                             required
                         >
-                            <Select
-                                v-bind="field"
-                                v-model="form.entity_id"
-                            >
+                            <Select v-bind="field" v-model="form.entity_id">
                                 <option value="">Selecione um cliente</option>
                                 <option
                                     v-for="customer in clients"
@@ -184,10 +181,7 @@
                             label="Estado"
                             required
                         >
-                            <Select
-                                v-bind="field"
-                                v-model="form.estado"
-                            >
+                            <Select v-bind="field" v-model="form.estado">
                                 <option value="rascunho">Rascunho</option>
                                 <option value="fechado">Fechado</option>
                             </Select>
@@ -321,7 +315,9 @@
                                             v-bind="field"
                                             v-model="item.entity_id"
                                         >
-                                            <option value="">Sem fornecedor</option>
+                                            <option value="">
+                                                Sem fornecedor
+                                            </option>
                                             <option
                                                 v-for="supplier in suppliers"
                                                 :key="supplier.id"
@@ -370,7 +366,9 @@
                                 <div>
                                     <FormField
                                         v-slot="{ field }"
-                                        :name="'lines.' + index + '.preco_custo'"
+                                        :name="
+                                            'lines.' + index + '.preco_custo'
+                                        "
                                         label="Preço Unit."
                                         required
                                     >

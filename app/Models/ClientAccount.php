@@ -10,6 +10,7 @@ class ClientAccount extends Model
 {
     protected $fillable = [
         'entity_id',
+        'invoice_id',
         'data_movimento',
         'tipo',
         'valor',
@@ -58,6 +59,14 @@ class ClientAccount extends Model
     public function entity(): BelongsTo
     {
         return $this->belongsTo(Entity::class);
+    }
+
+    /**
+     * Relacionamento com Invoice (Fatura)
+     */
+    public function invoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class);
     }
 
     /**

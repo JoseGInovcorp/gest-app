@@ -37,7 +37,7 @@ Registo das principais mudanças e desenvolvimentos realizados durante o estági
 -   Header compacto: h1 2xl (não 3xl), ícone h-6 w-6 (não h-8 w-8)
 -   Ícone background: p-2 rounded-lg (não p-3 rounded-full)
 -   Breadcrumbs simplificados: separador "/" sem divs extras
--   Removidos wrappers py-12 e max-w-*
+-   Removidos wrappers py-12 e max-w-\*
 -   Botões com gap-3, rounded-lg, transition-colors
 
 **Padrão de Implementação:**
