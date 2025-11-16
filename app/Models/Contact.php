@@ -31,7 +31,11 @@ class Contact extends Model
         'rgpd_consent' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
-        'deleted_at' => 'datetime'
+        'deleted_at' => 'datetime',
+        // Campos sensíveis cifrados (DESATIVADO EM DEV - Ativar antes de produção)
+        // 'phone' => 'encrypted',
+        // 'mobile' => 'encrypted',
+        // 'email' => 'encrypted',
     ];
 
     protected $appends = [

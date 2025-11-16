@@ -46,6 +46,7 @@ const precoComIva = computed(() => {
 const handleSubmit = () => {
     form.post(route("articles.update", props.article.id), {
         forceFormData: true,
+        _method: "PUT",
     });
 };
 

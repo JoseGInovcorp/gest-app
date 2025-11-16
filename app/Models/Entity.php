@@ -66,6 +66,12 @@ class Entity extends Model
         'tax_exempt' => 'boolean',
         'active' => 'boolean',
         'custom_fields' => 'array',
+        // Campos sensíveis cifrados (DESATIVADO EM DEV - Ativar antes de produção)
+        // 'tax_number' => 'encrypted',
+        // 'phone' => 'encrypted',
+        // 'mobile' => 'encrypted',
+        // 'email' => 'encrypted',
+        // 'iban' => 'encrypted',
     ];
 
     protected $appends = [

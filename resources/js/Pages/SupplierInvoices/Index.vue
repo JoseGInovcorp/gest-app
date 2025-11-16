@@ -100,8 +100,11 @@ const deleteInvoice = (invoice) => {
     }
 };
 
-const downloadDocument = (path) => {
-    window.open(`/storage/${path}`, "_blank");
+const downloadDocument = (invoice) => {
+    window.open(
+        route("supplier-invoices.download-document", invoice.id),
+        "_blank"
+    );
 };
 </script>
 
@@ -317,7 +320,7 @@ const downloadDocument = (path) => {
                             <td class="px-6 py-4 whitespace-nowrap text-sm">
                                 <button
                                     v-if="invoice.documento"
-                                    @click="downloadDocument(invoice.documento)"
+                                    @click="downloadDocument(invoice)"
                                     class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                                 >
                                     <Download class="h-5 w-5" />

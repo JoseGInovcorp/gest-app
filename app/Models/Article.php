@@ -33,6 +33,10 @@ class Article extends Model
         'data_criacao' => 'date',
     ];
 
+    protected $appends = [
+        'foto_url',
+    ];
+
     /**
      * Boot do modelo - eventos
      */

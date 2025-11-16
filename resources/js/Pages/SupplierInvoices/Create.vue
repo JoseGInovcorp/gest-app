@@ -41,12 +41,41 @@ watch(
 );
 
 const handleFileChange = (event) => {
-    form.documento = event.target.files[0];
+    const file = event.target.files[0];
+    console.log("Ficheiro selecionado:", {
+        name: file?.name,
+        size: file?.size,
+        type: file?.type,
+    });
+    form.documento = file;
 };
 
 const submit = () => {
+    console.log("Submetendo formulário:", {
+        has_documento: !!form.documento,
+        documento_name: form.documento?.name,
+        form_data: {
+            data_fatura: form.data_fatura,
+            data_vencimento: form.data_vencimento,
+            supplier_id: form.supplier_id,
+            supplier_order_id: form.supplier_order_id,
+            valor_total: form.valor_total,
+            estado: form.estado,
+        },
+    });
+
     form.post(route("supplier-invoices.store"), {
         preserveScroll: true,
+        forceFormData: true,
+        onSuccess: (response) => {
+            console.log("Sucesso:", response);
+        },
+        onError: (errors) => {
+            console.error("Erros de validação:", errors);
+        },
+        onFinish: () => {
+            console.log("Request finalizado");
+        },
     });
 };
 </script>

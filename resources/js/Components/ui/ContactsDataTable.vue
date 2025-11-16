@@ -25,7 +25,7 @@
                     <select
                         v-model="statusFilter"
                         @change="applyFilters"
-                        class="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm"
+                        class="h-10 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-6 py-2 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                         <option value="all">Todos</option>
                         <option value="active">Ativos</option>
@@ -34,7 +34,7 @@
                     <select
                         v-model="entityFilter"
                         @change="applyFilters"
-                        class="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm"
+                        class="h-10 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-6 py-2 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                         <option value="">Todas as Entidades</option>
                         <option

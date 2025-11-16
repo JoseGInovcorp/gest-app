@@ -25,3 +25,9 @@ Thumbs.db
 
 # Relatórios internos
 relatorio-progresso.md
+
+# Documentos de segurança sensíveis (NÃO fazer commit - repositório público)
+docs/APP_KEY-BACKUP-GUIDE.md
+docs/security-implementation.md
+docs/security-summary.md
+docs/security-summary-final.md

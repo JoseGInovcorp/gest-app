@@ -8,8 +8,8 @@ Este é o meu projeto final de estágio, desenvolvido na **Inovcorp** entre 6 e 
 
 O objetivo é criar um sistema de gestão empresarial para PMEs, com funcionalidades de gestão comercial, financeira e operacional.
 
-**Versão Atual:** v0.16.0  
-**Progresso:** 90% (18 de 20 módulos concluídos)  
+**Versão Atual:** v0.17.0  
+**Progresso:** 95% (19 de 20 módulos concluídos)  
 **Prazo de Entrega:** 18 Nov 2025
 
 ## ✅ O que já está pronto
@@ -198,6 +198,39 @@ Criação e gestão de propostas a clientes com workflow completo.
 -   Data proposta, validade (30 dias por padrão)
 -   Cliente (entidade)
 -   Estado: Rascunho, Pendente, Aprovado, Rejeitado, Fechado
+
+### Módulo 18: Arquivo Digital (v0.17.0)
+
+Sistema completo de gestão de documentos digitais com versioning e metadata.
+
+**Funcionalidades:**
+
+-   Upload de documentos (max 10MB): PDF, DOC, DOCX, XLS, XLSX, JPG, PNG
+-   Drag & drop interface para facilitar uploads
+-   Preview de PDF (iframe) e imagens diretamente no browser
+-   Sistema de versioning (histórico de versões)
+-   9 categorias de documentos com cores:
+    -   Contrato (azul), Fatura (vermelho), Proposta (verde)
+    -   Identificação (roxo), Certificado (amarelo), Relatório (índigo)
+    -   Comprovativo (rosa), Correspondência (ciano), Outros (cinza)
+-   Metadata completa: descrição, tags (JSON), data de expiração
+-   Associação polimórfica com módulos: Clientes, Fornecedores, Propostas, Encomendas
+-   Filtros avançados: pesquisa, categoria, módulo, período
+-   Grid view responsivo (1-4 colunas)
+-   Soft deletes (documentos podem ser recuperados)
+-   Download de documentos com nome original
+-   Permissões granulares (create, read, edit, delete)
+-   Dashboard com estatísticas (total documentos, tamanho, próximos a expirar)
+
+**Estados:**
+
+-   Ativo, Arquivado, Eliminado (soft delete)
+
+**Interface:**
+
+-   Index: Grid com cards de documentos, ícones por tipo de ficheiro
+-   Show: Preview + sidebar com metadata, versões anteriores
+-   Upload Modal: Custom modal com drag & drop, preview antes de submeter
 -   Observações
 
 **Linhas de Proposta:**

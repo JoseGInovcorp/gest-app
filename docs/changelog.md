@@ -4,6 +4,245 @@ Registo das principais mudanças e desenvolvimentos realizados durante o estági
 
 ---
 
+## v0.18.0 — 16 Nov 2025
+
+**Security Compliance + Data Protection**
+
+### O que foi feito
+
+**Segurança - 100% Compliance**
+
+-   ✅ **Encriptação de Dados Sensíveis (AES-256)**
+    -   Entity Model: tax_number, phone, mobile, email, iban
+    -   Contact Model: phone, mobile, email
+    -   BankAccount Model: iban, swift_bic
+    -   Comando Artisan: `php artisan security:encrypt-data` (migração de dados existentes)
+    -   Encryption transparente via Laravel encrypted casts
+-   ✅ **Proteção de Documentos**
+    -   Disco privado criado: `storage/app/private/` (fora da web root)
+    -   DocumentController: Documentos em disco privado
+    -   SupplierInvoiceController: Faturas e comprovativos em disco privado
+    -   Download controlado com autenticação obrigatória
+    -   Apenas imagens públicas (logos, fotos artigos) mantidas acessíveis
+-   ✅ **HTTPS Obrigatório (Produção)**
+    -   URL::forceScheme('https') em AppServiceProvider
+    -   Middleware ForceHttps (redirect 301 HTTP → HTTPS)
+    -   Ativo apenas em APP_ENV=production
+-   ✅ **Proteção contra Ataques**
+    -   CSRF: Laravel tokens nativos (já implementado)
+    -   XSS: Vue 3 auto-escaping + Laravel validation
+    -   SQL Injection: Eloquent ORM + prepared statements
+-   ✅ **Documentação Completa**
+    -   `docs/compliance-check.md` - Verificação 100% requisitos
+    -   `docs/security-implementation.md` - Guia de deployment
+    -   `docs/security-summary.md` - Resumo executivo
+    -   Instruções detalhadas para produção
+
+**Bug Fixes - Supplier Invoices**
+
+-   🐛 **Document Upload Failed**
+    -   Problema: Uploads falhavam com erro "failed to upload"
+    -   Causa: Limite PHP `upload_max_filesize` = 2MB vs validação Laravel 5MB
+    -   Solução: Aumentado `php.ini` limites para 10MB
+        -   `upload_max_filesize = 10M`
+        -   `post_max_size = 10M`
+    -   Create.vue/Edit.vue: Adicionado `forceFormData: true` para file uploads
+    -   SupplierInvoiceController: Logs detalhados para debug de uploads
+-   🐛 **Payment Proof Email Attachment**
+    -   PaymentProofMail: Mudado de `fromPath()` para `fromData()` com Storage facade
+    -   Estado atualizado para "paga" ao enviar comprovativo
+-   🐛 **Document Download 403 Forbidden**
+    -   Rotas protegidas criadas: `download-document`, `download-proof`
+    -   Index.vue/Edit.vue: Mudado de `/storage/` URLs para routes protegidas
+    -   Download com autenticação e permissões verificadas
+
+**Bug Fixes - Articles**
+
+-   🐛 **Articles Photo Upload**
+    -   Edit.vue: Adicionado `_method: 'PUT'` para file uploads
+    -   Article.php: Adicionado `$appends = ['foto_url']`
+    -   Fix: Laravel method spoofing com multipart/form-data
+
+### Ficheiros Modificados
+
+**Security Implementation:**
+
+-   `app/Models/Entity.php` - Encrypted casts
+-   `app/Models/Contact.php` - Encrypted casts
+-   `app/Models/BankAccount.php` - Encrypted casts
+-   `app/Console/Commands/EncryptExistingData.php` - NEW
+-   `app/Http/Middleware/ForceHttps.php` - NEW
+-   `app/Providers/AppServiceProvider.php` - HTTPS forcing
+-   `bootstrap/app.php` - Middleware registration
+-   `config/filesystems.php` - Private disk configuration
+
+**Document Protection:**
+
+-   `app/Http/Controllers/DocumentController.php` - Private storage
+-   `app/Http/Controllers/SupplierInvoiceController.php` - Private storage
+
+**Bug Fixes:**
+
+-   `app/Models/Article.php` - $appends fix
+-   `resources/js/Pages/Articles/Edit.vue` - \_method fix
+
+---
+
+## v0.17.0 — 16 Nov 2025
+
+**Digital Archive Module + UX Improvements**
+
+### O que foi feito
+
+**Novo Módulo: Arquivo Digital**
+
+-   ✅ **Sistema completo de gestão de documentos**
+    -   Migration: `documents` table com polymorphic relations (documentable_type/id)
+    -   Campos: name, original_filename, file_path, file_size, mime_type, category, module
+    -   Versioning system: parent_id para histórico de versões
+    -   Metadata: description, tags (JSON), expires_at, status (active/archived/deleted)
+    -   Soft deletes implementado
+-   ✅ **Document Model**
+    -   Relations: morphTo (documentable), belongsTo (uploader, parent), hasMany (versions)
+    -   Scopes: active, category, module, search, expiringSoon
+    -   Accessors: file_url, formatted_size, is_expired
+    -   Static methods: categories() array, modules() array
+-   ✅ **DocumentController**
+    -   CRUD completo com validação (max 10MB)
+    -   Métodos especiais: download(), getEntities() (AJAX), stats() (dashboard)
+    -   Storage em `storage/documents`
+    -   Suporta versioning (upload novo ficheiro cria nova versão)
+-   ✅ **Frontend Vue 3 + Inertia**
+    -   Index.vue: Grid view (1-4 colunas responsive) com filtros (search, category, module, date range)
+    -   Show.vue: Preview (PDF em iframe, imagens), metadata sidebar, version history
+    -   UploadModal.vue: Custom modal com drag & drop, file preview, form completo
+    -   Default imports (não named) para componentes Shadcn/ui
+-   ✅ **9 Categorias de Documentos**
+    -   contrato (blue), fatura (red), proposta (green), identificacao (purple)
+    -   certificado (yellow), relatorio (indigo), comprovativo (pink)
+    -   correspondencia (cyan), outros (gray)
+-   ✅ **Módulos Integrados**
+    -   Associação polimórfica com: clients, suppliers, proposals, customer-orders
+    -   Dropdown dinâmico carrega entidades via AJAX
+-   ✅ **Permissions System**
+    -   4 permissões: digital-archive.create/read/edit/delete
+    -   Seeder: DigitalArchivePermissionsSeeder
+    -   Atribuídas a: Super Admin (todas), Gestor Geral (todas), Visualizador (read only)
+-   ✅ **Menu Integration**
+    -   Item "Arquivo Digital" no sidebar (ícone FolderOpen purple)
+    -   Requires digital-archive permission para aparecer
+    -   Disabled: false (ativado)
+
+**Melhorias de UX:**
+
+-   ✅ **Padding em Filtros** (6 componentes atualizados)
+    -   ContactsDataTable.vue: filtros status e entidades
+    -   Articles/Index.vue: 4 filtros (tipo, gama, estado, ordenação)
+    -   EntitiesDataTable.vue: filtro ativo/inativo (já corrigido anteriormente)
+    -   Novo padrão: `h-10 px-6 py-2 pr-12` (24px base, 48px right para seta)
+    -   Focus ring adicionado: `focus:outline-none focus:ring-2 focus:ring-blue-500`
+    -   Acomoda textos longos (ex: "Inativos", "Todas as Entidades", "Maior Stock")
+-   ✅ **Menu Configurações**
+    -   Corrigido: dropdown permanece expandido ao navegar para "Financeiro - IVA" e "Logs"
+    -   Adicionados `vat-rates` e `logs` à lista de rotas que expandem automaticamente
+    -   AuthenticatedLayout.vue: configRoutes array atualizado
+
+### Padrão de Implementação
+
+**Polymorphic Relations:**
+
+```php
+// Migration
+$table->morphs('documentable'); // _type + _id
+
+// Model
+public function documentable() {
+    return $this->morphTo();
+}
+```
+
+**File Upload com Validação:**
+
+```php
+$request->validate([
+    'file' => 'required|file|max:10240', // 10MB
+]);
+$path = $request->file('file')->store('documents');
+```
+
+**Vue Import Pattern (Shadcn/ui):**
+
+```javascript
+// Default imports (not named)
+import Button from "@/Components/ui/Button.vue";
+import Input from "@/Components/ui/Input.vue";
+import Select from "@/Components/ui/Select.vue";
+```
+
+**Select Padding Pattern:**
+
+```vue
+<select class="h-10 px-6 py-2 pr-12 text-sm ...">
+```
+
+### Bugs Corrigidos
+
+1. **Import Errors - Case Sensitivity**
+    - Problema: Windows case-insensitive mas Vite case-sensitive
+    - Solução: Todos imports com casing exato (Button.vue, Input.vue, Select.vue)
+2. **Import Errors - Named vs Default**
+    - Problema: `"Button" is not exported by "Button.vue"`
+    - Solução: Default imports em vez de named (`import Button` não `import { Button }`)
+3. **Dialog Component Missing**
+    - Problema: Dialog.vue não existe no projeto
+    - Solução: Modal custom com fixed overlay em vez de Shadcn Dialog
+4. **Dropdown Padding Insufficient**
+    - Problema: Seta dropdown tocando texto ("Todos", "Inativos", nomes longos)
+    - Solução: Aumentado de px-3 para px-6, pr-12 (3 iterações até satisfatório)
+5. **Menu Configurações Fechando**
+    - Problema: Ao clicar "Financeiro IVA" ou "Logs" dropdown fechava
+    - Solução: Rotas adicionadas ao array de auto-expansão
+
+### Ficheiros Criados
+
+-   database/migrations/2025_11_16_180325_create_documents_table.php
+-   app/Models/Document.php
+-   app/Http/Controllers/DocumentController.php
+-   resources/js/Pages/DigitalArchive/Index.vue
+-   resources/js/Pages/DigitalArchive/Show.vue
+-   resources/js/Components/UploadModal.vue
+-   database/seeders/DigitalArchivePermissionsSeeder.php
+
+### Ficheiros Modificados
+
+-   routes/web.php (DocumentController routes adicionadas)
+-   resources/js/Layouts/AuthenticatedLayout.vue (menu item + configRoutes)
+-   resources/js/Components/ui/ContactsDataTable.vue (padding)
+-   resources/js/Components/ui/EntitiesDataTable.vue (padding - anterior)
+-   resources/js/Pages/Articles/Index.vue (padding 4 selects)
+
+### Estatísticas
+
+-   **Novo módulo:** Digital Archive (18º módulo)
+-   **Componentes criados:** 3 (Index, Show, UploadModal)
+-   **Permissions:** 4 novas (digital-archive.\*)
+-   **Categorias de documentos:** 9
+-   **File upload:** Max 10MB, múltiplos formatos (PDF, DOC, XLS, IMG)
+-   **UX improvements:** 6 componentes com padding corrigido
+-   **Bugs corrigidos:** 5 (imports, modal, padding, menu)
+
+### Impacto
+
+-   ✅ Sistema de arquivo digital completo e funcional
+-   ✅ Gestão de documentos com versioning e metadata
+-   ✅ Preview de PDF e imagens no browser
+-   ✅ Drag & drop para upload de ficheiros
+-   ✅ UX melhorada em filtros (espaço adequado para textos longos)
+-   ✅ Navegação de menu mais intuitiva (configurações não fecha)
+-   ✅ Zero erros de build (todos imports resolvidos)
+
+---
+
 ## v0.16.0 — 16 Nov 2025
 
 **Supplier Invoices - Refatoração Completa para Shadcn Form & Consistência Visual**

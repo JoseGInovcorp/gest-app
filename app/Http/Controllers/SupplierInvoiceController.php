@@ -11,6 +11,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use App\Mail\PaymentProofMail;
 
 class SupplierInvoiceController extends Controller
@@ -97,6 +98,13 @@ class SupplierInvoiceController extends Controller
      */
     public function store(Request $request)
     {
+        Log::info('SupplierInvoice Store - Request recebido', [
+            'has_file' => $request->hasFile('documento'),
+            'file_exists' => $request->file('documento') !== null,
+            'all_files' => $request->allFiles(),
+            'all_data' => $request->except(['documento']),
+        ]);
+
         $validated = $request->validate([
             'data_fatura' => 'required|date',
             'data_vencimento' => 'required|date|after_or_equal:data_fatura',
@@ -108,11 +116,24 @@ class SupplierInvoiceController extends Controller
         ]);
 
         // Upload do documento
-        if ($request->hasFile('documento')) {
-            $path = $request->file('documento')->store('supplier_invoices/documents', 'public');
-            $validated['documento'] = $path;
-        }
+        if ($request->hasFile('documento') && $request->file('documento')->isValid()) {
+            $file = $request->file('documento');
+            Log::info('Documento upload', [
+                'original_name' => $file->getClientOriginalName(),
+                'size' => $file->getSize(),
+                'mime' => $file->getMimeType(),
+                'error' => $file->getError(),
+            ]);
 
+            $path = $file->store('supplier_invoices/documents', 'private');
+            Log::info('Documento guardado', ['path' => $path]);
+            $validated['documento'] = $path;
+        } else if ($request->file('documento')) {
+            Log::error('Documento inválido', [
+                'error' => $request->file('documento')->getError(),
+                'error_message' => $request->file('documento')->getErrorMessage(),
+            ]);
+        }
         $invoice = SupplierInvoice::create($validated);
 
         activity()
@@ -181,9 +202,9 @@ class SupplierInvoiceController extends Controller
         if ($request->hasFile('documento')) {
             // Apagar documento antigo
             if ($supplierInvoice->documento) {
-                Storage::disk('public')->delete($supplierInvoice->documento);
+                Storage::disk('private')->delete($supplierInvoice->documento);
             }
-            $path = $request->file('documento')->store('supplier_invoices/documents', 'public');
+            $path = $request->file('documento')->store('supplier_invoices/documents', 'private');
             $validated['documento'] = $path;
         }
 
@@ -224,10 +245,10 @@ class SupplierInvoiceController extends Controller
 
         // Apagar ficheiros
         if ($supplierInvoice->documento) {
-            Storage::disk('public')->delete($supplierInvoice->documento);
+            Storage::disk('private')->delete($supplierInvoice->documento);
         }
         if ($supplierInvoice->comprovativo_pagamento) {
-            Storage::disk('public')->delete($supplierInvoice->comprovativo_pagamento);
+            Storage::disk('private')->delete($supplierInvoice->comprovativo_pagamento);
         }
 
         $numero = $supplierInvoice->numero;
@@ -247,8 +268,13 @@ class SupplierInvoiceController extends Controller
         ]);
 
         // Upload do comprovativo
-        $path = $request->file('comprovativo')->store('supplier_invoices/proofs', 'public');
-        $supplierInvoice->update(['comprovativo_pagamento' => $path]);
+        $path = $request->file('comprovativo')->store('supplier_invoices/proofs', 'private');
+
+        // Atualizar comprovativo E estado para paga
+        $supplierInvoice->update([
+            'comprovativo_pagamento' => $path,
+            'estado' => 'paga',
+        ]);
 
         // Obter dados da empresa
         $company = Company::getInstance();
@@ -258,16 +284,68 @@ class SupplierInvoiceController extends Controller
 
         if ($supplier->email) {
             try {
+                // Passar o disco e path relativo em vez de fullPath
                 Mail::to($supplier->email)->send(
-                    new PaymentProofMail($supplierInvoice, $company, storage_path('app/public/' . $path))
+                    new PaymentProofMail($supplierInvoice, $company, $path)
                 );
 
-                return back()->with('success', 'Comprovativo enviado com sucesso para ' . $supplier->email);
+                activity()
+                    ->performedOn($supplierInvoice)
+                    ->causedBy(Auth::user())
+                    ->withProperties([
+                        'ip' => request()->ip(),
+                        'user_agent' => request()->userAgent(),
+                        'action' => 'payment_proof_sent',
+                        'email' => $supplier->email,
+                    ])
+                    ->log('payment_proof_sent');
+
+                return back()->with('success', 'Fatura marcada como paga e comprovativo enviado para ' . $supplier->email);
             } catch (\Exception $e) {
                 return back()->with('error', 'Erro ao enviar email: ' . $e->getMessage());
             }
         }
 
-        return back()->with('warning', 'Fornecedor não tem email cadastrado.');
+        return back()->with('warning', 'Fatura marcada como paga, mas fornecedor não tem email cadastrado.');
+    }
+
+    /**
+     * Download do documento da fatura
+     */
+    public function downloadDocument(SupplierInvoice $supplierInvoice)
+    {
+        if (!$supplierInvoice->documento) {
+            abort(404, 'Documento não encontrado');
+        }
+
+        $path = Storage::disk('private')->path($supplierInvoice->documento);
+
+        if (!file_exists($path)) {
+            abort(404, 'Ficheiro não encontrado');
+        }
+
+        $filename = 'fatura_' . $supplierInvoice->numero . '_documento.' . pathinfo($supplierInvoice->documento, PATHINFO_EXTENSION);
+
+        return response()->download($path, $filename);
+    }
+
+    /**
+     * Download do comprovativo de pagamento
+     */
+    public function downloadProof(SupplierInvoice $supplierInvoice)
+    {
+        if (!$supplierInvoice->comprovativo_pagamento) {
+            abort(404, 'Comprovativo não encontrado');
+        }
+
+        $path = Storage::disk('private')->path($supplierInvoice->comprovativo_pagamento);
+
+        if (!file_exists($path)) {
+            abort(404, 'Ficheiro não encontrado');
+        }
+
+        $filename = 'fatura_' . $supplierInvoice->numero . '_comprovativo.' . pathinfo($supplierInvoice->comprovativo_pagamento, PATHINFO_EXTENSION);
+
+        return response()->download($path, $filename);
     }
 }

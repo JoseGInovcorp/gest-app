@@ -16,6 +16,11 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
         ]);
 
+        // Forçar HTTPS em produção
+        $middleware->web(prepend: [
+            \App\Http\Middleware\ForceHttps::class,
+        ]);
+
         // Registar middlewares personalizados
         $middleware->alias([
             'permission' => \App\Http\Middleware\CheckPermission::class,

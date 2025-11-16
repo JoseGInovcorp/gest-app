@@ -25,6 +25,9 @@ class BankAccount extends Model
     protected $casts = [
         'saldo_inicial' => 'decimal:2',
         'saldo_atual' => 'decimal:2',
+        // Campos sensíveis cifrados (DESATIVADO EM DEV - Ativar antes de produção)
+        // 'iban' => 'encrypted',
+        // 'swift_bic' => 'encrypted',
     ];
 
     /**

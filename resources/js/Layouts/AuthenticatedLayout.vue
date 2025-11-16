@@ -198,9 +198,9 @@ const financialNavigationItems = computed(() => {
 const allSystemNavigationItems = [
     {
         name: "Arquivo Digital",
-        href: "dashboard", // Temporário até implementar
+        href: "digital-archive",
         icon: FolderOpen,
-        disabled: true,
+        disabled: false,
         permission: "digital-archive", // Requer permissões de arquivo digital
     },
 ];
@@ -331,8 +331,38 @@ const getNavRoute = (href) => {
 
 // Auto-expand menus based on current route
 const currentRouteName = route().current();
-if (currentRouteName && currentRouteName.includes("articles")) {
-    configurationExpanded.value = true;
+
+// Expandir Financeiro se rota atual está em itens financeiros
+if (currentRouteName) {
+    const financialRoutes = [
+        "bank-accounts",
+        "client-accounts",
+        "supplier-invoices",
+    ];
+    if (financialRoutes.some((r) => currentRouteName.includes(r))) {
+        financialExpanded.value = true;
+    }
+
+    // Expandir Gestão de Acessos se rota atual está em users ou roles
+    const accessRoutes = ["users", "roles"];
+    if (accessRoutes.some((r) => currentRouteName.includes(r))) {
+        accessManagementExpanded.value = true;
+    }
+
+    // Expandir Configurações se rota atual está em itens de configuração
+    const configRoutes = [
+        "company",
+        "countries",
+        "contact-functions",
+        "calendar-event-types",
+        "calendar-event-actions",
+        "articles",
+        "vat-rates",
+        "logs",
+    ];
+    if (configRoutes.some((r) => currentRouteName.includes(r))) {
+        configurationExpanded.value = true;
+    }
 }
 
 const logout = () => {

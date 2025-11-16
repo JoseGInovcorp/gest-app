@@ -80,7 +80,7 @@
                         <select
                             v-model="searchForm.tipo"
                             @change="search"
-                            class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                            class="h-10 px-6 py-2 pr-12 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                         >
                             <option value="">Todos os Tipos</option>
                             <option value="produto">Produto</option>
@@ -90,7 +90,7 @@
                         <select
                             v-model="searchForm.gama"
                             @change="search"
-                            class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                            class="h-10 px-6 py-2 pr-12 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                         >
                             <option value="">Todas as Gamas</option>
                             <option
@@ -105,7 +105,7 @@
                         <select
                             v-model="searchForm.estado"
                             @change="search"
-                            class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                            class="h-10 px-6 py-2 pr-12 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                         >
                             <option value="">Todos os Estados</option>
                             <option value="ativo">Ativo</option>
@@ -115,7 +115,7 @@
                         <select
                             v-model="searchForm.sort"
                             @change="search"
-                            class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                            class="h-10 px-6 py-2 pr-12 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                         >
                             <option value="created_at-desc">
                                 Mais Recente

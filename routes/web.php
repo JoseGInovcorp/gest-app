@@ -19,6 +19,7 @@ use App\Http\Controllers\CalendarEventTypeController;
 use App\Http\Controllers\CalendarEventActionController;
 use App\Http\Controllers\CalendarEventController;
 use App\Http\Controllers\ProposalController;
+use App\Http\Controllers\DocumentController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -160,6 +161,8 @@ Route::middleware('auth')->group(function () {
     Route::patch('/supplier-invoices/{supplierInvoice}', [SupplierInvoiceController::class, 'update'])->name('supplier-invoices.update')->middleware('permission:supplier-invoices.update');
     Route::delete('/supplier-invoices/{supplierInvoice}', [SupplierInvoiceController::class, 'destroy'])->name('supplier-invoices.destroy')->middleware('permission:supplier-invoices.delete');
     Route::post('/supplier-invoices/{supplierInvoice}/send-payment-proof', [SupplierInvoiceController::class, 'sendPaymentProof'])->name('supplier-invoices.send-payment-proof')->middleware('permission:supplier-invoices.update');
+    Route::get('/supplier-invoices/{supplierInvoice}/download-document', [SupplierInvoiceController::class, 'downloadDocument'])->name('supplier-invoices.download-document')->middleware('permission:supplier-invoices.read');
+    Route::get('/supplier-invoices/{supplierInvoice}/download-proof', [SupplierInvoiceController::class, 'downloadProof'])->name('supplier-invoices.download-proof')->middleware('permission:supplier-invoices.read');
 
     // Rotas de Propostas
     Route::get('/proposals/create', [ProposalController::class, 'create'])->name('proposals.create')->middleware('permission:proposals.create');
@@ -288,6 +291,21 @@ Route::middleware('auth')->group(function () {
 
     Route::delete('/calendar-events/{calendarEvent}', [\App\Http\Controllers\CalendarEventController::class, 'destroy'])
         ->name('calendar-events.destroy')->middleware('permission:calendar-events.delete');
+
+    // Arquivo Digital
+    Route::middleware('permission:digital-archive.read')->group(function () {
+        Route::get('/digital-archive', [DocumentController::class, 'index'])->name('digital-archive.index');
+        Route::get('/digital-archive/{document}', [DocumentController::class, 'show'])->name('digital-archive.show');
+        Route::get('/digital-archive/{document}/download', [DocumentController::class, 'download'])->name('digital-archive.download');
+    });
+    Route::post('/digital-archive', [DocumentController::class, 'store'])->name('digital-archive.store')->middleware('permission:digital-archive.create');
+    Route::patch('/digital-archive/{document}', [DocumentController::class, 'update'])->name('digital-archive.update')->middleware('permission:digital-archive.edit');
+    Route::delete('/digital-archive/{document}', [DocumentController::class, 'destroy'])->name('digital-archive.destroy')->middleware('permission:digital-archive.delete');
+
+    // AJAX para obter entidades (usado no upload modal)
+    Route::get('/api/documents/entities', [DocumentController::class, 'getEntities'])->name('api.documents.entities');
+    Route::get('/api/documents/stats', [DocumentController::class, 'stats'])->name('api.documents.stats');
+
     Route::get('/settings', function () {
         return redirect()->route('dashboard')->with('info', 'Módulo Configurações em desenvolvimento');
     })->name('settings.index');

@@ -63,9 +63,13 @@ const submit = () => {
     form.post(route("supplier-invoices.update", props.invoice.id), {
         _method: "PATCH",
         preserveScroll: true,
+        forceFormData: true,
         onSuccess: () => {
             // Atualizar estado original após salvar
             originalEstado.value = form.estado;
+        },
+        onError: (errors) => {
+            console.error("Erros de validação:", errors);
         },
     });
 };
@@ -321,7 +325,12 @@ const cancelEstadoChange = () => {
                         Documento Atual:
                     </p>
                     <a
-                        :href="`/storage/${invoice.documento}`"
+                        :href="
+                            route(
+                                'supplier-invoices.download-document',
+                                invoice.id
+                            )
+                        "
                         target="_blank"
                         class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400"
                     >
@@ -356,7 +365,12 @@ const cancelEstadoChange = () => {
                         Comprovativo de Pagamento:
                     </p>
                     <a
-                        :href="`/storage/${invoice.comprovativo_pagamento}`"
+                        :href="
+                            route(
+                                'supplier-invoices.download-proof',
+                                invoice.id
+                            )
+                        "
                         target="_blank"
                         class="inline-flex items-center text-sm text-green-600 hover:text-green-800 dark:text-green-400"
                     >

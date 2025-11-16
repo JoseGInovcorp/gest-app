@@ -23,7 +23,7 @@
                             ]"
                         >
                             <div class="flex items-center space-x-2">
-                                <span>{{ column.title }}</span>
+                                <span>{{ column.title || column.label }}</span>
                                 <!-- Sorting indicator -->
                                 <button
                                     v-if="column.sortable"
