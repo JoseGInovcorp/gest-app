@@ -93,181 +93,141 @@
                 </div>
             </div>
 
-            <!-- Table -->
-            <div class="overflow-x-auto">
-                <table
-                    class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"
-                >
-                    <thead class="bg-gray-50 dark:bg-gray-900">
-                        <tr>
-                            <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                            >
-                                Data
-                            </th>
-                            <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                            >
-                                Número
-                            </th>
-                            <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                            >
-                                Validade
-                            </th>
-                            <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                            >
-                                Cliente
-                            </th>
-                            <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                            >
-                                Valor Total
-                            </th>
-                            <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                            >
-                                Estado
-                            </th>
-                            <th
-                                class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                            >
-                                Ações
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody
-                        class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"
+            <!-- DataTable -->
+            <DataTable :columns="columns" :data="orders?.data || []" class="p-6">
+            <!-- DataTable -->
+            <DataTable :columns="columns" :data="orders?.data || []" class="p-6">
+                <!-- Coluna Data -->
+                <template #cell-data="{ item }">
+                    <span class="text-sm text-gray-900 dark:text-white">
+                        {{ formatDate(item.proposal_date) }}
+                    </span>
+                </template>
+
+                <!-- Coluna Número -->
+                <template #cell-numero="{ item }">
+                    <span class="text-sm font-medium text-gray-900 dark:text-white">
+                        {{ item.number }}
+                    </span>
+                </template>
+
+                <!-- Coluna Validade -->
+                <template #cell-validade="{ item }">
+                    <span class="text-sm text-gray-900 dark:text-white">
+                        {{ formatDate(item.validity_date) }}
+                    </span>
+                </template>
+
+                <!-- Coluna Cliente -->
+                <template #cell-cliente="{ item }">
+                    <span class="text-sm text-gray-900 dark:text-white">
+                        {{ item.customer?.name || "—" }}
+                    </span>
+                </template>
+
+                <!-- Coluna Valor Total -->
+                <template #cell-valor_total="{ item }">
+                    <span class="text-sm font-semibold text-gray-900 dark:text-white">
+                        {{ formatCurrency(item.total_value) }}
+                    </span>
+                </template>
+
+                <!-- Coluna Estado -->
+                <template #cell-estado="{ item }">
+                    <span
+                        :class="[
+                            'px-2 py-1 text-xs font-semibold rounded-full',
+                            item.status === 'closed'
+                                ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                                : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
+                        ]"
                     >
-                        <tr v-if="orders.data.length === 0">
-                            <td
-                                colspan="7"
-                                class="px-6 py-12 text-center text-gray-500 dark:text-gray-400"
-                            >
-                                <FileX
-                                    class="mx-auto h-12 w-12 mb-4 opacity-50"
-                                />
-                                <p class="text-lg font-medium">
-                                    Nenhuma encomenda encontrada
-                                </p>
-                                <p class="text-sm mt-1">
-                                    {{
-                                        search
-                                            ? "Tente ajustar os filtros de pesquisa"
-                                            : "Comece criando a primeira encomenda"
-                                    }}
-                                </p>
-                            </td>
-                        </tr>
-                        <tr
-                            v-for="order in orders.data"
-                            :key="order.id"
-                            class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                        {{ item.status === "draft" ? "Rascunho" : "Fechado" }}
+                    </span>
+                </template>
+
+                <!-- Coluna Ações -->
+                <template #cell-acoes="{ item }">
+                    <div class="flex items-center gap-2 justify-end">
+                        <!-- Download PDF -->
+                        <a
+                            v-if="
+                                $page.props.auth.permissions.includes(
+                                    'customer-orders.read'
+                                )
+                            "
+                            :href="route('customer-orders.pdf', item.id)"
+                            target="_blank"
+                            class="p-1.5 text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded transition-colors"
+                            title="Download PDF"
                         >
-                            <td
-                                class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"
-                            >
-                                {{ formatDate(order.proposal_date) }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span
-                                    class="text-sm font-medium text-gray-900 dark:text-gray-100"
-                                >
-                                    {{ order.number }}
-                                </span>
-                            </td>
-                            <td
-                                class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"
-                            >
-                                {{ formatDate(order.validity_date) }}
-                            </td>
-                            <td
-                                class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"
-                            >
-                                {{ order.customer.name }}
-                            </td>
-                            <td
-                                class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100"
-                            >
-                                {{ formatCurrency(order.total_value) }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span
-                                    :class="{
-                                        'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400':
-                                            order.status === 'draft',
-                                        'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400':
-                                            order.status === 'closed',
-                                    }"
-                                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                                >
-                                    {{
-                                        order.status === "draft"
-                                            ? "Rascunho"
-                                            : "Fechado"
-                                    }}
-                                </span>
-                            </td>
-                            <td
-                                class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2"
-                            >
-                                <a
-                                    v-if="
-                                        $page.props.auth.permissions.includes(
-                                            'customer-orders.read'
-                                        )
-                                    "
-                                    :href="
-                                        route('customer-orders.pdf', order.id)
-                                    "
-                                    target="_blank"
-                                    class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 inline-flex items-center"
-                                    title="Download PDF"
-                                >
-                                    <FileText class="h-4 w-4" />
-                                </a>
-                                <Link
-                                    v-if="
-                                        $page.props.auth.permissions.includes(
-                                            'customer-orders.update'
-                                        )
-                                    "
-                                    :href="
-                                        route('customer-orders.edit', order.id)
-                                    "
-                                    class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 inline-flex items-center"
-                                >
-                                    <Pencil class="h-4 w-4" />
-                                </Link>
-                                <button
-                                    v-if="
-                                        $page.props.auth.permissions.includes(
-                                            'customer-orders.delete'
-                                        )
-                                    "
-                                    @click="confirmDelete(order)"
-                                    class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 inline-flex items-center"
-                                >
-                                    <Trash2 class="h-4 w-4" />
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+                            <FileText class="h-4 w-4" />
+                        </a>
+
+                        <!-- Editar -->
+                        <Link
+                            v-if="
+                                $page.props.auth.permissions.includes(
+                                    'customer-orders.update'
+                                )
+                            "
+                            :href="route('customer-orders.edit', item.id)"
+                            class="p-1.5 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
+                            title="Editar"
+                        >
+                            <Pencil class="h-4 w-4" />
+                        </Link>
+
+                        <!-- Eliminar -->
+                        <button
+                            v-if="
+                                $page.props.auth.permissions.includes(
+                                    'customer-orders.delete'
+                                )
+                            "
+                            @click="confirmDelete(item)"
+                            class="p-1.5 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                            title="Eliminar"
+                        >
+                            <Trash2 class="h-4 w-4" />
+                        </button>
+                    </div>
+                </template>
+
+                <!-- Empty State -->
+                <template #empty>
+                    <div class="text-center py-12">
+                        <FileX class="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                        <p class="text-lg font-medium text-gray-900 dark:text-white">
+                            Nenhuma encomenda encontrada
+                        </p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                            {{
+                                search
+                                    ? "Tente ajustar os filtros de pesquisa"
+                                    : "Comece criando a primeira encomenda"
+                            }}
+                        </p>
+                    </div>
+                </template>
+            </DataTable>
 
             <!-- Pagination -->
             <div
-                v-if="orders.data.length > 0"
+                v-if="orders?.data && orders.data.length > 0"
                 class="px-6 py-4 border-t border-gray-200 dark:border-gray-700"
             >
                 <div class="flex items-center justify-between">
-                    <div class="text-sm text-gray-500 dark:text-gray-400">
-                        Mostrando {{ orders.from }} a {{ orders.to }} de
-                        {{ orders.total }} registos
+                    <div class="text-sm text-gray-700 dark:text-gray-400">
+                        Mostrando
+                        <span class="font-medium">{{ orders.from || 0 }}</span>
+                        a
+                        <span class="font-medium">{{ orders.to || 0 }}</span>
+                        de
+                        <span class="font-medium">{{ orders.total || 0 }}</span>
+                        resultados
                     </div>
-                    <div class="flex gap-2">
+                    <div class="flex flex-wrap gap-1">
                         <template
                             v-for="link in orders.links"
                             :key="link.label"
@@ -277,16 +237,16 @@
                                 :href="link.url"
                                 v-html="link.label"
                                 :class="[
-                                    'px-3 py-1 text-sm rounded',
+                                    'px-3 py-2 text-sm border rounded-lg transition-colors',
                                     link.active
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600',
+                                        ? 'bg-blue-600 text-white border-blue-600'
+                                        : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600',
                                 ]"
                             />
                             <span
                                 v-else
                                 v-html="link.label"
-                                class="px-3 py-1 text-sm rounded bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 opacity-50 cursor-not-allowed"
+                                class="px-3 py-2 text-sm border rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-700 cursor-not-allowed"
                             />
                         </template>
                     </div>
@@ -297,9 +257,10 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { Head, Link, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import DataTable from "@/Components/ui/DataTable.vue";
 import {
     ShoppingCart,
     Search,
@@ -315,11 +276,51 @@ const props = defineProps({
     filters: Object,
 });
 
+// Colunas da DataTable
+const columns = computed(() => [
+    {
+        key: "data",
+        title: "Data",
+        sortable: false,
+    },
+    {
+        key: "numero",
+        title: "Número",
+        sortable: false,
+    },
+    {
+        key: "validade",
+        title: "Validade",
+        sortable: false,
+    },
+    {
+        key: "cliente",
+        title: "Cliente",
+        sortable: false,
+    },
+    {
+        key: "valor_total",
+        title: "Valor Total",
+        sortable: false,
+    },
+    {
+        key: "estado",
+        title: "Estado",
+        sortable: false,
+    },
+    {
+        key: "acoes",
+        title: "Ações",
+        sortable: false,
+        class: "text-right",
+    },
+]);
+
 const search = ref(props.filters?.search || "");
 const statusFilter = ref(props.filters?.status || "");
 
 const formatDate = (date) => {
-    if (!date) return "-";
+    if (!date) return "—";
     const d = new Date(date);
     return d.toLocaleDateString("pt-PT");
 };
