@@ -9,6 +9,7 @@ use App\Models\Entity;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Illuminate\Validation\Rule;
 
@@ -178,6 +179,15 @@ class CalendarEventController extends Controller
             $event->sharedWith()->sync([]);
         }
 
+        activity()
+            ->performedOn($event)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent()
+            ])
+            ->log('created');
+
         return redirect()->route('calendar-events.show', $event)->with('success', 'Evento criado com sucesso');
     }
 
@@ -253,6 +263,15 @@ class CalendarEventController extends Controller
             $calendarEvent->sharedWith()->sync([]);
         }
 
+        activity()
+            ->performedOn($calendarEvent)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent()
+            ])
+            ->log('updated');
+
         return redirect()->route('calendar-events.show', $calendarEvent)->with('success', 'Evento atualizado com sucesso');
     }
 
@@ -262,6 +281,22 @@ class CalendarEventController extends Controller
     public function destroy(CalendarEvent $calendarEvent)
     {
         $this->authorize('delete', $calendarEvent);
+
+        activity()
+            ->performedOn($calendarEvent)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'deleted_event' => [
+                    'user' => $calendarEvent->user->name,
+                    'type' => $calendarEvent->eventType->name,
+                    'data' => $calendarEvent->data,
+                    'hora' => $calendarEvent->hora,
+                    'estado' => $calendarEvent->estado
+                ]
+            ])
+            ->log('deleted');
 
         $calendarEvent->delete();
 

@@ -59,6 +59,16 @@ const getModuleLabel = (subjectType) => {
         VatRate: "Taxas IVA",
         User: "Utilizadores",
         Role: "Permissões",
+        Proposal: "Propostas",
+        CustomerOrder: "Encomendas Cliente",
+        SupplierOrder: "Encomendas Fornecedor",
+        BankAccount: "Contas Bancárias",
+        ClientAccount: "Conta Corrente Cliente",
+        SupplierInvoice: "Faturas Fornecedor",
+        CalendarEvent: "Eventos Calendário",
+        CalendarEventType: "Tipos de Evento",
+        CalendarEventAction: "Ações de Evento",
+        Company: "Empresa",
     };
     return labels[subjectType] || subjectType || "-";
 };

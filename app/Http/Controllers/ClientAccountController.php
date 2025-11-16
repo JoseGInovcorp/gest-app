@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ClientAccount;
 use App\Models\Entity;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class ClientAccountController extends Controller
@@ -118,7 +119,16 @@ class ClientAccountController extends Controller
             'observacoes' => 'nullable|string',
         ]);
 
-        ClientAccount::create($validated);
+        $clientAccount = ClientAccount::create($validated);
+
+        activity()
+            ->performedOn($clientAccount)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent()
+            ])
+            ->log('created');
 
         return redirect()->route('client-accounts.index', ['entity_id' => $validated['entity_id']])
             ->with('success', 'Movimento registado com sucesso.');
@@ -173,6 +183,15 @@ class ClientAccountController extends Controller
 
         $movement->update($validated);
 
+        activity()
+            ->performedOn($movement)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent()
+            ])
+            ->log('updated');
+
         return redirect()->route('client-accounts.index', ['entity_id' => $validated['entity_id']])
             ->with('success', 'Movimento atualizado com sucesso.');
     }
@@ -184,6 +203,22 @@ class ClientAccountController extends Controller
     {
         $movement = ClientAccount::findOrFail($id);
         $entityId = $movement->entity_id;
+
+        activity()
+            ->performedOn($movement)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'deleted_movement' => [
+                    'entity' => $movement->entity->name,
+                    'tipo' => $movement->tipo,
+                    'valor' => $movement->valor,
+                    'descricao' => $movement->descricao
+                ]
+            ])
+            ->log('deleted');
+
         $movement->delete();
 
         return redirect()->route('client-accounts.index', ['entity_id' => $entityId])

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CalendarEventType;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class CalendarEventTypeController extends Controller
@@ -64,7 +65,16 @@ class CalendarEventTypeController extends Controller
             'is_active' => 'required|boolean',
         ]);
 
-        CalendarEventType::create($validated);
+        $eventType = CalendarEventType::create($validated);
+
+        activity()
+            ->performedOn($eventType)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent()
+            ])
+            ->log('created');
 
         return redirect()->route('calendar-event-types.index')
             ->with('success', 'Tipo de evento criado com sucesso!');
@@ -105,6 +115,15 @@ class CalendarEventTypeController extends Controller
 
         $calendarEventType->update($validated);
 
+        activity()
+            ->performedOn($calendarEventType)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent()
+            ])
+            ->log('updated');
+
         return redirect()->route('calendar-event-types.index')
             ->with('success', 'Tipo de evento atualizado com sucesso!');
     }
@@ -115,6 +134,20 @@ class CalendarEventTypeController extends Controller
     public function destroy(CalendarEventType $calendarEventType)
     {
         $name = $calendarEventType->name;
+
+        activity()
+            ->performedOn($calendarEventType)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'deleted_type' => [
+                    'name' => $name,
+                    'color' => $calendarEventType->color
+                ]
+            ])
+            ->log('deleted');
+
         $calendarEventType->delete();
 
         return redirect()->route('calendar-event-types.index')

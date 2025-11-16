@@ -8,6 +8,7 @@ use App\Models\Entity;
 use App\Models\Article;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class CustomerOrderController extends Controller
@@ -118,6 +119,16 @@ class CustomerOrderController extends Controller
             }
 
             DB::commit();
+
+            activity()
+                ->performedOn($order)
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'ip' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'items_count' => count($validated['items'])
+                ])
+                ->log('created');
 
             return redirect()->route('customer-orders.index')
                 ->with('success', 'Encomenda criada com sucesso!');
@@ -231,6 +242,16 @@ class CustomerOrderController extends Controller
 
             DB::commit();
 
+            activity()
+                ->performedOn($customerOrder)
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'ip' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                    'items_count' => count($validated['items'])
+                ])
+                ->log('updated');
+
             return redirect()->route('customer-orders.index')
                 ->with('success', 'Encomenda atualizada com sucesso!');
         } catch (\Exception $e) {
@@ -245,6 +266,21 @@ class CustomerOrderController extends Controller
     public function destroy(CustomerOrder $customerOrder)
     {
         try {
+            activity()
+                ->performedOn($customerOrder)
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'ip' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                    'deleted_order' => [
+                        'number' => $customerOrder->number,
+                        'customer' => $customerOrder->customer->name,
+                        'status' => $customerOrder->status,
+                        'total_value' => $customerOrder->total_value
+                    ]
+                ])
+                ->log('deleted');
+
             $customerOrder->delete();
             return redirect()->route('customer-orders.index')
                 ->with('success', 'Encomenda eliminada com sucesso!');

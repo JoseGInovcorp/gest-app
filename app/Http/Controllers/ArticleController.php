@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Article;
 use App\Models\VatRate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -128,6 +129,16 @@ class ArticleController extends Controller
 
         $article = Article::create($validated);
 
+        // Log activity
+        activity()
+            ->performedOn($article)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ])
+            ->log('created');
+
         return redirect()->route('articles.index')
             ->with('success', 'Artigo criado com sucesso!');
     }
@@ -201,6 +212,16 @@ class ArticleController extends Controller
 
         $article->update($validated);
 
+        // Log activity
+        activity()
+            ->performedOn($article)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ])
+            ->log('updated');
+
         return redirect()->route('articles.index')
             ->with('success', 'Artigo atualizado com sucesso!');
     }
@@ -210,6 +231,21 @@ class ArticleController extends Controller
      */
     public function destroy(Article $article)
     {
+        // Log activity before delete
+        activity()
+            ->performedOn($article)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'deleted_article' => [
+                    'referencia' => $article->referencia,
+                    'nome' => $article->nome,
+                    'preco' => $article->preco,
+                ],
+            ])
+            ->log('deleted');
+
         // Deletar foto se existir
         if ($article->foto) {
             Storage::disk('public')->delete($article->foto);

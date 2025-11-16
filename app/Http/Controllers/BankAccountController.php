@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BankAccount;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class BankAccountController extends Controller
@@ -80,7 +81,16 @@ class BankAccountController extends Controller
             'observacoes' => 'nullable|string',
         ]);
 
-        BankAccount::create($validated);
+        $bankAccount = BankAccount::create($validated);
+
+        activity()
+            ->performedOn($bankAccount)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent()
+            ])
+            ->log('created');
 
         return redirect()->route('bank-accounts.index')
             ->with('success', 'Conta bancária criada com sucesso!');
@@ -133,6 +143,15 @@ class BankAccountController extends Controller
 
         $bankAccount->update($validated);
 
+        activity()
+            ->performedOn($bankAccount)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent()
+            ])
+            ->log('updated');
+
         // Recalcular saldo se o saldo inicial foi alterado
         $bankAccount->updateBalance();
 
@@ -145,6 +164,21 @@ class BankAccountController extends Controller
      */
     public function destroy(BankAccount $bankAccount)
     {
+        activity()
+            ->performedOn($bankAccount)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'deleted_account' => [
+                    'nome' => $bankAccount->nome,
+                    'banco' => $bankAccount->banco,
+                    'iban' => $bankAccount->iban,
+                    'saldo_atual' => $bankAccount->saldo_atual
+                ]
+            ])
+            ->log('deleted');
+
         $bankAccount->delete();
 
         return redirect()->route('bank-accounts.index')

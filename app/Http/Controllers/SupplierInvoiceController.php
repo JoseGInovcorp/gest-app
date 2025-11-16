@@ -8,6 +8,7 @@ use App\Models\SupplierOrder;
 use App\Models\Company;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\PaymentProofMail;
@@ -114,6 +115,15 @@ class SupplierInvoiceController extends Controller
 
         $invoice = SupplierInvoice::create($validated);
 
+        activity()
+            ->performedOn($invoice)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent()
+            ])
+            ->log('created');
+
         return redirect()->route('supplier-invoices.index')
             ->with('success', "Fatura {$invoice->numero} criada com sucesso!");
     }
@@ -179,6 +189,15 @@ class SupplierInvoiceController extends Controller
 
         $supplierInvoice->update($validated);
 
+        activity()
+            ->performedOn($supplierInvoice)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent()
+            ])
+            ->log('updated');
+
         return redirect()->route('supplier-invoices.index')
             ->with('success', "Fatura {$supplierInvoice->numero} atualizada com sucesso!");
     }
@@ -188,6 +207,21 @@ class SupplierInvoiceController extends Controller
      */
     public function destroy(SupplierInvoice $supplierInvoice)
     {
+        activity()
+            ->performedOn($supplierInvoice)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'deleted_invoice' => [
+                    'numero' => $supplierInvoice->numero,
+                    'supplier' => $supplierInvoice->supplier->name,
+                    'valor_total' => $supplierInvoice->valor_total,
+                    'estado' => $supplierInvoice->estado
+                ]
+            ])
+            ->log('deleted');
+
         // Apagar ficheiros
         if ($supplierInvoice->documento) {
             Storage::disk('public')->delete($supplierInvoice->documento);

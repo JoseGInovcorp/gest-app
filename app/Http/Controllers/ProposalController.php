@@ -10,6 +10,7 @@ use App\Models\CustomerOrder;
 use App\Models\CustomerOrderItem;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -122,6 +123,16 @@ class ProposalController extends Controller
             }
 
             DB::commit();
+
+            activity()
+                ->performedOn($proposal)
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'ip' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'lines_count' => count($validated['lines'])
+                ])
+                ->log('created');
 
             return redirect()->route('proposals.index')
                 ->with('success', 'Proposta criada com sucesso!');
@@ -239,6 +250,16 @@ class ProposalController extends Controller
 
             DB::commit();
 
+            activity()
+                ->performedOn($proposal)
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'ip' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                    'lines_count' => count($validated['lines'])
+                ])
+                ->log('updated');
+
             return redirect()->route('proposals.index')
                 ->with('success', 'Proposta atualizada com sucesso!');
         } catch (\Exception $e) {
@@ -253,6 +274,21 @@ class ProposalController extends Controller
     public function destroy(Proposal $proposal)
     {
         try {
+            activity()
+                ->performedOn($proposal)
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'ip' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                    'deleted_proposal' => [
+                        'numero' => $proposal->numero,
+                        'entity' => $proposal->entity->name,
+                        'estado' => $proposal->estado,
+                        'valor_total' => $proposal->valor_total
+                    ]
+                ])
+                ->log('deleted');
+
             $proposal->delete();
             return redirect()->route('proposals.index')
                 ->with('success', 'Proposta eliminada com sucesso!');

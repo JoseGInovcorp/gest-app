@@ -9,6 +9,7 @@ use App\Models\Article;
 use App\Models\Company;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -113,6 +114,16 @@ class SupplierOrderController extends Controller
 
             DB::commit();
 
+            activity()
+                ->performedOn($order)
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'ip' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'items_count' => count($validated['items'])
+                ])
+                ->log('created');
+
             return redirect()->route('supplier-orders.index')
                 ->with('success', 'Encomenda de fornecedor criada com sucesso!');
         } catch (\Exception $e) {
@@ -198,6 +209,16 @@ class SupplierOrderController extends Controller
 
             DB::commit();
 
+            activity()
+                ->performedOn($supplierOrder)
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'ip' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                    'items_count' => count($validated['items'])
+                ])
+                ->log('updated');
+
             return redirect()->route('supplier-orders.index')
                 ->with('success', 'Encomenda de fornecedor atualizada com sucesso!');
         } catch (\Exception $e) {
@@ -212,6 +233,21 @@ class SupplierOrderController extends Controller
     public function destroy(SupplierOrder $supplierOrder)
     {
         try {
+            activity()
+                ->performedOn($supplierOrder)
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'ip' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                    'deleted_order' => [
+                        'number' => $supplierOrder->number,
+                        'supplier' => $supplierOrder->supplier->name,
+                        'status' => $supplierOrder->status,
+                        'total_value' => $supplierOrder->total_value
+                    ]
+                ])
+                ->log('deleted');
+
             $supplierOrder->delete();
 
             return redirect()->route('supplier-orders.index')

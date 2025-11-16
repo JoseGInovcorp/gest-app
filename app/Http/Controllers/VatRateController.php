@@ -52,7 +52,16 @@ class VatRateController extends Controller
             VatRate::where('is_default', true)->update(['is_default' => false]);
         }
 
-        VatRate::create($validated);
+        $vatRate = VatRate::create($validated);
+
+        activity()
+            ->performedOn($vatRate)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent()
+            ])
+            ->log('created');
 
         return redirect()->route('vat-rates.index')
             ->with('success', 'Taxa de IVA criada com sucesso.');
@@ -89,6 +98,15 @@ class VatRateController extends Controller
 
         $vatRate->update($validated);
 
+        activity()
+            ->performedOn($vatRate)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent()
+            ])
+            ->log('updated');
+
         return redirect()->route('vat-rates.index')
             ->with('success', 'Taxa de IVA atualizada com sucesso.');
     }
@@ -98,6 +116,20 @@ class VatRateController extends Controller
      */
     public function destroy(VatRate $vatRate)
     {
+        activity()
+            ->performedOn($vatRate)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'deleted_vat_rate' => [
+                    'name' => $vatRate->name,
+                    'rate' => $vatRate->rate,
+                    'is_default' => $vatRate->is_default
+                ]
+            ])
+            ->log('deleted');
+
         // Verificar se a taxa está em uso (opcional - adicionar verificação com Article se necessário)
         $vatRate->delete();
 

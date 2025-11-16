@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ContactFunction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\RedirectResponse;
@@ -49,7 +50,16 @@ class ContactFunctionController extends Controller
             'active' => 'boolean',
         ]);
 
-        ContactFunction::create($validated);
+        $contactFunction = ContactFunction::create($validated);
+
+        activity()
+            ->performedOn($contactFunction)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent()
+            ])
+            ->log('created');
 
         return redirect()
             ->route('contact-functions.index')
@@ -89,6 +99,15 @@ class ContactFunctionController extends Controller
 
         $contactFunction->update($validated);
 
+        activity()
+            ->performedOn($contactFunction)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent()
+            ])
+            ->log('updated');
+
         return redirect()
             ->route('contact-functions.index')
             ->with('success', 'Função atualizada com sucesso!');
@@ -99,6 +118,19 @@ class ContactFunctionController extends Controller
      */
     public function destroy(ContactFunction $contactFunction): RedirectResponse
     {
+        activity()
+            ->performedOn($contactFunction)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'deleted_function' => [
+                    'name' => $contactFunction->name,
+                    'description' => $contactFunction->description
+                ]
+            ])
+            ->log('deleted');
+
         // Verificar se a função está sendo usada em contactos
         if ($contactFunction->contacts()->exists()) {
             return redirect()

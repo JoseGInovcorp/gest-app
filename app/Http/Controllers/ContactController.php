@@ -8,6 +8,7 @@ use App\Models\Entity;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -116,7 +117,17 @@ class ContactController extends Controller
         $validated['number'] = Contact::getNextNumber();
         $validated['created_by'] = request()->user()?->id;
 
-        Contact::create($validated);
+        $contact = Contact::create($validated);
+
+        // Log activity
+        activity()
+            ->performedOn($contact)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ])
+            ->log('created');
 
         return redirect()->route('contacts.index')
             ->with('success', 'Contacto criado com sucesso!');
@@ -178,6 +189,16 @@ class ContactController extends Controller
 
         $contact->update($validated);
 
+        // Log activity
+        activity()
+            ->performedOn($contact)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ])
+            ->log('updated');
+
         return redirect()->route('contacts.index')
             ->with('success', 'Contacto atualizado com sucesso!');
     }
@@ -187,6 +208,21 @@ class ContactController extends Controller
      */
     public function destroy(Contact $contact): RedirectResponse
     {
+        // Log activity before delete
+        activity()
+            ->performedOn($contact)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'deleted_contact' => [
+                    'number' => $contact->number,
+                    'name' => $contact->first_name . ' ' . $contact->last_name,
+                    'email' => $contact->email,
+                ],
+            ])
+            ->log('deleted');
+
         $contact->delete();
 
         return redirect()->route('contacts.index')

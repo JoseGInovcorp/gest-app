@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CalendarEventAction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class CalendarEventActionController extends Controller
@@ -67,7 +68,16 @@ class CalendarEventActionController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        CalendarEventAction::create($validated);
+        $eventAction = CalendarEventAction::create($validated);
+
+        activity()
+            ->performedOn($eventAction)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent()
+            ])
+            ->log('created');
 
         return redirect()->route('calendar-event-actions.index')
             ->with('success', 'Ação de evento criada com sucesso!');
@@ -106,6 +116,15 @@ class CalendarEventActionController extends Controller
 
         $calendarEventAction->update($validated);
 
+        activity()
+            ->performedOn($calendarEventAction)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent()
+            ])
+            ->log('updated');
+
         return redirect()->route('calendar-event-actions.index')
             ->with('success', 'Ação de evento atualizada com sucesso!');
     }
@@ -116,6 +135,19 @@ class CalendarEventActionController extends Controller
     public function destroy(CalendarEventAction $calendarEventAction)
     {
         $name = $calendarEventAction->name;
+
+        activity()
+            ->performedOn($calendarEventAction)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'deleted_action' => [
+                    'name' => $name
+                ]
+            ])
+            ->log('deleted');
+
         $calendarEventAction->delete();
 
         return redirect()->route('calendar-event-actions.index')

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Company;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
@@ -58,6 +59,16 @@ class CompanyController extends Controller
         }
 
         $company->update($validated);
+
+        activity()
+            ->performedOn($company)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'logo_updated' => $request->hasFile('logo')
+            ])
+            ->log('updated');
 
         return redirect()
             ->route('company.edit')

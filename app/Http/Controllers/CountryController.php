@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Country;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\RedirectResponse;
@@ -115,6 +116,20 @@ class CountryController extends Controller
      */
     public function destroy(Country $country): RedirectResponse
     {
+        activity()
+            ->performedOn($country)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'deleted_country' => [
+                    'name' => $country->name,
+                    'iso_code' => $country->iso_code,
+                    'has_vies' => $country->has_vies
+                ]
+            ])
+            ->log('deleted');
+
         // Verificar se o país está sendo usado em entidades
         if ($country->entities()->exists()) {
             return redirect()
