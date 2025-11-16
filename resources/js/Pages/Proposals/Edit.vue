@@ -23,7 +23,7 @@
                     </div>
                 </div>
 
-                <!-- Botão Converter para Encomenda -->
+                <!-- Botões de Ação do Header -->
                 <div class="flex gap-3">
                     <!-- Botão Download PDF -->
                     <a
@@ -36,16 +36,16 @@
                     </a>
 
                     <!-- Botão Converter (só aparece se fechado) -->
-                    <button
+                    <Button
                         v-if="form.estado === 'fechado'"
                         @click="convertToOrder"
                         :disabled="converting"
-                        class="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white font-semibold rounded-lg shadow-sm transition duration-150"
+                        variant="success"
                     >
-                        <Truck class="h-4 w-4" />
+                        <Truck class="h-4 w-4 mr-2" />
                         <span v-if="converting">Convertendo...</span>
                         <span v-else>Converter para Encomenda</span>
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>
@@ -78,7 +78,7 @@
         </nav>
 
         <!-- Form -->
-        <form @submit.prevent="submit" class="space-y-6">
+        <Form @submit.prevent="submit" class="space-y-6">
             <!-- Informações Gerais -->
             <div
                 class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg"
@@ -90,20 +90,18 @@
                         Informações Gerais
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Número -->
-                        <div>
-                            <label
-                                for="numero"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                            >
-                                Número *
-                            </label>
-                            <input
-                                id="numero"
+                        <!-- Número (readonly) -->
+                        <FormField
+                            v-slot="{ field }"
+                            name="numero"
+                            label="Número"
+                            required
+                        >
+                            <Input
+                                v-bind="field"
                                 v-model="form.numero"
-                                type="text"
                                 readonly
-                                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white bg-gray-50 shadow-sm"
+                                class="bg-gray-50 dark:bg-gray-900"
                             />
                             <p
                                 v-if="form.errors.numero"
@@ -111,21 +109,18 @@
                             >
                                 {{ form.errors.numero }}
                             </p>
-                        </div>
+                        </FormField>
 
                         <!-- Cliente -->
-                        <div>
-                            <label
-                                for="entity_id"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                            >
-                                Cliente *
-                            </label>
-                            <select
-                                id="entity_id"
+                        <FormField
+                            v-slot="{ field }"
+                            name="entity_id"
+                            label="Cliente"
+                            required
+                        >
+                            <Select
+                                v-bind="field"
                                 v-model="form.entity_id"
-                                required
-                                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             >
                                 <option value="">Selecione um cliente</option>
                                 <option
@@ -135,28 +130,25 @@
                                 >
                                     {{ customer.name }}
                                 </option>
-                            </select>
+                            </Select>
                             <p
                                 v-if="form.errors.entity_id"
                                 class="mt-1 text-sm text-red-600 dark:text-red-400"
                             >
                                 {{ form.errors.entity_id }}
                             </p>
-                        </div>
+                        </FormField>
 
                         <!-- Data da Proposta -->
-                        <div>
-                            <label
-                                for="data_proposta"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                            >
-                                Data da Proposta
-                            </label>
-                            <input
-                                id="data_proposta"
+                        <FormField
+                            v-slot="{ field }"
+                            name="data_proposta"
+                            label="Data da Proposta"
+                        >
+                            <Input
+                                v-bind="field"
                                 v-model="form.data_proposta"
                                 type="date"
-                                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             />
                             <p
                                 v-if="form.errors.data_proposta"
@@ -164,21 +156,18 @@
                             >
                                 {{ form.errors.data_proposta }}
                             </p>
-                        </div>
+                        </FormField>
 
                         <!-- Validade -->
-                        <div>
-                            <label
-                                for="validade"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                            >
-                                Validade
-                            </label>
-                            <input
-                                id="validade"
+                        <FormField
+                            v-slot="{ field }"
+                            name="validade"
+                            label="Validade"
+                        >
+                            <Input
+                                v-bind="field"
                                 v-model="form.validade"
                                 type="date"
-                                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             />
                             <p
                                 v-if="form.errors.validade"
@@ -186,47 +175,43 @@
                             >
                                 {{ form.errors.validade }}
                             </p>
-                        </div>
+                        </FormField>
 
                         <!-- Estado -->
-                        <div>
-                            <label
-                                for="estado"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                            >
-                                Estado *
-                            </label>
-                            <select
-                                id="estado"
+                        <FormField
+                            v-slot="{ field }"
+                            name="estado"
+                            label="Estado"
+                            required
+                        >
+                            <Select
+                                v-bind="field"
                                 v-model="form.estado"
-                                required
-                                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             >
                                 <option value="rascunho">Rascunho</option>
                                 <option value="fechado">Fechado</option>
-                            </select>
+                            </Select>
                             <p
                                 v-if="form.errors.estado"
                                 class="mt-1 text-sm text-red-600 dark:text-red-400"
                             >
                                 {{ form.errors.estado }}
                             </p>
-                        </div>
+                        </FormField>
 
                         <!-- Observações -->
                         <div class="md:col-span-2">
-                            <label
-                                for="observacoes"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                            <FormField
+                                v-slot="{ field }"
+                                name="observacoes"
+                                label="Observações"
                             >
-                                Observações
-                            </label>
-                            <textarea
-                                id="observacoes"
-                                v-model="form.observacoes"
-                                rows="3"
-                                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                            ></textarea>
+                                <Textarea
+                                    v-bind="field"
+                                    v-model="form.observacoes"
+                                    rows="3"
+                                />
+                            </FormField>
                         </div>
                     </div>
                 </div>
@@ -243,14 +228,15 @@
                         >
                             Artigos
                         </h3>
-                        <button
+                        <Button
                             type="button"
                             @click="addItem"
-                            class="inline-flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow-sm transition duration-150"
+                            variant="default"
+                            size="sm"
                         >
                             <Plus class="h-4 w-4 mr-1" />
                             Adicionar Artigo
-                        </button>
+                        </Button>
                     </div>
 
                     <p
@@ -284,137 +270,133 @@
                             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                                 <!-- Artigo -->
                                 <div class="md:col-span-2">
-                                    <label
-                                        :for="'article_' + index"
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                    >
-                                        Artigo *
-                                    </label>
-                                    <select
-                                        :id="'article_' + index"
-                                        v-model="item.article_id"
-                                        @change="updateArticlePrice(index)"
+                                    <FormField
+                                        v-slot="{ field }"
+                                        :name="'lines.' + index + '.article_id'"
+                                        label="Artigo"
                                         required
-                                        class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                     >
-                                        <option value="">
-                                            Selecione um artigo
-                                        </option>
-                                        <option
-                                            v-for="article in articles"
-                                            :key="article.id"
-                                            :value="article.id"
+                                        <Select
+                                            v-bind="field"
+                                            v-model="item.article_id"
+                                            @change="updateArticlePrice(index)"
                                         >
-                                            {{ article.reference }} -
-                                            {{ article.name }}
-                                        </option>
-                                    </select>
-                                    <p
-                                        v-if="
-                                            form.errors[
-                                                `lines.${index}.article_id`
-                                            ]
-                                        "
-                                        class="mt-1 text-sm text-red-600 dark:text-red-400"
-                                    >
-                                        {{
-                                            form.errors[
-                                                `lines.${index}.article_id`
-                                            ]
-                                        }}
-                                    </p>
+                                            <option value="">
+                                                Selecione um artigo
+                                            </option>
+                                            <option
+                                                v-for="article in articles"
+                                                :key="article.id"
+                                                :value="article.id"
+                                            >
+                                                {{ article.reference }} -
+                                                {{ article.name }}
+                                            </option>
+                                        </Select>
+                                        <p
+                                            v-if="
+                                                form.errors[
+                                                    `lines.${index}.article_id`
+                                                ]
+                                            "
+                                            class="mt-1 text-sm text-red-600 dark:text-red-400"
+                                        >
+                                            {{
+                                                form.errors[
+                                                    `lines.${index}.article_id`
+                                                ]
+                                            }}
+                                        </p>
+                                    </FormField>
                                 </div>
 
                                 <!-- Fornecedor -->
                                 <div>
-                                    <label
-                                        :for="'supplier_' + index"
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                                    <FormField
+                                        v-slot="{ field }"
+                                        :name="'lines.' + index + '.entity_id'"
+                                        label="Fornecedor"
                                     >
-                                        Fornecedor
-                                    </label>
-                                    <select
-                                        :id="'supplier_' + index"
-                                        v-model="item.entity_id"
-                                        class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                    >
-                                        <option value="">Sem fornecedor</option>
-                                        <option
-                                            v-for="supplier in suppliers"
-                                            :key="supplier.id"
-                                            :value="supplier.id"
+                                        <Select
+                                            v-bind="field"
+                                            v-model="item.entity_id"
                                         >
-                                            {{ supplier.name }}
-                                        </option>
-                                    </select>
+                                            <option value="">Sem fornecedor</option>
+                                            <option
+                                                v-for="supplier in suppliers"
+                                                :key="supplier.id"
+                                                :value="supplier.id"
+                                            >
+                                                {{ supplier.name }}
+                                            </option>
+                                        </Select>
+                                    </FormField>
                                 </div>
 
                                 <!-- Quantidade -->
                                 <div>
-                                    <label
-                                        :for="'quantidade_' + index"
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                    >
-                                        Quantidade *
-                                    </label>
-                                    <input
-                                        :id="'quantidade_' + index"
-                                        v-model.number="item.quantidade"
-                                        @input="calculateItemTotal(index)"
-                                        type="number"
-                                        step="0.01"
-                                        min="0.01"
+                                    <FormField
+                                        v-slot="{ field }"
+                                        :name="'lines.' + index + '.quantidade'"
+                                        label="Quantidade"
                                         required
-                                        class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                    />
-                                    <p
-                                        v-if="
-                                            form.errors[
-                                                `lines.${index}.quantidade`
-                                            ]
-                                        "
-                                        class="mt-1 text-sm text-red-600 dark:text-red-400"
                                     >
-                                        {{
-                                            form.errors[
-                                                `lines.${index}.quantidade`
-                                            ]
-                                        }}
-                                    </p>
+                                        <Input
+                                            v-bind="field"
+                                            v-model.number="item.quantidade"
+                                            @input="calculateItemTotal(index)"
+                                            type="number"
+                                            step="0.01"
+                                            min="0.01"
+                                        />
+                                        <p
+                                            v-if="
+                                                form.errors[
+                                                    `lines.${index}.quantidade`
+                                                ]
+                                            "
+                                            class="mt-1 text-sm text-red-600 dark:text-red-400"
+                                        >
+                                            {{
+                                                form.errors[
+                                                    `lines.${index}.quantidade`
+                                                ]
+                                            }}
+                                        </p>
+                                    </FormField>
                                 </div>
 
                                 <!-- Preço Unitário -->
                                 <div>
-                                    <label
-                                        :for="'preco_custo_' + index"
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                    >
-                                        Preço Unit. *
-                                    </label>
-                                    <input
-                                        :id="'preco_custo_' + index"
-                                        v-model.number="item.preco_custo"
-                                        @input="calculateItemTotal(index)"
-                                        type="number"
-                                        step="0.01"
-                                        min="0"
+                                    <FormField
+                                        v-slot="{ field }"
+                                        :name="'lines.' + index + '.preco_custo'"
+                                        label="Preço Unit."
                                         required
-                                        class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                    />
-                                    <p
-                                        v-if="
-                                            form.errors[
-                                                `lines.${index}.preco_custo`
-                                            ]
-                                        "
-                                        class="mt-1 text-sm text-red-600 dark:text-red-400"
                                     >
-                                        {{
-                                            form.errors[
-                                                `lines.${index}.preco_custo`
-                                            ]
-                                        }}
-                                    </p>
+                                        <Input
+                                            v-bind="field"
+                                            v-model.number="item.preco_custo"
+                                            @input="calculateItemTotal(index)"
+                                            type="number"
+                                            step="0.01"
+                                            min="0"
+                                        />
+                                        <p
+                                            v-if="
+                                                form.errors[
+                                                    `lines.${index}.preco_custo`
+                                                ]
+                                            "
+                                            class="mt-1 text-sm text-red-600 dark:text-red-400"
+                                        >
+                                            {{
+                                                form.errors[
+                                                    `lines.${index}.preco_custo`
+                                                ]
+                                            }}
+                                        </p>
+                                    </FormField>
                                 </div>
 
                                 <!-- Total da Linha -->
@@ -483,16 +465,16 @@
                 >
                     Cancelar
                 </Link>
-                <button
+                <Button
                     type="submit"
                     :disabled="form.processing"
-                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold rounded-lg shadow-sm transition duration-150"
+                    variant="default"
                 >
                     <span v-if="form.processing">Guardando...</span>
                     <span v-else>Atualizar Proposta</span>
-                </button>
+                </Button>
             </div>
-        </form>
+        </Form>
     </AuthenticatedLayout>
 </template>
 
@@ -500,6 +482,12 @@
 import { ref, computed } from "vue";
 import { Head, Link, useForm, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import Form from "@/Components/ui/Form.vue";
+import FormField from "@/Components/ui/FormField.vue";
+import Input from "@/Components/ui/Input.vue";
+import Select from "@/Components/ui/Select.vue";
+import Textarea from "@/Components/ui/Textarea.vue";
+import Button from "@/Components/ui/Button.vue";
 import { FileText, Plus, Trash2, Package, Truck } from "lucide-vue-next";
 
 const props = defineProps({
