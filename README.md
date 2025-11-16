@@ -8,8 +8,8 @@ Este é o meu projeto final de estágio, desenvolvido na **Inovcorp** entre 6 e 
 
 O objetivo é criar um sistema de gestão empresarial para PMEs, com funcionalidades de gestão comercial, financeira e operacional.
 
-**Versão Atual:** v0.15.1  
-**Progresso:** 85% (17 de 20 módulos concluídos)  
+**Versão Atual:** v0.16.0  
+**Progresso:** 90% (18 de 20 módulos concluídos)  
 **Prazo de Entrega:** 18 Nov 2025
 
 ## ✅ O que já está pronto
@@ -113,6 +113,7 @@ O objetivo é criar um sistema de gestão empresarial para PMEs, com funcionalid
 -   Badges coloridos por tipo de ação (created=verde, updated=azul, deleted=vermelho)
 
 **Cobertura de Logging:**
+
 -   ✅ Config (5): Contact, Article, Country, ContactFunction, VatRate
 -   ✅ Business (6): Proposal, CustomerOrder, SupplierOrder, BankAccount, ClientAccount, SupplierInvoice
 -   ✅ Calendar (3): CalendarEvent, CalendarEventType, CalendarEventAction
@@ -121,6 +122,7 @@ O objetivo é criar um sistema de gestão empresarial para PMEs, com funcionalid
 -   ✅ Access (2): User, Role
 
 **Propriedades Capturadas:**
+
 -   IP address em todos os logs
 -   User agent (browser info) em todos os logs
 -   Deleted entity details (antes de eliminar)
@@ -266,9 +268,38 @@ Gestão de encomendas a fornecedores, criadas automaticamente ou manualmente.
     -   Botão FileText roxo
     -   Layout A4 otimizado
 
+### Módulo 20: Faturas de Fornecedores (v0.16.0)
+
+Sistema de gestão de faturas recebidas de fornecedores com workflow de pagamento.
+
+**Campos:**
+
+-   Numeração automática: FF-YYYY-#### (ex: FF-2025-0001)
+-   Data fatura, data vencimento
+-   Fornecedor (entidade), encomenda fornecedor (opcional)
+-   Valor total, estado (pendente/paga)
+-   Upload de documento (PDF, imagens)
+-   Comprovativo de pagamento
+
+**Funcionalidades:**
+
+-   ✅ CRUD completo com Shadcn/ui Form components
+-   ✅ Interface moderna e consistente (h1 2xl, ícones h-6, breadcrumbs simplificados)
+-   ✅ Página de visualização detalhada com downloads
+-   ✅ Modal de comprovativo ao alterar estado para "paga"
+-   ✅ Envio automático de email ao fornecedor com comprovativo anexo
+-   ✅ Filtros por fornecedor, estado, período
+
+**Validações:**
+
+-   Fornecedor obrigatório
+-   Valor total > 0
+-   Data vencimento ≥ data fatura
+-   Upload limitado a 5MB
+
 ## 📋 Próximos Passos
 
-Faltam 3 módulos para completar o projeto:
+Faltam 2 módulos para completar o projeto:
 
 -   [ ] Faturas de Clientes (customerInvoices)
 -   [ ] Recibos (receipts)

@@ -4,6 +4,104 @@ Registo das principais mudanças e desenvolvimentos realizados durante o estági
 
 ---
 
+## v0.16.0 — 16 Nov 2025
+
+**Supplier Invoices - Refatoração Completa para Shadcn Form & Consistência Visual**
+
+### O que foi feito
+
+**Refatoração do Módulo Faturas Fornecedor:**
+
+-   ✅ **Create.vue** refatorado com Shadcn/ui Form components
+    -   Todos os 5 campos convertidos para FormField + Input/Select
+    -   Computed filteredOrders para encomendas do fornecedor
+    -   Redução de ~40% no código, melhor legibilidade
+-   ✅ **Edit.vue** refatorado com Shadcn/ui Form components
+    -   6 seções incluindo campo readonly para número da fatura
+    -   Modal de comprovativo de pagamento funcional
+    -   Corrigida estrutura de breadcrumbs duplicada (500 error)
+-   ✅ **Show.vue** criada do zero
+    -   Layout 2 colunas: informações principais + sidebar
+    -   Seção de documentos com downloads (fatura + comprovativo)
+    -   Botões de navegação: Voltar (ArrowLeft) + Editar (Pencil)
+    -   Metadados do sistema (created_at, updated_at)
+-   ✅ **Index.vue** corrigida e atualizada
+    -   Toolbar integrado dentro do card principal
+    -   Filtros inline (1ª linha: search, fornecedor, estado, botão criar)
+    -   Filtros de data na 2ª linha
+    -   Corrigida paginação (estava dentro `</tbody>` causando erro de load)
+    -   Ícones de ação padronizados (h-4 w-4)
+
+**Consistência Visual Aplicada (4 páginas):**
+
+-   Header compacto: h1 2xl (não 3xl), ícone h-6 w-6 (não h-8 w-8)
+-   Ícone background: p-2 rounded-lg (não p-3 rounded-full)
+-   Breadcrumbs simplificados: separador "/" sem divs extras
+-   Removidos wrappers py-12 e max-w-*
+-   Botões com gap-3, rounded-lg, transition-colors
+
+**Padrão de Implementação:**
+
+```vue
+<!-- Antes (HTML puro) -->
+<input type="text" v-model="form.field" class="..." />
+
+<!-- Depois (Shadcn Form) -->
+<FormField id="field" label="Label" :error="form.errors.field">
+    <Input v-model="form.field" />
+</FormField>
+```
+
+**Imports Individuais:**
+
+```javascript
+import Form from "@/Components/ui/Form.vue";
+import FormField from "@/Components/ui/FormField.vue";
+import Input from "@/Components/ui/Input.vue";
+import Select from "@/Components/ui/Select.vue";
+import Button from "@/Components/ui/Button.vue";
+```
+
+### Bugs Corrigidos
+
+1. **Index.vue - Module Load Error**
+    - Problema: Paginação HTML dentro `</tbody>` causava "Failed to fetch dynamically imported module"
+    - Solução: Movida paginação para fora da estrutura `<table>`
+2. **Edit.vue - 500 Internal Server Error**
+    - Problema: Breadcrumbs duplicados (dois `</nav>` closures)
+    - Solução: Removidas tags de fecho duplicadas
+3. **Index.vue - Botão visualizar não funcionava**
+    - Problema: Show.vue não existia
+    - Solução: Criada página Show.vue completa
+4. **Show.vue - Faltava botão voltar**
+    - Problema: Apenas botão editar no header
+    - Solução: Adicionado Link com ArrowLeft icon
+
+### Ficheiros Modificados
+
+-   resources/js/Pages/SupplierInvoices/Create.vue (refatorado)
+-   resources/js/Pages/SupplierInvoices/Edit.vue (refatorado + corrigido)
+-   resources/js/Pages/SupplierInvoices/Index.vue (corrigido + atualizado)
+-   resources/js/Pages/SupplierInvoices/Show.vue (criado)
+
+### Estatísticas
+
+-   **Páginas refatoradas:** 4 (Create, Edit, Index, Show)
+-   **Redução de código:** ~40% em Create/Edit
+-   **Componentes Shadcn:** Form, FormField, Input, Select, Button
+-   **Ícones Lucide:** FileText, Plus, Eye, Pencil, Trash2, Download, ArrowLeft, Mail
+-   **Bugs corrigidos:** 4 (pagination, breadcrumbs, view button, back button)
+
+### Impacto
+
+-   ✅ 100% compliance com especificação Shadcn/ui Form
+-   ✅ Consistência visual com outros módulos (CustomerOrders, ClientAccounts)
+-   ✅ Código mais limpo e manutenível (~40% menos linhas)
+-   ✅ UX melhorada (botão voltar, view funcional, filtros integrados)
+-   ✅ Zero erros de sintaxe ou carregamento
+
+---
+
 ## v0.15.1 — 16 Nov 2025
 
 **Activity Logging Completo em Todos os Controllers**
@@ -19,6 +117,7 @@ Registo das principais mudanças e desenvolvimentos realizados durante o estági
 -   ✅ Labels em português para todos os módulos (Entity→Entidades, Contact→Contactos, etc.)
 
 **Controllers com Logging (Priority 1 - Config):**
+
 -   ContactController: store, update, destroy com deleted_contact details
 -   ArticleController: store, update, destroy com deleted_article details (referencia, nome, preco)
 -   CountryController: store, update, destroy com deleted_country details (name, iso_code)
@@ -26,6 +125,7 @@ Registo das principais mudanças e desenvolvimentos realizados durante o estági
 -   VatRateController: store, update, destroy com deleted_vat_rate details (name, rate, is_default)
 
 **Controllers com Logging (Priority 2 - Business):**
+
 -   ProposalController: store/update após DB.commit() com lines_count, destroy com deleted_proposal
 -   CustomerOrderController: store/update após DB.commit() com items_count, destroy com deleted_order
 -   SupplierOrderController: store/update após DB.commit() com items_count, destroy com deleted_order
@@ -34,12 +134,14 @@ Registo das principais mudanças e desenvolvimentos realizados durante o estági
 -   SupplierInvoiceController: store, update, destroy com deleted_invoice details
 
 **Controllers com Logging (Priority 3 - Calendar/Settings):**
+
 -   CalendarEventController: store/update após sharedWith sync, destroy com deleted_event details
 -   CalendarEventTypeController: store, update, destroy com deleted_type details (name, color)
 -   CalendarEventActionController: store, update, destroy com deleted_action details
 -   CompanyController: update com logo_updated boolean (singleton - sem create/delete)
 
 **UI Atualizada - Logs/Index.vue:**
+
 -   18 módulos mapeados: Entity, Contact, Article, Country, ContactFunction, VatRate, User, Role
 -   Novos: Proposal, CustomerOrder, SupplierOrder, BankAccount, ClientAccount, SupplierInvoice
 -   Novos: CalendarEvent, CalendarEventType, CalendarEventAction, Company
@@ -49,6 +151,7 @@ Registo das principais mudanças e desenvolvimentos realizados durante o estági
 ### Padrão de Implementação
 
 **Código consistente em todos os controllers:**
+
 ```php
 use Illuminate\Support\Facades\Auth;
 
@@ -88,20 +191,24 @@ $model->delete();
 ### Casos Especiais Tratados
 
 **Transações DB:**
+
 -   ProposalController, CustomerOrderController, SupplierOrderController
 -   Logs colocados APÓS `DB::commit()` para garantir sucesso da transação
 -   Propriedades adicionais: `lines_count` e `items_count`
 
 **Deleted Entity Details:**
+
 -   Todos os destroy() methods capturam detalhes ANTES de `$model->delete()`
 -   Informações preservadas: números, nomes, valores, estados
 -   Permite reconstruir histórico completo mesmo após eliminação
 
 **Singleton Pattern:**
+
 -   CompanyController apenas tem update() (sem create/delete)
 -   Propriedade adicional `logo_updated` (boolean) quando logo é alterado
 
 **Shared Relationships:**
+
 -   CalendarEventController logs após `sharedWith->sync()` para incluir partilha
 
 ### Estatísticas

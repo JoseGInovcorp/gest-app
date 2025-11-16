@@ -109,107 +109,74 @@ const downloadDocument = (path) => {
     <Head title="Faturas de Fornecedores" />
 
     <AuthenticatedLayout>
-        <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <!-- Header -->
-                <div class="mb-6 flex items-center">
-                    <div class="flex items-center space-x-4 flex-1">
-                        <div
-                            class="p-3 bg-red-100 rounded-full dark:bg-red-900"
-                        >
-                            <FileText
-                                class="h-8 w-8 text-red-600 dark:text-red-300"
-                            />
-                        </div>
-                        <div>
-                            <h1
-                                class="text-3xl font-bold text-gray-900 dark:text-white"
-                            >
-                                Faturas de Fornecedores
-                            </h1>
-                            <p class="text-gray-600 dark:text-gray-400 mt-1">
-                                Gestão de faturas e pagamentos a fornecedores
-                            </p>
-                        </div>
-                    </div>
-                    <Link
-                        v-if="can.create"
-                        :href="route('supplier-invoices.create')"
-                        class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150"
-                    >
-                        <Plus class="h-4 w-4 mr-2" />
-                        Nova Fatura
-                    </Link>
+        <!-- Header -->
+        <div class="mb-6">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-red-100 dark:bg-red-900/20 rounded-lg">
+                    <FileText class="h-6 w-6 text-red-600 dark:text-red-400" />
                 </div>
+                <div>
+                    <h1
+                        class="text-2xl font-bold text-gray-900 dark:text-white"
+                    >
+                        Faturas de Fornecedores
+                    </h1>
+                    <p class="text-gray-500 dark:text-gray-400">
+                        Gestão de faturas e pagamentos a fornecedores
+                    </p>
+                </div>
+            </div>
+        </div>
 
-                <!-- Breadcrumbs -->
-                <nav class="flex mb-6" aria-label="Breadcrumb">
-                    <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                        <li class="inline-flex items-center">
-                            <Link
-                                :href="route('dashboard')"
-                                class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white"
-                            >
-                                Dashboard
-                            </Link>
-                        </li>
-                        <li>
-                            <div class="flex items-center">
-                                <span class="mx-2 text-gray-400">/</span>
-                                <span
-                                    class="text-sm font-medium text-gray-500 dark:text-gray-400"
-                                >
-                                    Financeiro
-                                </span>
+        <!-- Breadcrumbs -->
+        <nav class="mb-6">
+            <ol
+                class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400"
+            >
+                <li>
+                    <Link
+                        :href="route('dashboard')"
+                        class="hover:text-gray-700 dark:hover:text-gray-200"
+                    >
+                        Dashboard
+                    </Link>
+                </li>
+                <li>/</li>
+                <li class="text-gray-900 dark:text-white">
+                    Faturas de Fornecedores
+                </li>
+            </ol>
+        </nav>
+
+        <!-- Main Card -->
+        <div
+            class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg"
+        >
+            <!-- Toolbar -->
+            <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex flex-col gap-4">
+                    <div
+                        class="flex flex-col sm:flex-row justify-between gap-4"
+                    >
+                        <div class="flex flex-col sm:flex-row gap-4 flex-1">
+                            <!-- Pesquisa -->
+                            <div class="flex-1 max-w-md">
+                                <input
+                                    type="text"
+                                    v-model="filterForm.search"
+                                    placeholder="Pesquisar por número ou fornecedor..."
+                                    class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                    @input="applyFilters"
+                                />
                             </div>
-                        </li>
-                        <li aria-current="page">
-                            <div class="flex items-center">
-                                <span class="mx-2 text-gray-400">/</span>
-                                <span
-                                    class="text-sm font-medium text-gray-500 dark:text-gray-400"
-                                >
-                                    Faturas de Fornecedores
-                                </span>
-                            </div>
-                        </li>
-                    </ol>
-                </nav>
 
-                <!-- Filtros -->
-                <div
-                    class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6"
-                >
-                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                        <!-- Pesquisa -->
-                        <div>
-                            <label
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                            >
-                                Pesquisar
-                            </label>
-                            <input
-                                type="text"
-                                v-model="filterForm.search"
-                                placeholder="Número ou fornecedor..."
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                @input="applyFilters"
-                            />
-                        </div>
-
-                        <!-- Fornecedor -->
-                        <div>
-                            <label
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                            >
-                                Fornecedor
-                            </label>
+                            <!-- Filtro Fornecedor -->
                             <select
                                 v-model="filterForm.supplier_id"
                                 @change="applyFilters"
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             >
-                                <option value="">Todos</option>
+                                <option value="">Todos fornecedores</option>
                                 <option
                                     v-for="supplier in suppliers"
                                     :key="supplier.id"
@@ -218,60 +185,46 @@ const downloadDocument = (path) => {
                                     {{ supplier.name }}
                                 </option>
                             </select>
-                        </div>
 
-                        <!-- Estado -->
-                        <div>
-                            <label
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                            >
-                                Estado
-                            </label>
+                            <!-- Filtro Estado -->
                             <select
                                 v-model="filterForm.estado"
                                 @change="applyFilters"
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             >
-                                <option value="">Todos</option>
-                                <option value="pendente">
-                                    Pendente de Pagamento
-                                </option>
+                                <option value="">Todos os estados</option>
+                                <option value="pendente">Pendente</option>
                                 <option value="paga">Paga</option>
                             </select>
                         </div>
 
-                        <!-- Data Início -->
-                        <div>
-                            <label
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                            >
-                                Data Início
-                            </label>
-                            <input
-                                type="date"
-                                v-model="filterForm.data_inicio"
-                                @change="applyFilters"
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            />
-                        </div>
-
-                        <!-- Data Fim -->
-                        <div>
-                            <label
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                            >
-                                Data Fim
-                            </label>
-                            <input
-                                type="date"
-                                v-model="filterForm.data_fim"
-                                @change="applyFilters"
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            />
-                        </div>
+                        <!-- Botão Criar -->
+                        <Link
+                            v-if="can.create"
+                            :href="route('supplier-invoices.create')"
+                            class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm transition duration-150"
+                        >
+                            <Plus class="h-5 w-5 mr-2" />
+                            Nova Fatura
+                        </Link>
                     </div>
 
-                    <div class="mt-4 flex justify-end">
+                    <!-- Filtros de Data (segunda linha) -->
+                    <div class="flex gap-4">
+                        <input
+                            type="date"
+                            v-model="filterForm.data_inicio"
+                            @change="applyFilters"
+                            placeholder="Data início"
+                            class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        />
+                        <input
+                            type="date"
+                            v-model="filterForm.data_fim"
+                            @change="applyFilters"
+                            placeholder="Data fim"
+                            class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        />
                         <button
                             @click="clearFilters"
                             class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
@@ -280,272 +233,234 @@ const downloadDocument = (path) => {
                         </button>
                     </div>
                 </div>
+            </div>
 
-                <!-- Tabela -->
-                <div
-                    class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg"
+            <!-- Table -->
+            <div class="overflow-x-auto">
+                <table
+                    class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"
                 >
-                    <div class="overflow-x-auto">
-                        <table
-                            class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"
-                        >
-                            <thead class="bg-gray-50 dark:bg-gray-900">
-                                <tr>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                                    >
-                                        Data
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                                    >
-                                        Número
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                                    >
-                                        Fornecedor
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                                    >
-                                        Encomenda
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                                    >
-                                        Documento
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                                    >
-                                        Valor Total
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                                    >
-                                        Estado
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                                    >
-                                        Ações
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody
-                                class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"
+                    <thead class="bg-gray-50 dark:bg-gray-900">
+                        <tr>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
                             >
-                                <tr
-                                    v-for="invoice in invoices.data"
-                                    :key="invoice.id"
-                                    class="hover:bg-gray-50 dark:hover:bg-gray-700"
-                                >
-                                    <td
-                                        class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"
-                                    >
-                                        {{ formatDate(invoice.data_fatura) }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span
-                                            class="text-sm font-medium text-gray-900 dark:text-gray-100"
-                                        >
-                                            {{ invoice.numero }}
-                                        </span>
-                                    </td>
-                                    <td
-                                        class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"
-                                    >
-                                        {{ invoice.supplier?.nome || "-" }}
-                                    </td>
-                                    <td
-                                        class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"
-                                    >
-                                        {{
-                                            invoice.supplier_order?.number ||
-                                            "-"
-                                        }}
-                                    </td>
-                                    <td
-                                        class="px-6 py-4 whitespace-nowrap text-sm"
-                                    >
-                                        <button
-                                            v-if="invoice.documento"
-                                            @click="
-                                                downloadDocument(
-                                                    invoice.documento
-                                                )
-                                            "
-                                            class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                                        >
-                                            <Download class="h-5 w-5" />
-                                        </button>
-                                        <span v-else class="text-gray-400"
-                                            >-</span
-                                        >
-                                    </td>
-                                    <td
-                                        class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100"
-                                    >
-                                        {{
-                                            formatCurrency(invoice.valor_total)
-                                        }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span
-                                            :class="
-                                                getEstadoBadgeClass(
-                                                    invoice.estado
-                                                )
-                                            "
-                                            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                                        >
-                                            {{ getEstadoLabel(invoice.estado) }}
-                                        </span>
-                                    </td>
-                                    <td
-                                        class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
-                                    >
-                                        <div class="flex justify-end space-x-2">
-                                            <Link
-                                                v-if="can.view"
-                                                :href="
-                                                    route(
-                                                        'supplier-invoices.show',
-                                                        invoice.id
-                                                    )
-                                                "
-                                                class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
-                                                title="Visualizar"
-                                            >
-                                                <Eye class="h-5 w-5" />
-                                            </Link>
-                                            <Link
-                                                v-if="can.edit"
-                                                :href="
-                                                    route(
-                                                        'supplier-invoices.edit',
-                                                        invoice.id
-                                                    )
-                                                "
-                                                class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                                                title="Editar"
-                                            >
-                                                <Pencil class="h-5 w-5" />
-                                            </Link>
-                                            <button
-                                                v-if="can.delete"
-                                                @click="deleteInvoice(invoice)"
-                                                class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                                                title="Eliminar"
-                                            >
-                                                <Trash2 class="h-5 w-5" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr
-                                    v-if="
-                                        !invoices.data ||
-                                        invoices.data.length === 0
-                                    "
-                                >
-                                    <td
-                                        colspan="8"
-                                        class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400"
-                                    >
-                                        Nenhuma fatura encontrada.
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Paginação -->
-                    <div
-                        v-if="invoices.links && invoices.links.length > 3"
-                        class="bg-white dark:bg-gray-800 px-4 py-3 border-t border-gray-200 dark:border-gray-700 sm:px-6"
+                                Data
+                            </th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                            >
+                                Número
+                            </th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                            >
+                                Fornecedor
+                            </th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                            >
+                                Encomenda
+                            </th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                            >
+                                Documento
+                            </th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                            >
+                                Valor Total
+                            </th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                            >
+                                Estado
+                            </th>
+                            <th
+                                class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                            >
+                                Ações
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody
+                        class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"
                     >
-                        <div class="flex items-center justify-between">
-                            <div class="flex-1 flex justify-between sm:hidden">
-                                <Link
-                                    v-if="invoices.links[0].url"
-                                    :href="invoices.links[0].url"
-                                    class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                                >
-                                    Anterior
-                                </Link>
-                                <Link
-                                    v-if="
-                                        invoices.links[
-                                            invoices.links.length - 1
-                                        ].url
-                                    "
-                                    :href="
-                                        invoices.links[
-                                            invoices.links.length - 1
-                                        ].url
-                                    "
-                                    class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                                >
-                                    Próxima
-                                </Link>
-                            </div>
-                            <div
-                                class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between"
+                        <tr
+                            v-for="invoice in invoices.data"
+                            :key="invoice.id"
+                            class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                        >
+                            <td
+                                class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"
                             >
-                                <div>
-                                    <p
-                                        class="text-sm text-gray-700 dark:text-gray-400"
-                                    >
-                                        Mostrando
-                                        <span class="font-medium">{{
-                                            invoices.from || 0
-                                        }}</span>
-                                        a
-                                        <span class="font-medium">{{
-                                            invoices.to || 0
-                                        }}</span>
-                                        de
-                                        <span class="font-medium">{{
-                                            invoices.total || 0
-                                        }}</span>
-                                        resultados
-                                    </p>
-                                </div>
-                                <div>
-                                    <nav
-                                        class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
-                                        aria-label="Pagination"
-                                    >
-                                        <template
-                                            v-for="(
-                                                link, index
-                                            ) in invoices.links"
-                                            :key="index"
-                                        >
-                                            <Link
-                                                v-if="link.url"
-                                                :href="link.url"
-                                                :class="[
-                                                    link.active
-                                                        ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                                                        : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50',
-                                                    'relative inline-flex items-center px-4 py-2 border text-sm font-medium dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400',
-                                                ]"
-                                                v-html="link.label"
-                                            />
-                                            <span
-                                                v-else
-                                                :class="[
-                                                    'relative inline-flex items-center px-4 py-2 border border-gray-300 bg-gray-100 text-sm font-medium text-gray-400 dark:bg-gray-900 dark:border-gray-700',
-                                                ]"
-                                                v-html="link.label"
-                                            />
-                                        </template>
-                                    </nav>
-                                </div>
-                            </div>
+                                {{ formatDate(invoice.data_fatura) }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span
+                                    class="text-sm font-medium text-gray-900 dark:text-gray-100"
+                                >
+                                    {{ invoice.numero }}
+                                </span>
+                            </td>
+                            <td
+                                class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"
+                            >
+                                {{ invoice.supplier?.nome || "-" }}
+                            </td>
+                            <td
+                                class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"
+                            >
+                                {{ invoice.supplier_order?.number || "-" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <button
+                                    v-if="invoice.documento"
+                                    @click="downloadDocument(invoice.documento)"
+                                    class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                                >
+                                    <Download class="h-5 w-5" />
+                                </button>
+                                <span v-else class="text-gray-400">-</span>
+                            </td>
+                            <td
+                                class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100"
+                            >
+                                {{ formatCurrency(invoice.valor_total) }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span
+                                    :class="getEstadoBadgeClass(invoice.estado)"
+                                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                >
+                                    {{ getEstadoLabel(invoice.estado) }}
+                                </span>
+                            </td>
+                            <td
+                                class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2"
+                            >
+                                <Link
+                                    v-if="can.view"
+                                    :href="
+                                        route(
+                                            'supplier-invoices.show',
+                                            invoice.id
+                                        )
+                                    "
+                                    class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 inline-flex items-center"
+                                    title="Visualizar"
+                                >
+                                    <Eye class="h-4 w-4" />
+                                </Link>
+                                <Link
+                                    v-if="can.edit"
+                                    :href="
+                                        route(
+                                            'supplier-invoices.edit',
+                                            invoice.id
+                                        )
+                                    "
+                                    class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 inline-flex items-center"
+                                    title="Editar"
+                                >
+                                    <Pencil class="h-4 w-4" />
+                                </Link>
+                                <button
+                                    v-if="can.delete"
+                                    @click="deleteInvoice(invoice)"
+                                    class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 inline-flex items-center"
+                                    title="Eliminar"
+                                >
+                                    <Trash2 class="h-4 w-4" />
+                                </button>
+                            </td>
+                        </tr>
+                        <tr v-if="!invoices.data || invoices.data.length === 0">
+                            <td
+                                colspan="8"
+                                class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400"
+                            >
+                                Nenhuma fatura encontrada.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginação -->
+            <div
+                v-if="invoices.links && invoices.links.length > 3"
+                class="bg-white dark:bg-gray-800 px-4 py-3 border-t border-gray-200 dark:border-gray-700 sm:px-6"
+            >
+                <div class="flex items-center justify-between">
+                    <div class="flex-1 flex justify-between sm:hidden">
+                        <Link
+                            v-if="invoices.links[0].url"
+                            :href="invoices.links[0].url"
+                            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                        >
+                            Anterior
+                        </Link>
+                        <Link
+                            v-if="invoices.links[invoices.links.length - 1].url"
+                            :href="
+                                invoices.links[invoices.links.length - 1].url
+                            "
+                            class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                        >
+                            Próxima
+                        </Link>
+                    </div>
+                    <div
+                        class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between"
+                    >
+                        <div>
+                            <p class="text-sm text-gray-700 dark:text-gray-400">
+                                Mostrando
+                                <span class="font-medium">{{
+                                    invoices.from || 0
+                                }}</span>
+                                a
+                                <span class="font-medium">{{
+                                    invoices.to || 0
+                                }}</span>
+                                de
+                                <span class="font-medium">{{
+                                    invoices.total || 0
+                                }}</span>
+                                resultados
+                            </p>
+                        </div>
+                        <div>
+                            <nav
+                                class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+                                aria-label="Pagination"
+                            >
+                                <template
+                                    v-for="(link, index) in invoices.links"
+                                    :key="index"
+                                >
+                                    <Link
+                                        v-if="link.url"
+                                        :href="link.url"
+                                        :class="[
+                                            link.active
+                                                ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                                                : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50',
+                                            'relative inline-flex items-center px-4 py-2 border text-sm font-medium dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400',
+                                        ]"
+                                        v-html="link.label"
+                                    />
+                                    <span
+                                        v-else
+                                        :class="[
+                                            'relative inline-flex items-center px-4 py-2 border border-gray-300 bg-gray-100 text-sm font-medium text-gray-400 dark:bg-gray-900 dark:border-gray-700',
+                                        ]"
+                                        v-html="link.label"
+                                    />
+                                </template>
+                            </nav>
                         </div>
                     </div>
                 </div>
