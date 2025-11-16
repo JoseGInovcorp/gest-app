@@ -265,7 +265,9 @@
                     :loading="false"
                 >
                     <template #cell-data_movimento="{ item }">
-                        <span class="whitespace-nowrap">{{ formatDate(item.data_movimento) }}</span>
+                        <span class="whitespace-nowrap">{{
+                            formatDate(item.data_movimento)
+                        }}</span>
                     </template>
 
                     <template #cell-cliente="{ item }">
@@ -328,7 +330,7 @@
 
                     <template #cell-acoes="{ item }">
                         <div class="flex items-center justify-center gap-1">
-                            <Link
+                            <a
                                 v-if="item.invoice_id"
                                 :href="route('client-accounts.pdf', item.id)"
                                 target="_blank"
@@ -336,7 +338,7 @@
                                 title="Download PDF Fatura"
                             >
                                 <FileText class="h-4 w-4" />
-                            </Link>
+                            </a>
                             <Link
                                 :href="route('client-accounts.show', item.id)"
                                 class="p-1.5 text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
@@ -363,7 +365,9 @@
 
                     <template #empty>
                         <div class="text-center py-12">
-                            <DollarSign class="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                            <DollarSign
+                                class="h-12 w-12 text-gray-400 mx-auto mb-4"
+                            />
                             <p class="text-gray-500 dark:text-gray-400">
                                 Nenhum movimento encontrado.
                             </p>
@@ -419,7 +423,15 @@ import { ref, computed } from "vue";
 import { Head, Link, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import DataTable from "@/Components/ui/DataTable.vue";
-import { DollarSign, Search, Plus, Eye, Pencil, Trash2, FileText } from "lucide-vue-next";
+import {
+    DollarSign,
+    Search,
+    Plus,
+    Eye,
+    Pencil,
+    Trash2,
+    FileText,
+} from "lucide-vue-next";
 
 const props = defineProps({
     movements: Object,

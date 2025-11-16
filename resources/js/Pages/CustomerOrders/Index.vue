@@ -94,9 +94,11 @@
             </div>
 
             <!-- DataTable -->
-            <DataTable :columns="columns" :data="orders?.data || []" class="p-6">
-            <!-- DataTable -->
-            <DataTable :columns="columns" :data="orders?.data || []" class="p-6">
+            <DataTable
+                :columns="columns"
+                :data="orders?.data || []"
+                class="p-6"
+            >
                 <!-- Coluna Data -->
                 <template #cell-data="{ item }">
                     <span class="text-sm text-gray-900 dark:text-white">
@@ -106,7 +108,9 @@
 
                 <!-- Coluna Número -->
                 <template #cell-numero="{ item }">
-                    <span class="text-sm font-medium text-gray-900 dark:text-white">
+                    <span
+                        class="text-sm font-medium text-gray-900 dark:text-white"
+                    >
                         {{ item.number }}
                     </span>
                 </template>
@@ -127,7 +131,9 @@
 
                 <!-- Coluna Valor Total -->
                 <template #cell-valor_total="{ item }">
-                    <span class="text-sm font-semibold text-gray-900 dark:text-white">
+                    <span
+                        class="text-sm font-semibold text-gray-900 dark:text-white"
+                    >
                         {{ formatCurrency(item.total_value) }}
                     </span>
                 </template>
@@ -198,10 +204,14 @@
                 <template #empty>
                     <div class="text-center py-12">
                         <FileX class="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                        <p class="text-lg font-medium text-gray-900 dark:text-white">
+                        <p
+                            class="text-lg font-medium text-gray-900 dark:text-white"
+                        >
                             Nenhuma encomenda encontrada
                         </p>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        <p
+                            class="text-sm text-gray-500 dark:text-gray-400 mt-1"
+                        >
                             {{
                                 search
                                     ? "Tente ajustar os filtros de pesquisa"

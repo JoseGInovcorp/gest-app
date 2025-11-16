@@ -158,7 +158,10 @@
                                     : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
                             ]"
                         >
-                            {{ item.estado.charAt(0).toUpperCase() + item.estado.slice(1) }}
+                            {{
+                                item.estado.charAt(0).toUpperCase() +
+                                item.estado.slice(1)
+                            }}
                         </span>
                     </template>
 
@@ -193,7 +196,9 @@
 
                     <template #empty>
                         <div class="text-center py-12">
-                            <CreditCard class="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                            <CreditCard
+                                class="h-12 w-12 text-gray-400 mx-auto mb-4"
+                            />
                             <p class="text-gray-500 dark:text-gray-400">
                                 Nenhuma conta bancária encontrada.
                             </p>
@@ -266,7 +271,12 @@ const columns = computed(() => [
     { key: "banco", title: "Banco", sortable: true },
     { key: "iban", title: "IBAN", sortable: false },
     { key: "tipo", title: "Tipo", sortable: true },
-    { key: "saldo_atual", title: "Saldo Atual", sortable: true, class: "text-right" },
+    {
+        key: "saldo_atual",
+        title: "Saldo Atual",
+        sortable: true,
+        class: "text-right",
+    },
     { key: "estado", title: "Estado", sortable: true },
     { key: "acoes", title: "Ações", sortable: false, class: "text-right" },
 ]);

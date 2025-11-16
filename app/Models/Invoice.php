@@ -97,10 +97,10 @@ class Invoice extends Model
      */
     public function getIsVencidaAttribute(): bool
     {
-        return $this->data_vencimento && 
-               $this->data_vencimento->isPast() && 
-               $this->estado !== 'paga' &&
-               $this->estado !== 'cancelada';
+        return $this->data_vencimento &&
+            $this->data_vencimento->isPast() &&
+            $this->estado !== 'paga' &&
+            $this->estado !== 'cancelada';
     }
 
     /**
@@ -117,7 +117,7 @@ class Invoice extends Model
         } else {
             $this->estado = 'pendente';
         }
-        
+
         $this->save();
     }
 

@@ -116,7 +116,7 @@ class ClientAccountController extends Controller
             'tipo' => 'required|in:debito,credito',
             'valor' => 'required|numeric|min:0.01',
             'descricao' => 'required|string|max:255',
-            'categoria' => 'required|in:fatura,pagamento,nota_credito,nota_debito,juros,ajuste,outros',
+            'categoria' => 'required|in:fatura,pagamento,outros',
             'referencia' => 'nullable|string|max:255',
             'observacoes' => 'nullable|string',
         ]);
@@ -196,7 +196,7 @@ class ClientAccountController extends Controller
             'tipo' => 'required|in:debito,credito',
             'valor' => 'required|numeric|min:0.01',
             'descricao' => 'required|string|max:255',
-            'categoria' => 'required|in:fatura,pagamento,nota_credito,nota_debito,juros,ajuste,outros',
+            'categoria' => 'required|in:fatura,pagamento,outros',
             'referencia' => 'nullable|string|max:255',
             'observacoes' => 'nullable|string',
         ]);
@@ -248,16 +248,16 @@ class ClientAccountController extends Controller
     /**
      * Download PDF da fatura associada ao movimento
      */
-    public function downloadPdf(string $id)
+    public function downloadPdf(ClientAccount $clientAccount)
     {
-        $movement = ClientAccount::with(['entity', 'invoice'])->findOrFail($id);
+        $clientAccount->load(['entity', 'invoice']);
 
         // Verificar se existe fatura associada
-        if (!$movement->invoice) {
+        if (!$clientAccount->invoice) {
             return redirect()->back()->with('error', 'Este movimento não possui fatura associada.');
         }
 
-        $invoice = $movement->invoice;
+        $invoice = $clientAccount->invoice;
         $company = \App\Models\Company::first();
 
         $pdf = Pdf::loadView('invoices.pdf', [
@@ -265,6 +265,9 @@ class ClientAccountController extends Controller
             'company' => $company,
         ]);
 
-        return $pdf->download("fatura-{$invoice->numero}.pdf");
+        // Substituir / por - no número da fatura para nome de ficheiro válido
+        $filename = str_replace('/', '-', $invoice->numero);
+
+        return $pdf->download("fatura-{$filename}.pdf");
     }
 }

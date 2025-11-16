@@ -192,12 +192,6 @@
                             >
                                 <option value="fatura">Fatura</option>
                                 <option value="pagamento">Pagamento</option>
-                                <option value="nota_credito">
-                                    Nota Crédito
-                                </option>
-                                <option value="nota_debito">Nota Débito</option>
-                                <option value="juros">Juros</option>
-                                <option value="ajuste">Ajuste</option>
                                 <option value="outros">Outros</option>
                             </select>
                             <p

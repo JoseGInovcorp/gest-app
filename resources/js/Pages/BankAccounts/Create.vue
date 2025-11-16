@@ -217,11 +217,7 @@
                                 Tipo de Conta
                                 <span class="text-red-500">*</span>
                             </label>
-                            <Select
-                                v-bind="field"
-                                v-model="form.tipo"
-                                required
-                            >
+                            <Select v-bind="field" v-model="form.tipo" required>
                                 <option value="corrente">Corrente</option>
                                 <option value="poupanca">Poupança</option>
                                 <option value="credito">Crédito</option>
@@ -273,7 +269,11 @@
                         </FormField>
 
                         <!-- Observações -->
-                        <FormField v-slot="{ field }" name="observacoes" class="md:col-span-2">
+                        <FormField
+                            v-slot="{ field }"
+                            name="observacoes"
+                            class="md:col-span-2"
+                        >
                             <label
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
                             >
