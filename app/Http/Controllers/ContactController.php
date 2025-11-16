@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Contact;
+use App\Models\ContactFunction;
 use App\Models\Entity;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
@@ -82,8 +83,14 @@ class ContactController extends Controller
             ->orderBy('name')
             ->get();
 
+        $functions = ContactFunction::active()
+            ->select('id', 'name')
+            ->orderBy('name')
+            ->get();
+
         return Inertia::render('Contacts/Create', [
             'entities' => $entities,
+            'functions' => $functions,
             'nextNumber' => Contact::getNextNumber()
         ]);
     }
@@ -137,9 +144,15 @@ class ContactController extends Controller
             ->orderBy('name')
             ->get();
 
+        $functions = ContactFunction::active()
+            ->select('id', 'name')
+            ->orderBy('name')
+            ->get();
+
         return Inertia::render('Contacts/Edit', [
             'contact' => $contact,
-            'entities' => $entities
+            'entities' => $entities,
+            'functions' => $functions
         ]);
     }
 

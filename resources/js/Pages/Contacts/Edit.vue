@@ -146,14 +146,21 @@
                                 <div class="md:col-span-2">
                                     <FormField
                                         label="Função"
-                                        description="Função na empresa (ex: Diretor Comercial, Gerente, etc.)"
+                                        description="Selecione a função do contacto na empresa"
                                         :error="errors.function"
                                     >
-                                        <Input
-                                            v-model="form.function"
-                                            type="text"
-                                            placeholder="Ex: Diretor Comercial"
-                                        />
+                                        <Select v-model="form.function">
+                                            <option value="">
+                                                Selecione uma função...
+                                            </option>
+                                            <option
+                                                v-for="func in functions"
+                                                :key="func.id"
+                                                :value="func.name"
+                                            >
+                                                {{ func.name }}
+                                            </option>
+                                        </Select>
                                     </FormField>
                                 </div>
 
@@ -331,6 +338,10 @@ const props = defineProps({
     entities: {
         type: Array,
         required: true,
+    },
+    functions: {
+        type: Array,
+        default: () => [],
     },
     errors: {
         type: Object,
