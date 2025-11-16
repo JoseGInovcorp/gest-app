@@ -4,6 +4,125 @@ Registo das principais mudanças e desenvolvimentos realizados durante o estági
 
 ---
 
+## v0.15.1 — 16 Nov 2025
+
+**Activity Logging Completo em Todos os Controllers**
+
+### O que foi feito
+
+**Implementação Abrangente de Activity Logging:**
+
+-   ✅ Adicionado Spatie Activity Log em **16 controllers** (100% cobertura)
+-   ✅ Logs automáticos para create, update, delete em todos os módulos
+-   ✅ Captura de IP address, user agent e deleted entity details
+-   ✅ Atualização da interface Logs/Index.vue com 18 módulos mapeados
+-   ✅ Labels em português para todos os módulos (Entity→Entidades, Contact→Contactos, etc.)
+
+**Controllers com Logging (Priority 1 - Config):**
+-   ContactController: store, update, destroy com deleted_contact details
+-   ArticleController: store, update, destroy com deleted_article details (referencia, nome, preco)
+-   CountryController: store, update, destroy com deleted_country details (name, iso_code)
+-   ContactFunctionController: store, update, destroy com deleted_function details
+-   VatRateController: store, update, destroy com deleted_vat_rate details (name, rate, is_default)
+
+**Controllers com Logging (Priority 2 - Business):**
+-   ProposalController: store/update após DB.commit() com lines_count, destroy com deleted_proposal
+-   CustomerOrderController: store/update após DB.commit() com items_count, destroy com deleted_order
+-   SupplierOrderController: store/update após DB.commit() com items_count, destroy com deleted_order
+-   BankAccountController: store, update, destroy com deleted_account details (nome, banco, iban, saldo)
+-   ClientAccountController: store, update, destroy com deleted_movement details
+-   SupplierInvoiceController: store, update, destroy com deleted_invoice details
+
+**Controllers com Logging (Priority 3 - Calendar/Settings):**
+-   CalendarEventController: store/update após sharedWith sync, destroy com deleted_event details
+-   CalendarEventTypeController: store, update, destroy com deleted_type details (name, color)
+-   CalendarEventActionController: store, update, destroy com deleted_action details
+-   CompanyController: update com logo_updated boolean (singleton - sem create/delete)
+
+**UI Atualizada - Logs/Index.vue:**
+-   18 módulos mapeados: Entity, Contact, Article, Country, ContactFunction, VatRate, User, Role
+-   Novos: Proposal, CustomerOrder, SupplierOrder, BankAccount, ClientAccount, SupplierInvoice
+-   Novos: CalendarEvent, CalendarEventType, CalendarEventAction, Company
+-   Labels portugueses completos: getModuleLabel() com 18 módulos
+-   Action labels completos: created→Criado, updated→Atualizado, deleted→Eliminado
+
+### Padrão de Implementação
+
+**Código consistente em todos os controllers:**
+```php
+use Illuminate\Support\Facades\Auth;
+
+// store()
+activity()
+    ->performedOn($model)
+    ->causedBy(Auth::user())
+    ->withProperties([
+        'ip' => $request->ip(),
+        'user_agent' => $request->userAgent(),
+    ])
+    ->log('created');
+
+// update()
+activity()
+    ->performedOn($model)
+    ->causedBy(Auth::user())
+    ->withProperties([
+        'ip' => $request->ip(),
+        'user_agent' => $request->userAgent(),
+    ])
+    ->log('updated');
+
+// destroy()
+activity()
+    ->performedOn($model)
+    ->causedBy(Auth::user())
+    ->withProperties([
+        'deleted_entity' => [...details...],
+        'ip' => $request->ip(),
+        'user_agent' => $request->userAgent(),
+    ])
+    ->log('deleted');
+$model->delete();
+```
+
+### Casos Especiais Tratados
+
+**Transações DB:**
+-   ProposalController, CustomerOrderController, SupplierOrderController
+-   Logs colocados APÓS `DB::commit()` para garantir sucesso da transação
+-   Propriedades adicionais: `lines_count` e `items_count`
+
+**Deleted Entity Details:**
+-   Todos os destroy() methods capturam detalhes ANTES de `$model->delete()`
+-   Informações preservadas: números, nomes, valores, estados
+-   Permite reconstruir histórico completo mesmo após eliminação
+
+**Singleton Pattern:**
+-   CompanyController apenas tem update() (sem create/delete)
+-   Propriedade adicional `logo_updated` (boolean) quando logo é alterado
+
+**Shared Relationships:**
+-   CalendarEventController logs após `sharedWith->sync()` para incluir partilha
+
+### Estatísticas
+
+-   **Controllers modificados:** 16
+-   **Edits de código:** ~64 string replacements
+-   **Módulos UI mapeados:** 18 (11 novos)
+-   **Propriedades capturadas:** IP, user agent, deleted details em 100% dos logs
+-   **Commits:** 1 (b74c73e)
+-   **Tempo:** 3 horas
+
+### Impacto
+
+-   ✅ Sistema de auditoria 100% completo
+-   ✅ Rastreamento total de todas as operações CRUD
+-   ✅ Histórico completo preservado mesmo após eliminações
+-   ✅ Interface pronta para exibir todos os logs corretamente
+-   ✅ Compliance com requisitos de controlo e rastreabilidade
+
+---
+
 ## v0.15.0 — 15-16 Nov 2025
 
 **Módulos criados:** Propostas Comerciais, Encomendas Cliente (melhorias), Encomendas Fornecedor (melhorias)

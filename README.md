@@ -8,7 +8,7 @@ Este é o meu projeto final de estágio, desenvolvido na **Inovcorp** entre 6 e 
 
 O objetivo é criar um sistema de gestão empresarial para PMEs, com funcionalidades de gestão comercial, financeira e operacional.
 
-**Versão Atual:** v0.15.0  
+**Versão Atual:** v0.15.1  
 **Progresso:** 85% (17 de 20 módulos concluídos)  
 **Prazo de Entrega:** 18 Nov 2025
 
@@ -103,12 +103,28 @@ O objetivo é criar um sistema de gestão empresarial para PMEs, com funcionalid
 
 ### Módulo 8: Histórico de Atividades
 
--   Todas as ações (criar, editar, eliminar) ficam guardadas
--   Package: Spatie Laravel Activitylog
--   Mostra quem fez o quê e quando
--   Tabela filtrada por módulo e ação
--   Campos: descrição, módulo, utilizador, timestamp
--   Log automático em todos os módulos
+-   **100% dos controllers** com activity logging implementado
+-   Package: Spatie Laravel Activitylog v4.10
+-   Registo automático de todas as ações: create, update, delete
+-   Captura de contexto completo: IP, user agent, deleted entity details
+-   Tabela com 7 colunas: Data, Hora, Utilizador, Menu, Ação, Dispositivo, IP
+-   18 módulos mapeados com labels em português
+-   Detecção automática de dispositivo (Desktop/Mobile/Tablet)
+-   Badges coloridos por tipo de ação (created=verde, updated=azul, deleted=vermelho)
+
+**Cobertura de Logging:**
+-   ✅ Config (5): Contact, Article, Country, ContactFunction, VatRate
+-   ✅ Business (6): Proposal, CustomerOrder, SupplierOrder, BankAccount, ClientAccount, SupplierInvoice
+-   ✅ Calendar (3): CalendarEvent, CalendarEventType, CalendarEventAction
+-   ✅ Settings (1): Company
+-   ✅ Auth (2): Login, Logout
+-   ✅ Access (2): User, Role
+
+**Propriedades Capturadas:**
+-   IP address em todos os logs
+-   User agent (browser info) em todos os logs
+-   Deleted entity details (antes de eliminar)
+-   Propriedades especiais: items_count, lines_count, logo_updated
 
 ### Módulo 9: Contas Bancárias
 
