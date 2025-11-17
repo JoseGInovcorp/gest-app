@@ -241,19 +241,21 @@ const deleteTemplate = (template) => {
         <!-- Pagination -->
         <div v-if="templates.links.length > 3" class="mt-6 flex justify-center">
             <nav class="flex gap-2">
-                <Link
+                <component
                     v-for="link in templates.links"
                     :key="link.label"
-                    :href="link.url"
+                    :is="link.url ? Link : 'span'"
+                    :href="link.url || undefined"
                     :class="[
                         link.active
                             ? 'bg-blue-600 text-white'
                             : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300',
                         'px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700',
+                        !link.url && 'opacity-50 cursor-not-allowed',
                     ]"
                     v-html="link.label"
                 >
-                </Link>
+                </component>
             </nav>
         </div>
     </AuthenticatedLayout>

@@ -307,10 +307,11 @@ const deleteWorkOrder = (id) => {
             class="mt-6"
         >
             <div class="flex items-center justify-center gap-1">
-                <Link
+                <component
                     v-for="(link, index) in workOrders.links"
                     :key="index"
-                    :href="link.url"
+                    :is="link.url ? Link : 'span'"
+                    :href="link.url || undefined"
                     v-html="link.label"
                     :class="[
                         'px-3 py-2 text-sm rounded',

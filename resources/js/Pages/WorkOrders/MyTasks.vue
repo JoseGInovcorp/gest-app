@@ -349,10 +349,11 @@ const completeTask = (taskId) => {
         <!-- Pagination -->
         <div v-if="tasks.links && tasks.links.length > 3" class="mt-6">
             <div class="flex items-center justify-center gap-1">
-                <Link
+                <component
                     v-for="(link, index) in tasks.links"
                     :key="index"
-                    :href="link.url"
+                    :is="link.url ? Link : 'span'"
+                    :href="link.url || undefined"
                     v-html="link.label"
                     :class="[
                         'px-3 py-2 text-sm rounded',
