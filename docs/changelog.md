@@ -4,6 +4,202 @@ Registo das principais mudanças e desenvolvimentos realizados durante o estági
 
 ---
 
+## v0.23.0 — 17 Nov 2025
+
+**Gestão Automática de Stock nas Encomendas de Cliente**
+
+### O que foi feito
+
+**Backend - Article Model**
+
+-   ✅ **Método `hasStock(float $quantity): bool`**
+    -   Verifica disponibilidade de stock para quantidade solicitada
+    -   Serviços (`tipo = 'servico'`) sempre retornam `true`
+    -   Produtos verificam: `stock_quantidade >= $quantity`
+-   ✅ **Método `decreaseStock(float $quantity): void`**
+    -   Decrementa stock automaticamente ao fechar encomenda
+    -   Usa `max(0, stock - quantity)` para evitar valores negativos
+    -   Apenas para produtos
+-   ✅ **Método `increaseStock(float $quantity): void`**
+    -   Repõe stock ao cancelar/reabrir encomenda
+    -   Usado quando encomenda volta de "closed" para "draft"
+    -   Apenas para produtos
+
+**Backend - CustomerOrderController**
+
+-   ✅ **Validação de stock ao criar encomenda**
+    -   Itera sobre todos os itens verificando `hasStock()`
+    -   Coleta warnings de stock insuficiente
+    -   Array `$stockWarnings` com artigo, quantidade solicitada e disponível
+-   ✅ **Validação de stock ao editar encomenda**
+    -   Mesma lógica de validação do create
+    -   Warnings exibidos antes de salvar
+-   ✅ **Atualização automática de stock**
+    -   Detecta mudança de status: `draft → closed` ou `closed → draft`
+    -   **draft → closed**: Decrementa stock de todos os itens
+    -   **closed → draft**: Repõe stock dos itens antigos
+    -   Log de atividade registra mudança de stock
+-   ✅ **Mensagens contextuais**
+    -   Sucesso padrão: "Encomenda criada com sucesso!"
+    -   Com warnings: "+ ATENÇÃO: Alguns artigos têm stock insuficiente. Considere criar encomendas ao fornecedor."
+    -   Atualização com stock: "+ Stock atualizado."
+
+**Frontend - Create.vue & Edit.vue**
+
+-   ✅ **Indicador visual de stock em tempo real**
+    -   Exibido abaixo do seletor de artigo
+    -   Verde: Stock suficiente (`stock >= quantidade`)
+    -   Laranja/Vermelho: Stock insuficiente (`stock < quantidade`)
+    -   Não exibido para serviços
+-   ✅ **Alertas inline**
+    -   "⚠️ Stock insuficiente! Considere adicionar fornecedor."
+    -   Aparece quando quantidade solicitada > stock disponível
+    -   Usuário pode prosseguir mesmo assim
+-   ✅ **Função helper `getArticleStock()`**
+    -   Busca stock do artigo selecionado
+    -   Retorna `null` para serviços
+    -   Retorna quantidade para produtos
+
+**Dados Adicionados ao Controller**
+
+-   ✅ Articles agora incluem:
+    -   `stock_quantidade` - Quantidade disponível
+    -   `tipo` - Produto ou Serviço
+    -   Campos adicionados em `create()` e `edit()`
+
+### Fluxo de Trabalho
+
+**Cenário 1: Stock Suficiente**
+
+1. Criar encomenda → Selecionar artigo
+2. ✅ Indicador verde: "Stock disponível: 10"
+3. Submeter com status "draft"
+4. Mudar para "closed" → Stock decrementado (10 → 7)
+
+**Cenário 2: Stock Insuficiente**
+
+1. Criar encomenda → Selecionar artigo
+2. ⚠️ Indicador vermelho: "Stock disponível: 2"
+3. ⚠️ Alerta: "Stock insuficiente! Considere adicionar fornecedor."
+4. Usuário pode continuar e criar encomenda
+5. Mensagem: "Encomenda criada! ATENÇÃO: Stock insuficiente..."
+6. Adicionar fornecedor ao item
+7. Converter para encomenda fornecedor
+
+**Cenário 3: Cancelamento**
+
+1. Encomenda fechada (stock já decrementado)
+2. Reabrir (draft) → Stock reposto automaticamente
+3. Permite edição/correção
+
+**Cenário 4: Serviços**
+
+1. Selecionar serviço (ex: "Consultoria IT")
+2. Sem indicador de stock (não aplicável)
+3. Métodos `decreaseStock/increaseStock` não fazem nada
+
+### Activity Logs
+
+Propriedades registradas:
+
+-   `status_change`: "draft -> closed" ou "closed -> draft"
+-   `stock_updated`: true/false
+-   `stock_warnings`: Array com artigos em falta
+
+### Resultado Final
+
+Sistema completo de gestão de stock:
+
+-   ✅ Validação em tempo real no frontend
+-   ✅ Alertas visuais (verde/laranja/vermelho)
+-   ✅ Encomenda pode prosseguir sem stock
+-   ✅ Sugestão de criar encomenda fornecedor
+-   ✅ Atualização automática ao fechar encomenda
+-   ✅ Reposição automática ao reabrir
+-   ✅ Serviços não afetam stock
+-   ✅ Stock nunca fica negativo
+
+---
+
+## v0.22.0 — 17 Nov 2025
+
+**Dashboard Adaptativo com Métricas Baseadas em Permissões**
+
+### O que foi feito
+
+**Dashboard Controller**
+
+-   ✅ **DashboardController com lógica adaptativa**
+    -   7 métricas condicionais baseadas em permissões do utilizador
+    -   Propostas Pendentes (`proposals.read`)
+    -   Encomendas Cliente Ativas (`customer-orders.read`)
+    -   Faturas Fornecedor Pendentes (`supplier-invoices.read`)
+    -   Ordens de Trabalho Em Progresso (`work-orders.read`)
+    -   Encomendas Fornecedor Pendentes (`supplier-orders.read`)
+    -   Saldo Total Contas Bancárias (`bank-accounts.read`)
+    -   Clientes com Saldo Devedor (`client-accounts.read`)
+    -   Minhas Tarefas Pendentes (sempre visível)
+-   ✅ **Widget de Tarefas Urgentes**
+    -   Top 5 tarefas por prazo (due_date)
+    -   Indicador de tarefas atrasadas (is_overdue)
+    -   Relações eager loading (workOrder, customerOrder, customer)
+    -   Informação completa: título, cliente, prazo, status, atribuído
+-   ✅ **Atividade Recente (Super Admin apenas)**
+    -   Últimos 10 logs de atividade
+    -   Restrição: apenas Super Admin visualiza
+    -   Informação: ação, módulo, utilizador, timestamp
+
+**Dashboard Frontend**
+
+-   ✅ **Componente Vue 3 com renderização condicional**
+    -   Props: stats, urgentTasks, recentActivity, permissions
+    -   Grid responsivo: 1-4 colunas (mobile → desktop)
+    -   Cards condicionais com `v-if="permissions.canViewX"`
+    -   8 tipos de cards com ícones e cores específicas:
+        -   Propostas: FileText (azul)
+        -   Encomendas: ShoppingCart (verde)
+        -   Faturas: CreditCard (vermelho)
+        -   Ordens: Briefcase (roxo)
+        -   Saldo: Wallet (esmeralda)
+        -   Devedores: AlertCircle (laranja)
+        -   Tarefas: CheckSquare (amarelo)
+-   ✅ **Layout Centralizado**
+    -   Container `max-w-7xl mx-auto` para centralização
+    -   Margens automáticas em ecrãs grandes
+    -   Melhor aproveitamento do espaço visual
+-   ✅ **Dark Mode Completo**
+    -   Todos os cards adaptados
+    -   Cores ajustadas para tema escuro
+    -   Bordas e fundos consistentes
+
+**Correção de Permissões**
+
+-   ✅ **FixRolePermissionsSeeder criado**
+    -   Gestor Financeiro: Removidas permissões comerciais indevidas
+    -   Visualizador: Removidas permissões de escrita (create/update/delete)
+    -   Gestor de Armazém: Removidas permissões desnecessárias
+    -   Cache de permissões limpo com `php artisan permission:cache-reset`
+
+**Bugs Corrigidos**
+
+-   ✅ BankAccount: Coluna `state` → `estado`
+-   ✅ ClientAccount: Query corrigida para usar `saldo_apos`
+-   ✅ WorkOrderTask: Removido relationship `assignedGroup()` inexistente
+-   ✅ Utilizadores com permissões incorretas identificados e corrigidos
+
+### Resultado Final
+
+Dashboard 100% funcional e adaptativo:
+
+-   **Super Admin**: Vê todas as métricas + atividade recente
+-   **Gestor Comercial**: Propostas, encomendas, ordens de trabalho
+-   **Gestor Financeiro**: Contas bancárias, clientes devedores, faturas
+-   **Gestor de Armazém**: Encomendas fornecedor, ordens de trabalho
+-   **Visualizador**: Todos os cards (só leitura)
+-   **Todos**: Minhas tarefas pendentes sempre visível
+
+---
+
 ## v0.21.0 — 17 Nov 2025
 
 **UI/UX Standardization — Complete Interface Consistency**

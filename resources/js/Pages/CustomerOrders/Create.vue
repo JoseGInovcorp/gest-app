@@ -271,6 +271,43 @@
                                                 ]
                                             }}
                                         </p>
+                                        <!-- Indicador de Stock -->
+                                        <div
+                                            v-if="
+                                                item.article_id &&
+                                                getArticleStock(
+                                                    item.article_id
+                                                ) !== null
+                                            "
+                                            class="mt-2 text-sm"
+                                            :class="[
+                                                getArticleStock(
+                                                    item.article_id
+                                                ) >= item.quantity
+                                                    ? 'text-green-600 dark:text-green-400'
+                                                    : 'text-orange-600 dark:text-orange-400',
+                                            ]"
+                                        >
+                                            <span class="font-medium">
+                                                Stock disponível:
+                                                {{
+                                                    getArticleStock(
+                                                        item.article_id
+                                                    )
+                                                }}
+                                            </span>
+                                            <span
+                                                v-if="
+                                                    getArticleStock(
+                                                        item.article_id
+                                                    ) < item.quantity
+                                                "
+                                                class="block mt-1 text-xs text-red-600 dark:text-red-400"
+                                            >
+                                                ⚠️ Stock insuficiente! Considere
+                                                adicionar fornecedor.
+                                            </span>
+                                        </div>
                                     </FormField>
                                 </div>
 
@@ -492,6 +529,16 @@ const updateArticlePrice = (index) => {
     if (article) {
         item.unit_price = parseFloat(article.unit_price) || 0;
     }
+};
+
+const getArticleStock = (articleId) => {
+    const article = props.articles.find((a) => a.id == articleId);
+    if (!article) return null;
+
+    // Serviços não têm stock
+    if (article.tipo === "servico") return null;
+
+    return parseFloat(article.stock_quantidade) || 0;
 };
 
 // Observar mudanças nos article_id dos items para atualizar preços

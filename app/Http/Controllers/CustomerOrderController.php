@@ -92,6 +92,20 @@ class CustomerOrderController extends Controller
             'items.*.unit_price' => 'required|numeric|min:0',
         ]);
 
+        // Verificar stock disponível
+        $stockWarnings = [];
+        foreach ($validated['items'] as $index => $item) {
+            $article = Article::find($item['article_id']);
+            if ($article && !$article->hasStock($item['quantity'])) {
+                $stockWarnings[] = [
+                    'article_id' => $article->id,
+                    'article_name' => $article->nome,
+                    'requested' => $item['quantity'],
+                    'available' => $article->stock_quantidade,
+                ];
+            }
+        }
+
         DB::beginTransaction();
         try {
             // Gerar número automaticamente
@@ -124,12 +138,19 @@ class CustomerOrderController extends Controller
                 ->withProperties([
                     'ip' => $request->ip(),
                     'user_agent' => $request->userAgent(),
-                    'items_count' => count($validated['items'])
+                    'items_count' => count($validated['items']),
+                    'stock_warnings' => $stockWarnings
                 ])
                 ->log('created');
 
+            $message = 'Encomenda criada com sucesso!';
+            if (!empty($stockWarnings)) {
+                $message .= ' ATENÇÃO: Alguns artigos têm stock insuficiente. Considere criar encomendas ao fornecedor.';
+            }
+
             return redirect()->route('customer-orders.index')
-                ->with('success', 'Encomenda criada com sucesso!');
+                ->with('success', $message)
+                ->with('stock_warnings', $stockWarnings);
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withErrors(['error' => 'Erro ao criar encomenda: ' . $e->getMessage()]);
@@ -213,8 +234,41 @@ class CustomerOrderController extends Controller
             'items.*.unit_price' => 'required|numeric|min:0',
         ]);
 
+        // Verificar stock disponível
+        $stockWarnings = [];
+        foreach ($validated['items'] as $index => $item) {
+            $article = Article::find($item['article_id']);
+            if ($article && !$article->hasStock($item['quantity'])) {
+                $stockWarnings[] = [
+                    'article_id' => $article->id,
+                    'article_name' => $article->nome,
+                    'requested' => $item['quantity'],
+                    'available' => $article->stock_quantidade,
+                ];
+            }
+        }
+
         DB::beginTransaction();
         try {
+            $oldStatus = $customerOrder->status;
+            $newStatus = $validated['status'];
+
+            // Se a encomenda passou de draft para closed, atualizar stock
+            $shouldUpdateStock = ($oldStatus === 'draft' && $newStatus === 'closed');
+
+            // Se a encomenda voltou de closed para draft, repor stock
+            $shouldRestoreStock = ($oldStatus === 'closed' && $newStatus === 'draft');
+
+            // Repor stock dos itens antigos se estava fechada
+            if ($shouldRestoreStock) {
+                foreach ($customerOrder->items as $oldItem) {
+                    $article = Article::find($oldItem->article_id);
+                    if ($article) {
+                        $article->increaseStock($oldItem->quantity);
+                    }
+                }
+            }
+
             $customerOrder->update([
                 'number' => $validated['number'],
                 'proposal_date' => $validated['proposal_date'],
@@ -236,6 +290,14 @@ class CustomerOrderController extends Controller
                     'quantity' => $item['quantity'],
                     'unit_price' => $item['unit_price'],
                 ]);
+
+                // Atualizar stock se a encomenda está a ser fechada
+                if ($shouldUpdateStock) {
+                    $article = Article::find($item['article_id']);
+                    if ($article) {
+                        $article->decreaseStock($item['quantity']);
+                    }
+                }
             }
 
             DB::commit();
@@ -246,12 +308,24 @@ class CustomerOrderController extends Controller
                 ->withProperties([
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
-                    'items_count' => count($validated['items'])
+                    'items_count' => count($validated['items']),
+                    'status_change' => $oldStatus !== $newStatus ? "$oldStatus -> $newStatus" : null,
+                    'stock_updated' => $shouldUpdateStock,
+                    'stock_warnings' => $stockWarnings
                 ])
                 ->log('updated');
 
+            $message = 'Encomenda atualizada com sucesso!';
+            if ($shouldUpdateStock) {
+                $message .= ' Stock atualizado.';
+            }
+            if (!empty($stockWarnings)) {
+                $message .= ' ATENÇÃO: Alguns artigos têm stock insuficiente. Considere criar encomendas ao fornecedor.';
+            }
+
             return redirect()->route('customer-orders.index')
-                ->with('success', 'Encomenda atualizada com sucesso!');
+                ->with('success', $message)
+                ->with('stock_warnings', $stockWarnings);
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withErrors(['error' => 'Erro ao atualizar encomenda: ' . $e->getMessage()]);

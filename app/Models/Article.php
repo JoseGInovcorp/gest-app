@@ -110,13 +110,48 @@ class Article extends Model
     }
 
     /**
-     * Accessor para URL da foto
+     * Get foto URL
      */
-    public function getFotoUrlAttribute()
+    public function getFotoUrlAttribute(): ?string
     {
         if ($this->foto) {
             return asset('storage/' . $this->foto);
         }
         return null;
+    }
+
+    /**
+     * Check if article has sufficient stock
+     */
+    public function hasStock(float $quantity): bool
+    {
+        // Serviços não têm stock
+        if ($this->tipo === 'servico') {
+            return true;
+        }
+
+        return $this->stock_quantidade >= $quantity;
+    }
+
+    /**
+     * Decrease stock quantity
+     */
+    public function decreaseStock(float $quantity): void
+    {
+        if ($this->tipo === 'produto') {
+            $this->stock_quantidade = max(0, $this->stock_quantidade - $quantity);
+            $this->save();
+        }
+    }
+
+    /**
+     * Increase stock quantity
+     */
+    public function increaseStock(float $quantity): void
+    {
+        if ($this->tipo === 'produto') {
+            $this->stock_quantidade += $quantity;
+            $this->save();
+        }
     }
 }

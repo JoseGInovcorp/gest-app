@@ -8,8 +8,8 @@ Este é o meu projeto final de estágio, desenvolvido na **Inovcorp** entre 6 e 
 
 O objetivo é criar um sistema de gestão empresarial para PMEs, com funcionalidades de gestão comercial, financeira e operacional.
 
-**Versão Atual:** v0.21.0  
-**Progresso:** 100% (20 de 20 módulos concluídos)  
+**Versão Atual:** v0.23.0  
+**Progresso:** 100% (20 de 20 módulos concluídos + Dashboard + Gestão Stock)  
 **Prazo de Entrega:** 18 Nov 2025
 
 ## ✅ O que já está pronto
@@ -18,6 +18,8 @@ O objetivo é criar um sistema de gestão empresarial para PMEs, com funcionalid
 -   ✅ Sistema de permissões completo
 -   ✅ Histórico de atividades (logs)
 -   ✅ Logo da empresa integrado
+-   ✅ **Dashboard adaptativo baseado em permissões**
+-   ✅ **Gestão automática de stock nas encomendas**
 -   ✅ **Interface 100% uniformizada e consistente**
 -   ✅ **Componente ConfirmDialog reutilizável**
 -   ✅ **Botões de ação padronizados (cinza/azul/vermelho)**
@@ -60,6 +62,21 @@ O objetivo é criar um sistema de gestão empresarial para PMEs, com funcionalid
 -   Upload de imagens com preview
 -   Dropdown de taxas IVA carregado da BD
 -   Estados Ativo/Inativo
+-   **Controlo de stock (quantidade disponível)**
+-   **Tipo: Produto ou Serviço**
+-   **Gama: Premium, Standard, Básico**
+
+### Gestão de Stock
+
+-   ✅ **Validação automática ao criar/editar encomendas**
+-   ✅ **Indicadores visuais em tempo real** (verde/laranja/vermelho)
+-   ✅ **Alertas de stock insuficiente**
+-   ✅ **Encomenda pode prosseguir sem stock** (com aviso)
+-   ✅ **Sugestão de criar encomenda ao fornecedor**
+-   ✅ **Atualização automática ao fechar encomenda**
+-   ✅ **Reposição automática ao reabrir encomenda**
+-   ✅ **Serviços não afetam stock**
+-   ✅ **Stock nunca fica negativo**
 
 ### Módulo 4: Países (Configurações)
 
