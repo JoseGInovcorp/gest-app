@@ -60,18 +60,35 @@ const handlePaymentProofChange = (event) => {
 };
 
 const submit = () => {
-    form.post(route("supplier-invoices.update", props.invoice.id), {
-        _method: "PATCH",
-        preserveScroll: true,
-        forceFormData: true,
-        onSuccess: () => {
-            // Atualizar estado original após salvar
-            originalEstado.value = form.estado;
-        },
-        onError: (errors) => {
-            console.error("Erros de validação:", errors);
-        },
-    });
+    // Usar POST com _method quando há upload de arquivo
+    if (form.documento) {
+        form.transform((data) => ({
+            ...data,
+            _method: "PATCH",
+        })).post(route("supplier-invoices.update", props.invoice.id), {
+            preserveScroll: true,
+            forceFormData: true,
+            onSuccess: () => {
+                // Atualizar estado original após salvar
+                originalEstado.value = form.estado;
+            },
+            onError: (errors) => {
+                console.error("Erros de validação:", errors);
+            },
+        });
+    } else {
+        // Usar PATCH direto quando não há upload
+        form.patch(route("supplier-invoices.update", props.invoice.id), {
+            preserveScroll: true,
+            onSuccess: () => {
+                // Atualizar estado original após salvar
+                originalEstado.value = form.estado;
+            },
+            onError: (errors) => {
+                console.error("Erros de validação:", errors);
+            },
+        });
+    }
 };
 
 const sendPaymentProof = async () => {

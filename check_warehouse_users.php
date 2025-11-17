@@ -13,15 +13,15 @@ $users = User::role('Gestor de Armazém')->get(['id', 'name', 'email']);
 if ($users->isEmpty()) {
     echo "❌ Nenhum utilizador com papel 'Gestor de Armazém' encontrado.\n";
     echo "\nCriando utilizador de teste...\n";
-    
+
     $user = User::create([
         'name' => 'Gestor Armazém Teste',
         'email' => 'armazem@test.com',
         'password' => bcrypt('password'),
     ]);
-    
+
     $user->assignRole('Gestor de Armazém');
-    
+
     echo "✅ Utilizador criado: {$user->name} ({$user->email})\n";
     echo "   Password: password\n";
 } else {
@@ -40,8 +40,8 @@ if ($users->isEmpty()) {
 // Verificar se há tarefas para este papel
 echo "\n=== Verificação de Tarefas ===\n\n";
 $tasks = \App\Models\WorkOrderTask::where('assigned_group', 'Gestor de Armazém')
-    ->orWhereHas('assignedUser', function($q) {
-        $q->whereHas('roles', function($q) {
+    ->orWhereHas('assignedUser', function ($q) {
+        $q->whereHas('roles', function ($q) {
             $q->where('name', 'Gestor de Armazém');
         });
     })
@@ -53,7 +53,7 @@ if ($tasks > 0) {
     $sample = \App\Models\WorkOrderTask::where('assigned_group', 'Gestor de Armazém')
         ->with('workOrder')
         ->first();
-    
+
     if ($sample) {
         echo "\nExemplo de tarefa:\n";
         echo "- {$sample->title}\n";
