@@ -137,23 +137,40 @@
                         </FormField>
 
                         <!-- Data da Proposta -->
-                        <FormField
-                            v-slot="{ field }"
-                            name="data_proposta"
-                            label="Data da Proposta"
-                        >
+                        <div>
+                            <label
+                                for="data_proposta"
+                                class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2"
+                            >
+                                Data da Proposta
+                                <span
+                                    v-if="form.estado === 'fechado'"
+                                    class="text-red-500"
+                                    >*</span
+                                >
+                            </label>
                             <Input
-                                v-bind="field"
+                                id="data_proposta"
                                 v-model="form.data_proposta"
                                 type="date"
+                                :required="form.estado === 'fechado'"
                             />
+                            <p
+                                class="mt-1 text-xs text-gray-500 dark:text-gray-400"
+                            >
+                                {{
+                                    form.estado === "fechado"
+                                        ? "Obrigatória para propostas fechadas"
+                                        : "Data em que a proposta foi criada (opcional)"
+                                }}
+                            </p>
                             <p
                                 v-if="form.errors.data_proposta"
                                 class="mt-1 text-sm text-red-600 dark:text-red-400"
                             >
                                 {{ form.errors.data_proposta }}
                             </p>
-                        </FormField>
+                        </div>
 
                         <!-- Validade -->
                         <FormField
@@ -273,7 +290,9 @@
                                         <Select
                                             v-bind="field"
                                             v-model="item.article_id"
-                                            @change="updateArticlePrice(index)"
+                                            @update:modelValue="
+                                                updateArticlePrice(index)
+                                            "
                                         >
                                             <option value="">
                                                 Selecione um artigo
@@ -477,7 +496,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { Head, Link, useForm, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Form from "@/Components/ui/Form.vue";
@@ -522,11 +541,35 @@ const removeItem = (index) => {
 
 const updateArticlePrice = (index) => {
     const item = form.lines[index];
-    const article = props.articles.find((a) => a.id === item.article_id);
+    const article = props.articles.find((a) => a.id == item.article_id); // usar == para comparar string com número
     if (article) {
-        item.preco_custo = article.sale_price || 0;
+        item.preco_custo = parseFloat(article.price) || 0;
     }
 };
+
+// Observar mudanças nos article_id das linhas para atualizar preços
+watch(
+    () => form.lines.map((item) => item.article_id),
+    (newValues, oldValues) => {
+        newValues.forEach((newValue, index) => {
+            if (newValue && newValue !== oldValues[index]) {
+                updateArticlePrice(index);
+            }
+        });
+    }
+);
+
+// Calcular validade automaticamente quando estado muda para "fechado"
+watch(
+    () => form.estado,
+    (newEstado) => {
+        if (newEstado === "fechado" && form.data_proposta) {
+            const dataProposta = new Date(form.data_proposta);
+            dataProposta.setDate(dataProposta.getDate() + 30);
+            form.validade = dataProposta.toISOString().split("T")[0];
+        }
+    }
+);
 
 const calculateItemTotal = (index) => {
     // Reactivity will handle this automatically

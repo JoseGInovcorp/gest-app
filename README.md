@@ -8,8 +8,8 @@ Este é o meu projeto final de estágio, desenvolvido na **Inovcorp** entre 6 e 
 
 O objetivo é criar um sistema de gestão empresarial para PMEs, com funcionalidades de gestão comercial, financeira e operacional.
 
-**Versão Atual:** v0.17.0  
-**Progresso:** 95% (19 de 20 módulos concluídos)  
+**Versão Atual:** v0.20.0  
+**Progresso:** 100% (20 de 20 módulos concluídos)  
 **Prazo de Entrega:** 18 Nov 2025
 
 ## ✅ O que já está pronto
@@ -188,16 +188,24 @@ O objetivo é criar um sistema de gestão empresarial para PMEs, com funcionalid
 -   Estados Ativo/Inativo
 -   Usado no campo de próxima ação dos eventos
 
-### Módulo 17: Propostas Comerciais (v0.15.0)
+### Módulo 17: Propostas Comerciais (v0.20.0)
 
-Criação e gestão de propostas a clientes com workflow completo.
+Criação e gestão de propostas a clientes com workflow completo e business rules.
 
 **Campos:**
 
 -   Numeração automática: PROP-YEAR-#### (ex: PROP-2025-0001)
--   Data proposta, validade (30 dias por padrão)
+-   Data proposta (condicional), validade (auto-calculada +30 dias)
 -   Cliente (entidade)
--   Estado: Rascunho, Pendente, Aprovado, Rejeitado, Fechado
+-   Estado: Rascunho, Fechado
+-   Observações
+
+**Business Rules (v0.20.0):**
+
+-   **Rascunho:** data_proposta e validade opcionais
+-   **Fechado:** data_proposta obrigatória, validade auto-calculada (+30 dias)
+-   Validação condicional baseada em estado
+-   Auto-fill de preços com IVA ao selecionar artigo
 
 ### Módulo 18: Arquivo Digital (v0.17.0)
 
@@ -301,42 +309,83 @@ Gestão de encomendas a fornecedores, criadas automaticamente ou manualmente.
     -   Botão FileText roxo
     -   Layout A4 otimizado
 
-### Módulo 20: Faturas de Fornecedores (v0.16.0)
+### Módulo 20: Ordens de Trabalho (v0.19.0 - v0.20.0)
 
-Sistema de gestão de faturas recebidas de fornecedores com workflow de pagamento.
+Sistema completo de gestão de tarefas e workflow automation com templates configuráveis.
 
-**Campos:**
+**Funcionalidades Principais:**
 
--   Numeração automática: FF-YYYY-#### (ex: FF-2025-0001)
--   Data fatura, data vencimento
--   Fornecedor (entidade), encomenda fornecedor (opcional)
--   Valor total, estado (pendente/paga)
--   Upload de documento (PDF, imagens)
--   Comprovativo de pagamento
+-   ✅ Workflow automático ao criar Customer Order
+-   ✅ 12 templates de tarefas configuráveis (DB)
+-   ✅ Sistema de dependências sequenciais
+-   ✅ Atribuição automática a grupos
+-   ✅ Cálculo automático de prazos
+-   ✅ Dashboard "Minhas Tarefas" com filtros (cliente, estado, atrasadas)
+-   ✅ Timeline visual de progresso
+-   ✅ Status automático baseado em conclusão de tarefas
 
-**Funcionalidades:**
+**Task Templates (v0.20.0):**
 
--   ✅ CRUD completo com Shadcn/ui Form components
--   ✅ Interface moderna e consistente (h1 2xl, ícones h-6, breadcrumbs simplificados)
--   ✅ Página de visualização detalhada com downloads
--   ✅ Modal de comprovativo ao alterar estado para "paga"
--   ✅ Envio automático de email ao fornecedor com comprovativo anexo
--   ✅ Filtros por fornecedor, estado, período
+CRUD completo em Configurações para gerir templates:
 
-**Validações:**
+1. VALIDATE_STOCK - Validar Stock
+2. ORDER_SUPPLIER - Encomendar a Fornecedor
+3. WAREHOUSE_COLLECT - Recolher no Armazém
+4. RECEIVE_GOODS - Receção de Mercadoria
+5. PACK_ORDER - Embalar Encomenda
+6. TRANSPORT_GUIDE - Gerar Guia de Transporte
+7. SCHEDULE_TRANSPORT - Agendar Transporte
+8. SEND_ORDER - Enviar Encomenda
+9. PICKUP_ORDER - Levantamento pelo Cliente
+10. DELIVER_ORDER - Entregar ao Cliente
+11. CONFIRM_ORDER - Confirmar Encomenda
+12. CREATE_CUSTOMER_INVOICE - Criar Fatura de Cliente
 
--   Fornecedor obrigatório
--   Valor total > 0
--   Data vencimento ≥ data fatura
--   Upload limitado a 5MB
+**Interface:**
 
-## 📋 Próximos Passos
+-   MyTasks.vue: Dashboard pessoal com filtros (cliente, estado, atrasadas)
+-   Index.vue: Todas as ordens com filtros avançados
+-   Show.vue: Timeline com progresso visual
+-   TaskTemplates: CRUD em Configurações (shadcn-vue)
 
-Faltam 2 módulos para completar o projeto:
+**Workflow:**
 
--   [ ] Faturas de Clientes (customerInvoices)
--   [ ] Recibos (receipts)
--   [ ] Dashboard inicial com estatísticas
+-   Automático ao criar encomenda de cliente
+-   Duas rotas: Envio (9 tarefas) vs Levantamento (7 tarefas)
+-   100% configurável via DB sem alterar código
+
+**Permissions:**
+
+-   work-orders.create/read/update/delete
+-   task-templates.create/read/update/delete
+
+## 📋 Sistema Completo
+
+**Total de Módulos:** 20 ✅  
+**Status:** 100% Concluído
+
+### Módulos Core (20)
+
+1. ✅ Entidades (Clientes/Fornecedores)
+2. ✅ Contactos
+3. ✅ Artigos
+4. ✅ Países
+5. ✅ Funções de Contacto
+6. ✅ Taxas de IVA
+7. ✅ Gestão de Acessos (Utilizadores + Permissões)
+8. ✅ Histórico de Atividades
+9. ✅ Configurações da Empresa
+10. ✅ Contas Bancárias
+11. ✅ Conta Corrente Bancária
+12. ✅ Conta Corrente de Clientes
+13. ✅ Calendário de Eventos
+14. ✅ Tipos de Eventos
+15. ✅ Ações de Eventos
+16. ✅ Faturas de Fornecedores
+17. ✅ Propostas Comerciais
+18. ✅ Encomendas Cliente
+19. ✅ Arquivo Digital
+20. ✅ Ordens de Trabalho + Task Templates
 
 ## 🔧 Como Executar
 

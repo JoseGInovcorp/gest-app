@@ -83,9 +83,7 @@ class CustomerOrderController extends Controller
     {
         $validated = $request->validate([
             'proposal_date' => 'nullable|date',
-            'validity_date' => 'nullable|date',
             'customer_id' => 'required|exists:entities,id',
-            'status' => 'required|in:draft,closed',
             'notes' => 'nullable|string',
             'items' => 'required|array|min:1',
             'items.*.article_id' => 'required|exists:articles,id',

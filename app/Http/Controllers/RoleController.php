@@ -278,6 +278,7 @@ class RoleController extends Controller
             'contact-functions' => ['name' => 'Funções Contacto', 'order' => 41, 'group' => 'Configurações → Contactos'],
             'articles' => ['name' => 'Artigos', 'order' => 42, 'group' => 'Configurações'],
             'vat-rates' => ['name' => 'Taxas IVA', 'order' => 43, 'group' => 'Configurações → Financeiro'],
+            'task-templates' => ['name' => 'Templates de Tarefas', 'order' => 44, 'group' => 'Configurações'],
 
             // Calendário (ordem 50-52)
             'calendar' => ['name' => 'Calendário', 'order' => 50, 'group' => 'Calendário'],

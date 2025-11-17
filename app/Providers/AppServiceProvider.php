@@ -5,6 +5,8 @@ namespace App\Providers;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
+use App\Models\CustomerOrder;
+use App\Observers\CustomerOrderObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,5 +29,8 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->environment('production')) {
             URL::forceScheme('https');
         }
+
+        // Registar observers
+        CustomerOrder::observe(CustomerOrderObserver::class);
     }
 }

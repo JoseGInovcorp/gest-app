@@ -20,6 +20,8 @@ use App\Http\Controllers\CalendarEventActionController;
 use App\Http\Controllers\CalendarEventController;
 use App\Http\Controllers\ProposalController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\WorkOrderController;
+use App\Http\Controllers\TaskTemplateController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -233,6 +235,31 @@ Route::middleware('auth')->group(function () {
     Route::patch('/supplier-orders/{supplierOrder}', [\App\Http\Controllers\SupplierOrderController::class, 'update'])->name('supplier-orders.update')->middleware('permission:supplier-orders.update');
     Route::delete('/supplier-orders/{supplierOrder}', [\App\Http\Controllers\SupplierOrderController::class, 'destroy'])->name('supplier-orders.destroy')->middleware('permission:supplier-orders.delete');
     Route::get('/supplier-orders/{supplierOrder}/pdf', [\App\Http\Controllers\SupplierOrderController::class, 'generatePDF'])->name('supplier-orders.pdf')->middleware('permission:supplier-orders.read');
+
+    // Rotas de Ordens de Trabalho
+    Route::get('/work-orders/my-tasks', [WorkOrderController::class, 'myTasks'])->name('work-orders.my-tasks');
+    Route::get('/work-orders/create', [WorkOrderController::class, 'create'])->name('work-orders.create')->middleware('permission:work-orders.create');
+    Route::middleware('permission:work-orders.read')->group(function () {
+        Route::get('/work-orders', [WorkOrderController::class, 'index'])->name('work-orders.index');
+        Route::get('/work-orders/{workOrder}', [WorkOrderController::class, 'show'])->name('work-orders.show');
+    });
+    Route::post('/work-orders', [WorkOrderController::class, 'store'])->name('work-orders.store')->middleware('permission:work-orders.create');
+    Route::patch('/work-orders/{workOrder}', [WorkOrderController::class, 'update'])->name('work-orders.update')->middleware('permission:work-orders.update');
+    Route::delete('/work-orders/{workOrder}', [WorkOrderController::class, 'destroy'])->name('work-orders.destroy')->middleware('permission:work-orders.delete');
+
+    // Ações de tarefas
+    Route::post('/work-order-tasks/{task}/assign', [WorkOrderController::class, 'assignTask'])->name('work-order-tasks.assign')->middleware('permission:work-orders.update');
+    Route::post('/work-order-tasks/{task}/start', [WorkOrderController::class, 'startTask'])->name('work-order-tasks.start');
+    Route::post('/work-order-tasks/{task}/complete', [WorkOrderController::class, 'completeTask'])->name('work-order-tasks.complete');
+    Route::post('/work-orders/{workOrder}/tasks', [WorkOrderController::class, 'addTask'])->name('work-orders.add-task')->middleware('permission:work-orders.update');
+
+    // Rotas de Templates de Tarefas (Configurações)
+    Route::get('/task-templates', [\App\Http\Controllers\TaskTemplateController::class, 'index'])->name('task-templates.index')->middleware('permission:task-templates.read');
+    Route::get('/task-templates/create', [\App\Http\Controllers\TaskTemplateController::class, 'create'])->name('task-templates.create')->middleware('permission:task-templates.create');
+    Route::post('/task-templates', [\App\Http\Controllers\TaskTemplateController::class, 'store'])->name('task-templates.store')->middleware('permission:task-templates.create');
+    Route::get('/task-templates/{taskTemplate}/edit', [\App\Http\Controllers\TaskTemplateController::class, 'edit'])->name('task-templates.edit')->middleware('permission:task-templates.update');
+    Route::patch('/task-templates/{taskTemplate}', [\App\Http\Controllers\TaskTemplateController::class, 'update'])->name('task-templates.update')->middleware('permission:task-templates.update');
+    Route::delete('/task-templates/{taskTemplate}', [\App\Http\Controllers\TaskTemplateController::class, 'destroy'])->name('task-templates.destroy')->middleware('permission:task-templates.delete');
 
     // Rotas de Tipos de Eventos do Calendário (Configurações)
     Route::get('/calendar-event-types/create', [CalendarEventTypeController::class, 'create'])->name('calendar-event-types.create')->middleware('permission:calendar-event-types.create');

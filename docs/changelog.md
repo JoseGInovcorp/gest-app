@@ -4,6 +4,195 @@ Registo das principais mudanças e desenvolvimentos realizados durante o estági
 
 ---
 
+## v0.20.0 — 17 Nov 2025
+
+**Task Templates Management + Form Validations & Business Rules**
+
+### O que foi feito
+
+**Sistema de Gestão de Templates de Tarefas**
+
+-   ✅ **Database & Model**
+    -   Tabela `task_templates`: code, label, description, assigned_group, default_sequence, is_active
+    -   Model com scopes: active(), orderedBySequence()
+    -   Soft deletes implementado
+-   ✅ **CRUD Completo em Configurações**
+    -   TaskTemplateController com 6 rotas + permissions middleware
+    -   Index.vue: Lista de templates com ordenação por sequência
+    -   Create.vue/Edit.vue: Formulários com componentes shadcn-vue
+    -   Integração no menu Configurações (Gestão de Tarefas)
+-   ✅ **Permissions Integration**
+    -   4 permissões: task-templates.create/read/update/delete
+    -   TaskTemplatePermissionsSeeder: atribuições para 5 roles
+    -   UI de Gestão de Permissões atualizada (RoleController)
+-   ✅ **Workflow Dinâmico**
+    -   CustomerOrderObserver refatorado para usar templates da DB
+    -   12 templates pré-carregados (TaskTemplateSeeder)
+    -   Workflow agora 100% configurável sem alterar código
+-   ✅ **Templates Criados**
+    1. VALIDATE_STOCK - Validar Stock (Gestor Comercial)
+    2. ORDER_SUPPLIER - Encomendar a Fornecedor (Gestor Comercial)
+    3. WAREHOUSE_COLLECT - Recolher no Armazém (Gestor de Armazém)
+    4. RECEIVE_GOODS - Receção de Mercadoria (Gestor de Armazém)
+    5. PACK_ORDER - Embalar Encomenda (Gestor de Armazém)
+    6. TRANSPORT_GUIDE - Gerar Guia de Transporte (Gestor Comercial)
+    7. SCHEDULE_TRANSPORT - Agendar Transporte (Gestor Comercial)
+    8. SEND_ORDER - Enviar Encomenda (Gestor de Armazém)
+    9. PICKUP_ORDER - Levantamento pelo Cliente (Gestor de Armazém)
+    10. DELIVER_ORDER - Entregar ao Cliente (Gestor de Armazém)
+    11. CONFIRM_ORDER - Confirmar Encomenda (Gestor Comercial)
+    12. CREATE_CUSTOMER_INVOICE - Criar Fatura de Cliente (Gestor Financeiro)
+
+**Validações de Formulários - Customer Orders & Proposals**
+
+-   ✅ **Auto-fill de Preços com IVA**
+    -   CustomerOrders: Ao selecionar artigo, preenche `preco_com_iva` como `unit_price`
+    -   Proposals: Ao selecionar artigo, preenche `preco_com_iva` como `price`
+    -   Watch pattern: Observa mudanças em `article_id`, atualiza preço automaticamente
+    -   Eventos: @update:modelValue para compatibilidade Vue 3
+    -   Comparação: == (string/number compatibility)
+-   ✅ **Auto-cálculo de Validade (+30 dias)**
+    -   CustomerOrders: Ao preencher `proposal_date`, calcula `validity_date` automaticamente
+    -   Proposals: Ao alterar estado para "fechado" e ter `data_proposta`, calcula `validade`
+    -   Frontend watchers em Create.vue e Edit.vue
+    -   Backend calcula validade no store() e update() se necessário
+
+**Business Rules - Proposals**
+
+-   ✅ **Regras de Datas Condicionais**
+    -   **Rascunho**: `data_proposta` e `validade` são opcionais
+    -   **Fechado**: `data_proposta` obrigatória, `validade` auto-calculada (+30 dias)
+    -   Migration: `data_proposta` e `validade` tornadas nullable
+    -   Validação condicional: `$request->estado === 'fechado' ? 'required|date' : 'nullable|date'`
+    -   Frontend: Asterisco (\*) aparece condicionalmente quando estado = 'fechado'
+    -   Mensagem de ajuda dinâmica baseada no estado
+-   ✅ **Estado Select Values**
+    -   Corrigido: valores lowercase ('rascunho', 'fechado')
+    -   Validação backend: `in:rascunho,fechado`
+    -   Labels frontend mantém capitalização correta
+
+**Melhorias - Work Orders (Minhas Tarefas)**
+
+-   ✅ **Filtro por Cliente**
+    -   Novo filtro: dropdown de clientes nas tarefas do utilizador
+    -   Backend: Busca clientes únicos das work orders com tarefas atribuídas
+    -   Query otimizada: JOIN customer_orders → work_orders → work_order_tasks
+    -   Frontend: Select component com opção "Todos os clientes"
+    -   Watch automático: Aplica filtro sem reload
+-   ✅ **Interface de Filtros Completa**
+    -   4 filtros: Cliente, Estado, Apenas atrasadas, Limpar Filtros
+    -   Grid responsivo (md:grid-cols-4)
+    -   Ícone Funnel para identificação visual
+    -   Checkbox para tarefas atrasadas
+    -   Botão "Limpar Filtros" reseta todos os filtros
+    -   Preservação de estado nos filtros (query string)
+
+### Bug Fixes
+
+-   🐛 **MyTasks Customer Filter Query Error**
+    -   Problema: Column 'customer_orders.entity_id' not found
+    -   Causa: Nome incorreto da coluna (entity_id vs customer_id)
+    -   Solução: Corrigido em 2 locais (filtro + query clientes)
+        -   Filtro: `$q->where('customer_id', $request->customer_id)`
+        -   Query: `$query->select('customer_orders.customer_id')`
+
+### Ficheiros Modificados
+
+**Task Templates System:**
+
+-   `database/migrations/2025_11_16_create_task_templates_table.php` - NEW
+-   `app/Models/TaskTemplate.php` - NEW
+-   `app/Http/Controllers/TaskTemplateController.php` - NEW
+-   `app/Observers/CustomerOrderObserver.php` - UPDATED (dynamic templates)
+-   `database/seeders/TaskTemplateSeeder.php` - NEW
+-   `database/seeders/TaskTemplatePermissionsSeeder.php` - NEW
+-   `resources/js/Pages/TaskTemplates/Index.vue` - NEW
+-   `resources/js/Pages/TaskTemplates/Create.vue` - NEW
+-   `resources/js/Pages/TaskTemplates/Edit.vue` - NEW
+-   `routes/web.php` - Task templates routes
+-   `app/Http/Controllers/RoleController.php` - Permissions UI
+
+**Proposals Business Logic:**
+
+-   `app/Http/Controllers/ProposalController.php` - Conditional validation
+-   `database/migrations/2025_11_17_014110_make_validade_nullable_in_proposals_table.php` - NEW
+-   `resources/js/Pages/Proposals/Create.vue` - Conditional required, auto-calc
+-   `resources/js/Pages/Proposals/Edit.vue` - Conditional required, auto-calc
+
+**Customer Orders:**
+
+-   `app/Http/Controllers/CustomerOrderController.php` - preco_com_iva
+-   `resources/js/Pages/CustomerOrders/Create.vue` - Auto-fill price, validity
+
+**Work Orders:**
+
+-   `app/Http/Controllers/WorkOrderController.php` - Customer filter + query fix
+-   `resources/js/Pages/WorkOrders/MyTasks.vue` - Filter UI
+
+**Layout:**
+
+-   `resources/js/Layouts/AuthenticatedLayout.vue` - Menu item "Gestão de Tarefas"
+
+### Impact
+
+-   **Workflow 100% Configurável** - Templates geridos via UI, sem código
+-   **Business Logic Compliance** - Proposals seguem regras de negócio corretas
+-   **UX Improvements** - Auto-fill elimina erros, filtros melhoram produtividade
+-   **Data Integrity** - Validações condicionais garantem consistência
+
+---
+
+## v0.19.0 — 16 Nov 2025
+
+**Work Orders Module - Task Management & Workflow Automation**
+
+### O que foi feito
+
+**Módulo de Ordens de Trabalho**
+
+-   ✅ **Database & Models**
+    -   Tabela `work_orders`: customer_order_id, title, description, priority (4 níveis), status (4 estados), created_by
+    -   Tabela `work_order_tasks`: task_type, assigned_to/assigned_group, sequence_order, depends_on_task_id, due_date, notes
+    -   Models com soft deletes, activity log, relationships completas
+    -   10 tipos de tarefas: validação stock, encomenda fornecedor, recolha armazém, receção, embalamento, guia transporte, agendamento, envio, levantamento, entrega
+-   ✅ **Workflow Automático**
+    -   CustomerOrderObserver: cria WorkOrder automaticamente quando encomenda é criada
+    -   Duas rotas de workflow: Envio (9 tarefas) vs Levantamento (7 tarefas)
+    -   Dependências sequenciais: cada tarefa depende da conclusão da anterior
+    -   Atribuições automáticas a grupos (Gestor Comercial, Gestor de Armazém, Gestor Financeiro)
+    -   Prazos calculados automaticamente (1 dia por tarefa)
+-   ✅ **Controller & Routes**
+    -   11 endpoints: CRUD completo + gestão de tarefas
+    -   myTasks(): dashboard pessoal (tarefas atribuídas ao utilizador + grupo)
+    -   assignTask(), startTask(), completeTask(): gestão workflow
+    -   addTask(): adicionar tarefas a ordens existentes (workflow flexível)
+    -   Permissions: work-orders.create/read/update/delete
+-   ✅ **Novo Papel - Gestor de Armazém**
+    -   Role criado em WorkOrderPermissionsSeeder
+    -   Permissões: work-orders.read/update, articles.read/update, supplier-orders.read/update
+    -   Substituiu papel "Editor" para operações de armazém
+-   ✅ **Interface Vue**
+    -   MyTasks.vue: Dashboard pessoal com tarefas pendentes/em progresso
+    -   Index.vue: Lista todas as ordens com filtros (status, prioridade, pesquisa)
+    -   Show.vue: Timeline de tarefas com indicadores visuais de progresso
+    -   Create.vue: Criação manual de ordens com construtor de tarefas
+    -   Menu atualizado com submenu: "Minhas Tarefas" e "Todas as Ordens"
+-   ✅ **Features Avançadas**
+    -   Status automático: ordem atualiza baseado na conclusão de tarefas
+    -   Progresso percentual: cálculo automático de completion
+    -   Validação dependências: tarefas bloqueadas até dependências completas
+    -   Indicadores overdue: alertas visuais para tarefas atrasadas
+    -   Activity logging: histórico completo de todas as ações
+
+**Impact**
+
+-   **Módulo 20/20 Completo** - Última funcionalidade antes do delivery final
+-   **Automação Total** - Zero intervenção manual para processar encomendas
+-   **Rastreabilidade** - Histórico completo de todas as operações
+-   **Flexibilidade** - Workflow adaptável a diferentes tipos de encomendas
+
+---
+
 ## v0.18.0 — 16 Nov 2025
 
 **Security Compliance + Data Protection**

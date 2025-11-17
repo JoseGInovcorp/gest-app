@@ -148,6 +148,11 @@
                                 type="date"
                             />
                             <p
+                                class="mt-1 text-xs text-gray-500 dark:text-gray-400"
+                            >
+                                Data em que a proposta fica no estado Fechado
+                            </p>
+                            <p
                                 v-if="form.errors.proposal_date"
                                 class="mt-1 text-sm text-red-600 dark:text-red-400"
                             >
@@ -273,7 +278,9 @@
                                         <Select
                                             v-bind="field"
                                             v-model="item.article_id"
-                                            @change="updateArticlePrice(index)"
+                                            @update:modelValue="
+                                                updateArticlePrice(index)
+                                            "
                                         >
                                             <option value="">
                                                 Selecione um artigo
@@ -476,7 +483,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { Head, Link, useForm, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Form from "@/Components/ui/Form.vue";
@@ -528,11 +535,35 @@ const removeItem = (index) => {
 
 const updateArticlePrice = (index) => {
     const item = form.items[index];
-    const article = props.articles.find((a) => a.id === item.article_id);
+    const article = props.articles.find((a) => a.id == item.article_id); // usar == para comparar string com número
     if (article) {
-        item.unit_price = article.sale_price || 0;
+        item.unit_price = parseFloat(article.unit_price) || 0;
     }
 };
+
+// Observar mudanças nos article_id dos items para atualizar preços
+watch(
+    () => form.items.map((item) => item.article_id),
+    (newValues, oldValues) => {
+        newValues.forEach((newValue, index) => {
+            if (newValue && newValue !== oldValues[index]) {
+                updateArticlePrice(index);
+            }
+        });
+    }
+);
+
+// Calcular validade automaticamente (+30 dias após data da proposta)
+watch(
+    () => form.proposal_date,
+    (newDate) => {
+        if (newDate) {
+            const proposalDate = new Date(newDate);
+            proposalDate.setDate(proposalDate.getDate() + 30);
+            form.validity_date = proposalDate.toISOString().split("T")[0];
+        }
+    }
+);
 
 const calculateItemTotal = (index) => {
     // Reactivity will handle this automatically

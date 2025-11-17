@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class CustomerOrder extends Model
 {
@@ -14,7 +15,6 @@ class CustomerOrder extends Model
     protected $fillable = [
         'number',
         'proposal_date',
-        'validity_date',
         'customer_id',
         'status',
         'total_value',
@@ -23,7 +23,6 @@ class CustomerOrder extends Model
 
     protected $casts = [
         'proposal_date' => 'date',
-        'validity_date' => 'date',
         'total_value' => 'decimal:2',
     ];
 
@@ -41,6 +40,14 @@ class CustomerOrder extends Model
     public function items(): HasMany
     {
         return $this->hasMany(CustomerOrderItem::class);
+    }
+
+    /**
+     * Get the work order for this customer order
+     */
+    public function workOrder(): HasOne
+    {
+        return $this->hasOne(WorkOrder::class);
     }
 
     /**

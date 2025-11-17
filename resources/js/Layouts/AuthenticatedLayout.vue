@@ -33,12 +33,16 @@ import {
     Archive,
     Building,
     ListChecks,
+    CheckSquare,
+    List,
+    ListTodo,
 } from "lucide-vue-next";
 
 const showingNavigationDropdown = ref(false);
 const sidebarOpen = ref(false);
 
 // Estados para controlar expansão dos submenus
+const workOrdersExpanded = ref(false);
 const financialExpanded = ref(false);
 const accessManagementExpanded = ref(false);
 const configurationExpanded = ref(false);
@@ -73,6 +77,10 @@ const hasAnyPermission = (module) => {
 provide("hasPermission", hasPermission);
 
 // Funções para toggle dos submenus
+const toggleWorkOrders = () => {
+    workOrdersExpanded.value = !workOrdersExpanded.value;
+};
+
 const toggleFinancial = () => {
     financialExpanded.value = !financialExpanded.value;
 };
@@ -150,10 +158,21 @@ const allOrdersNavigationItems = [
     },
     {
         name: "Ordens de Trabalho",
-        href: "dashboard", // Temporário até implementar
+        href: "work-orders",
         icon: Briefcase,
-        disabled: true,
         permission: "work-orders",
+        children: [
+            {
+                name: "Minhas Tarefas",
+                href: "work-orders.my-tasks",
+                icon: CheckSquare,
+            },
+            {
+                name: "Todas as Ordens",
+                href: "work-orders.index",
+                icon: List,
+            },
+        ],
     },
 ];
 
@@ -273,6 +292,13 @@ const allConfigurationItems = [
         icon: ListChecks,
         disabled: false,
         permission: "calendar-event-actions",
+    },
+    {
+        name: "Tarefas - Templates",
+        href: "task-templates",
+        icon: ListTodo,
+        disabled: false,
+        permission: "task-templates",
     },
     {
         name: "Artigos",
@@ -478,7 +504,85 @@ const logout = () => {
                                             v-for="item in ordersNavigationItems"
                                             :key="item.name"
                                         >
+                                            <!-- Item with children (expandable) -->
+                                            <div v-if="item.children">
+                                                <button
+                                                    @click="toggleWorkOrders"
+                                                    :class="[
+                                                        isActive(item.href)
+                                                            ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                                                            : 'text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
+                                                        'group flex w-full items-center justify-between gap-x-3 rounded-md p-2 text-sm leading-6 font-medium transition-all',
+                                                    ]"
+                                                >
+                                                    <div
+                                                        class="flex items-center gap-x-3"
+                                                    >
+                                                        <component
+                                                            :is="item.icon"
+                                                            :class="[
+                                                                isActive(
+                                                                    item.href
+                                                                )
+                                                                    ? 'text-blue-600 dark:text-blue-400'
+                                                                    : 'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
+                                                                'h-5 w-5 shrink-0',
+                                                            ]"
+                                                        />
+                                                        {{ item.name }}
+                                                    </div>
+                                                    <ChevronDown
+                                                        :class="[
+                                                            'h-4 w-4 transition-transform duration-200',
+                                                            workOrdersExpanded
+                                                                ? 'rotate-180'
+                                                                : '',
+                                                        ]"
+                                                    />
+                                                </button>
+                                                <!-- Submenu items -->
+                                                <ul
+                                                    v-show="workOrdersExpanded"
+                                                    class="mt-1 space-y-1 pl-9"
+                                                >
+                                                    <li
+                                                        v-for="child in item.children"
+                                                        :key="child.name"
+                                                    >
+                                                        <Link
+                                                            :href="
+                                                                route(
+                                                                    child.href
+                                                                )
+                                                            "
+                                                            :class="[
+                                                                isActive(
+                                                                    child.href
+                                                                )
+                                                                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
+                                                                    : 'text-gray-600 dark:text-gray-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
+                                                                'group flex gap-x-3 rounded-md p-2 text-sm leading-6 transition-all',
+                                                            ]"
+                                                        >
+                                                            <component
+                                                                :is="child.icon"
+                                                                :class="[
+                                                                    isActive(
+                                                                        child.href
+                                                                    )
+                                                                        ? 'text-blue-600 dark:text-blue-400'
+                                                                        : 'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
+                                                                    'h-4 w-4 shrink-0',
+                                                                ]"
+                                                            />
+                                                            {{ child.name }}
+                                                        </Link>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <!-- Item without children (regular link) -->
                                             <Link
+                                                v-else
                                                 :href="
                                                     route(
                                                         getNavRoute(item.href)
@@ -800,7 +904,75 @@ const logout = () => {
                                     v-for="item in ordersNavigationItems"
                                     :key="item.name"
                                 >
+                                    <!-- Item with children (expandable) -->
+                                    <div v-if="item.children">
+                                        <button
+                                            @click="toggleWorkOrders"
+                                            :class="[
+                                                isActive(item.href)
+                                                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                                                    : 'text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
+                                                'group flex w-full items-center justify-between gap-x-3 rounded-md p-2 text-sm leading-6 font-medium transition-all',
+                                            ]"
+                                        >
+                                            <div
+                                                class="flex items-center gap-x-3"
+                                            >
+                                                <component
+                                                    :is="item.icon"
+                                                    :class="[
+                                                        isActive(item.href)
+                                                            ? 'text-blue-600 dark:text-blue-400'
+                                                            : 'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
+                                                        'h-5 w-5 shrink-0',
+                                                    ]"
+                                                />
+                                                {{ item.name }}
+                                            </div>
+                                            <ChevronDown
+                                                :class="[
+                                                    'h-4 w-4 transition-transform duration-200',
+                                                    workOrdersExpanded
+                                                        ? 'rotate-180'
+                                                        : '',
+                                                ]"
+                                            />
+                                        </button>
+                                        <!-- Submenu items -->
+                                        <ul
+                                            v-show="workOrdersExpanded"
+                                            class="mt-1 space-y-1 pl-9"
+                                        >
+                                            <li
+                                                v-for="child in item.children"
+                                                :key="child.name"
+                                            >
+                                                <Link
+                                                    :href="route(child.href)"
+                                                    :class="[
+                                                        isActive(child.href)
+                                                            ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
+                                                            : 'text-gray-600 dark:text-gray-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
+                                                        'group flex gap-x-3 rounded-md p-2 text-sm leading-6 transition-all',
+                                                    ]"
+                                                >
+                                                    <component
+                                                        :is="child.icon"
+                                                        :class="[
+                                                            isActive(child.href)
+                                                                ? 'text-blue-600 dark:text-blue-400'
+                                                                : 'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
+                                                            'h-4 w-4 shrink-0',
+                                                        ]"
+                                                    />
+                                                    {{ child.name }}
+                                                </Link>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <!-- Item without children (regular link) -->
                                     <Link
+                                        v-else
                                         :href="route(getNavRoute(item.href))"
                                         :class="[
                                             isActive(item.href)

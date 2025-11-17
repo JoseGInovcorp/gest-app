@@ -62,7 +62,7 @@ class ProposalController extends Controller
 
         $articles = Article::ativos()
             ->orderBy('nome')
-            ->get(['id', 'nome as name', 'preco as price', 'referencia as reference']);
+            ->get(['id', 'nome as name', 'preco_com_iva as price', 'referencia as reference']);
 
         $suppliers = Entity::whereIn('type', ['supplier', 'both'])
             ->where('active', true)
@@ -86,9 +86,9 @@ class ProposalController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'data_proposta' => 'required|date',
+            'data_proposta' => $request->estado === 'fechado' ? 'required|date' : 'nullable|date',
             'entity_id' => 'required|exists:entities,id',
-            'validade' => 'required|date',
+            'validade' => 'nullable|date',
             'estado' => 'required|in:rascunho,fechado',
             'observacoes' => 'nullable|string',
             'lines' => 'required|array|min:1',
@@ -103,11 +103,20 @@ class ProposalController extends Controller
             // Gerar número automaticamente
             $numero = Proposal::generateNumber();
 
+            // Se estado for fechado e tiver data_proposta, calcular validade automaticamente (+30 dias)
+            $dataProposta = $validated['data_proposta'] ?? null;
+            $validade = null;
+            if ($validated['estado'] === 'fechado' && $dataProposta) {
+                $date = new \DateTime($dataProposta);
+                $date->modify('+30 days');
+                $validade = $date->format('Y-m-d');
+            }
+
             $proposal = Proposal::create([
                 'numero' => $numero,
-                'data_proposta' => $validated['data_proposta'],
+                'data_proposta' => $dataProposta,
                 'entity_id' => $validated['entity_id'],
-                'validade' => $validated['validade'],
+                'validade' => $validade,
                 'estado' => $validated['estado'],
                 'observacoes' => $validated['observacoes'] ?? null,
             ]);
@@ -168,7 +177,7 @@ class ProposalController extends Controller
 
         $articles = Article::ativos()
             ->orderBy('nome')
-            ->get(['id', 'nome as name', 'preco as price', 'referencia as reference']);
+            ->get(['id', 'nome as name', 'preco_com_iva as price', 'referencia as reference']);
 
         $suppliers = Entity::whereIn('type', ['supplier', 'both'])
             ->where('active', true)
@@ -211,9 +220,9 @@ class ProposalController extends Controller
     {
         $validated = $request->validate([
             'numero' => 'required|string|unique:proposals,numero,' . $proposal->id,
-            'data_proposta' => 'required|date',
+            'data_proposta' => $request->estado === 'fechado' ? 'required|date' : 'nullable|date',
             'entity_id' => 'required|exists:entities,id',
-            'validade' => 'required|date',
+            'validade' => 'nullable|date',
             'estado' => 'required|in:rascunho,fechado',
             'observacoes' => 'nullable|string',
             'lines' => 'required|array|min:1',
@@ -225,11 +234,20 @@ class ProposalController extends Controller
 
         DB::beginTransaction();
         try {
+            // Se estado for fechado e tiver data_proposta, calcular validade automaticamente (+30 dias)
+            $dataProposta = $validated['data_proposta'] ?? null;
+            $validade = null;
+            if ($validated['estado'] === 'fechado' && $dataProposta) {
+                $date = new \DateTime($dataProposta);
+                $date->modify('+30 days');
+                $validade = $date->format('Y-m-d');
+            }
+
             $proposal->update([
                 'numero' => $validated['numero'],
-                'data_proposta' => $validated['data_proposta'],
+                'data_proposta' => $dataProposta,
                 'entity_id' => $validated['entity_id'],
-                'validade' => $validated['validade'],
+                'validade' => $validade,
                 'estado' => $validated['estado'],
                 'observacoes' => $validated['observacoes'] ?? null,
             ]);
