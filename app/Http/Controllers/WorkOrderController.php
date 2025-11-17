@@ -99,8 +99,11 @@ class WorkOrderController extends Controller
         ")
             ->orderBy('due_date', 'asc')
             ->paginate(20)
-            ->withQueryString()
-            ->through(fn($task) => [
+            ->withQueryString();
+
+        // Transform tasks after pagination to avoid null links issue
+        $tasks->through(function ($task) {
+            return [
                 'id' => $task->id,
                 'title' => $task->title,
                 'description' => $task->description,
@@ -121,7 +124,8 @@ class WorkOrderController extends Controller
                     'id' => $task->dependsOn->id,
                     'title' => $task->dependsOn->title,
                 ] : null,
-            ]);
+            ];
+        });
 
         $taskTemplates = TaskTemplate::active()
             ->orderedBySequence()
