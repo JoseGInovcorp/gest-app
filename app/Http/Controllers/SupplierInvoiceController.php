@@ -177,7 +177,11 @@ class SupplierInvoiceController extends Controller
             ->get(['id', 'number', 'supplier_id']);
 
         return Inertia::render('SupplierInvoices/Edit', [
-            'invoice' => $supplierInvoice,
+            'invoice' => [
+                ...$supplierInvoice->toArray(),
+                'data_fatura' => $supplierInvoice->data_fatura?->format('Y-m-d'),
+                'data_vencimento' => $supplierInvoice->data_vencimento?->format('Y-m-d'),
+            ],
             'suppliers' => $suppliers,
             'supplierOrders' => $supplierOrders,
         ]);

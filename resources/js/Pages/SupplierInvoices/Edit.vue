@@ -8,6 +8,7 @@ import FormField from "@/Components/ui/FormField.vue";
 import Input from "@/Components/ui/Input.vue";
 import Select from "@/Components/ui/Select.vue";
 import Button from "@/Components/ui/Button.vue";
+import ConfirmDialog from "@/Components/ConfirmDialog.vue";
 
 const props = defineProps({
     invoice: Object,
@@ -29,6 +30,11 @@ const form = useForm({
 const showPaymentProofDialog = ref(false);
 const paymentProofFile = ref(null);
 const sendingProof = ref(false);
+
+// Diálogos de aviso e erro
+const showWarningDialog = ref(false);
+const showErrorDialog = ref(false);
+const errorMessage = ref("");
 
 // Estado original para detectar mudança para "paga"
 const originalEstado = ref(props.invoice.estado);
@@ -93,7 +99,7 @@ const submit = () => {
 
 const sendPaymentProof = async () => {
     if (!paymentProofFile.value) {
-        alert("Por favor, selecione o comprovativo de pagamento.");
+        showWarningDialog.value = true;
         return;
     }
 
@@ -119,10 +125,10 @@ const sendPaymentProof = async () => {
         // Recarregar a página para mostrar o comprovativo enviado
         window.location.reload();
     } catch (error) {
-        alert(
+        errorMessage.value =
             "Erro ao enviar comprovativo: " +
-                (error.response?.data?.message || error.message)
-        );
+            (error.response?.data?.message || error.message);
+        showErrorDialog.value = true;
     } finally {
         sendingProof.value = false;
     }
@@ -492,5 +498,29 @@ const cancelEstadoChange = () => {
                 </div>
             </div>
         </div>
+
+        <!-- Warning Dialog (arquivo não selecionado) -->
+        <ConfirmDialog
+            :show="showWarningDialog"
+            type="warning"
+            title="Atenção"
+            message="Por favor, selecione o comprovativo de pagamento."
+            confirm-text="OK"
+            :cancel-text="null"
+            @confirm="showWarningDialog = false"
+            @cancel="showWarningDialog = false"
+        />
+
+        <!-- Error Dialog (erro no envio) -->
+        <ConfirmDialog
+            :show="showErrorDialog"
+            type="danger"
+            title="Erro ao Enviar"
+            :message="errorMessage"
+            confirm-text="OK"
+            :cancel-text="null"
+            @confirm="showErrorDialog = false"
+            @cancel="showErrorDialog = false"
+        />
     </AuthenticatedLayout>
 </template>

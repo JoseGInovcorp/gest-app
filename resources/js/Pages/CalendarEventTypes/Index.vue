@@ -3,6 +3,7 @@ import { ref, computed } from "vue";
 import { Head, Link, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Button from "@/Components/ui/Button.vue";
+import ConfirmDialog from "@/Components/ConfirmDialog.vue";
 import Table from "@/Components/ui/table/Table.vue";
 import TableBody from "@/Components/ui/table/TableBody.vue";
 import TableCell from "@/Components/ui/table/TableCell.vue";
@@ -41,10 +42,26 @@ const filteredEventTypes = computed(() => {
     );
 });
 
-const deleteEventType = (id) => {
-    if (confirm("Tem certeza que deseja eliminar este tipo de evento?")) {
-        router.delete(route("calendar-event-types.destroy", id));
-    }
+const showDeleteDialog = ref(false);
+const itemToDelete = ref(null);
+
+const confirmDelete = (id) => {
+    itemToDelete.value = id;
+    showDeleteDialog.value = true;
+};
+
+const deleteEventType = () => {
+    router.delete(route("calendar-event-types.destroy", itemToDelete.value), {
+        onFinish: () => {
+            showDeleteDialog.value = false;
+            itemToDelete.value = null;
+        },
+    });
+};
+
+const cancelDelete = () => {
+    showDeleteDialog.value = false;
+    itemToDelete.value = null;
 };
 </script>
 
@@ -218,7 +235,7 @@ const deleteEventType = (id) => {
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
-                                                class="h-8 w-8 p-0"
+                                                class="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950"
                                             >
                                                 <Pencil class="h-4 w-4" />
                                             </Button>
@@ -228,9 +245,7 @@ const deleteEventType = (id) => {
                                             variant="ghost"
                                             size="sm"
                                             class="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
-                                            @click="
-                                                deleteEventType(eventType.id)
-                                            "
+                                            @click="confirmDelete(eventType.id)"
                                         >
                                             <Trash2 class="h-4 w-4" />
                                         </Button>
@@ -242,5 +257,17 @@ const deleteEventType = (id) => {
                 </div>
             </div>
         </div>
+
+        <!-- Confirm Delete Dialog -->
+        <ConfirmDialog
+            :show="showDeleteDialog"
+            type="danger"
+            title="Eliminar Tipo de Evento"
+            message="Tens a certeza que desejas eliminar este tipo de evento?"
+            confirm-text="Eliminar"
+            cancel-text="Cancelar"
+            @confirm="deleteEventType"
+            @cancel="cancelDelete"
+        />
     </AuthenticatedLayout>
 </template>

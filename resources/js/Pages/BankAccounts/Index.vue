@@ -185,7 +185,7 @@
                             </Link>
                             <button
                                 v-if="can.delete"
-                                @click="deleteAccount(item.id)"
+                                @click="confirmDelete(item.id)"
                                 class="p-1.5 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
                                 title="Eliminar"
                             >
@@ -232,14 +232,27 @@
                 </div>
             </div>
         </div>
+
+        <!-- Confirm Delete Dialog -->
+        <ConfirmDialog
+            :show="showDeleteDialog"
+            type="danger"
+            title="Eliminar Conta Bancária"
+            message="Tem certeza que deseja eliminar esta conta bancária? Esta ação não pode ser desfeita."
+            confirm-text="Eliminar"
+            cancel-text="Cancelar"
+            @confirm="deleteAccount"
+            @cancel="cancelDelete"
+        />
     </AuthenticatedLayout>
 </template>
 
 <script setup>
-import { reactive, computed } from "vue";
+import { reactive, computed, ref } from "vue";
 import { router, Head, Link } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import DataTable from "@/Components/ui/DataTable.vue";
+import ConfirmDialog from "@/Components/ConfirmDialog.vue";
 import { CreditCard, Search, Plus, Pencil, Trash2, Eye } from "lucide-vue-next";
 
 // Props
@@ -302,15 +315,26 @@ const search = () => {
     );
 };
 
-const deleteAccount = (id) => {
-    if (
-        confirm(
-            "Tem certeza que deseja eliminar esta conta bancária? Esta ação não pode ser desfeita."
-        )
-    ) {
-        router.delete(route("bank-accounts.destroy", id), {
-            preserveState: true,
-        });
-    }
+const showDeleteDialog = ref(false);
+const accountToDelete = ref(null);
+
+const confirmDelete = (id) => {
+    accountToDelete.value = id;
+    showDeleteDialog.value = true;
+};
+
+const deleteAccount = () => {
+    router.delete(route("bank-accounts.destroy", accountToDelete.value), {
+        preserveState: true,
+        onFinish: () => {
+            showDeleteDialog.value = false;
+            accountToDelete.value = null;
+        },
+    });
+};
+
+const cancelDelete = () => {
+    showDeleteDialog.value = false;
+    accountToDelete.value = null;
 };
 </script>

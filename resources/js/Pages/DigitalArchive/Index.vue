@@ -1,6 +1,7 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import UploadModal from "@/Components/UploadModal.vue";
+import ConfirmDialog from "@/Components/ConfirmDialog.vue";
 import { Head, Link, router } from "@inertiajs/vue3";
 import { ref, computed } from "vue";
 import {
@@ -103,12 +104,27 @@ const downloadDocument = (documentId) => {
 };
 
 // Eliminar
-const deleteDocument = (document) => {
-    if (confirm(`Tem a certeza que deseja eliminar "${document.name}"?`)) {
-        router.delete(route("digital-archive.destroy", document.id), {
-            preserveScroll: true,
-        });
-    }
+const showDeleteDialog = ref(false);
+const documentToDelete = ref(null);
+
+const openDeleteDialog = (document) => {
+    documentToDelete.value = document;
+    showDeleteDialog.value = true;
+};
+
+const deleteDocument = () => {
+    router.delete(route("digital-archive.destroy", documentToDelete.value.id), {
+        preserveScroll: true,
+        onFinish: () => {
+            showDeleteDialog.value = false;
+            documentToDelete.value = null;
+        },
+    });
+};
+
+const cancelDelete = () => {
+    showDeleteDialog.value = false;
+    documentToDelete.value = null;
 };
 
 // Formatar data
@@ -374,7 +390,7 @@ const formatDate = (date) => {
                             </Button>
                             <Button
                                 v-if="can.delete"
-                                @click="deleteDocument(document)"
+                                @click="openDeleteDialog(document)"
                                 variant="destructive"
                                 size="sm"
                             >
@@ -457,6 +473,22 @@ const formatDate = (date) => {
             :categories="categories"
             :modules="modules"
             @close="showUploadModal = false"
+        />
+
+        <!-- Confirm Delete Dialog -->
+        <ConfirmDialog
+            :show="showDeleteDialog"
+            type="danger"
+            title="Eliminar Documento"
+            :message="
+                documentToDelete
+                    ? `Tem a certeza que deseja eliminar &quot;${documentToDelete.name}&quot;?`
+                    : ''
+            "
+            confirm-text="Eliminar"
+            cancel-text="Cancelar"
+            @confirm="deleteDocument"
+            @cancel="cancelDelete"
         />
     </AuthenticatedLayout>
 </template>

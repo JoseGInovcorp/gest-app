@@ -3,6 +3,7 @@ import { ref, computed } from "vue";
 import { Head, Link, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Button from "@/Components/ui/Button.vue";
+import ConfirmDialog from "@/Components/ConfirmDialog.vue";
 import Table from "@/Components/ui/table/Table.vue";
 import TableBody from "@/Components/ui/table/TableBody.vue";
 import TableCell from "@/Components/ui/table/TableCell.vue";
@@ -42,10 +43,26 @@ const filteredEventActions = computed(() => {
     );
 });
 
-const deleteEventAction = (id) => {
-    if (confirm("Tem certeza que deseja eliminar esta ação de evento?")) {
-        router.delete(route("calendar-event-actions.destroy", id));
-    }
+const showDeleteDialog = ref(false);
+const itemToDelete = ref(null);
+
+const confirmDelete = (id) => {
+    itemToDelete.value = id;
+    showDeleteDialog.value = true;
+};
+
+const deleteEventAction = () => {
+    router.delete(route("calendar-event-actions.destroy", itemToDelete.value), {
+        onFinish: () => {
+            showDeleteDialog.value = false;
+            itemToDelete.value = null;
+        },
+    });
+};
+
+const cancelDelete = () => {
+    showDeleteDialog.value = false;
+    itemToDelete.value = null;
 };
 </script>
 
@@ -194,7 +211,7 @@ const deleteEventAction = (id) => {
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
-                                                class="h-8 w-8 p-0"
+                                                class="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950"
                                             >
                                                 <Pencil class="h-4 w-4" />
                                             </Button>
@@ -205,9 +222,7 @@ const deleteEventAction = (id) => {
                                             size="sm"
                                             class="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
                                             @click="
-                                                deleteEventAction(
-                                                    eventAction.id
-                                                )
+                                                confirmDelete(eventAction.id)
                                             "
                                         >
                                             <Trash2 class="h-4 w-4" />
@@ -220,5 +235,17 @@ const deleteEventAction = (id) => {
                 </div>
             </div>
         </div>
+
+        <!-- Confirm Delete Dialog -->
+        <ConfirmDialog
+            :show="showDeleteDialog"
+            type="danger"
+            title="Eliminar Ação de Evento"
+            message="Tens a certeza que desejas eliminar esta ação de evento?"
+            confirm-text="Eliminar"
+            cancel-text="Cancelar"
+            @confirm="deleteEventAction"
+            @cancel="cancelDelete"
+        />
     </AuthenticatedLayout>
 </template>

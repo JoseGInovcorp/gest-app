@@ -54,51 +54,18 @@
             @create="handleCreate"
         />
 
-        <!-- Delete Confirmation Modal -->
-        <Modal :show="showDeleteModal" @close="closeDeleteModal">
-            <div class="p-6">
-                <div class="flex items-center mb-4">
-                    <div
-                        class="flex-shrink-0 w-10 h-10 mx-auto bg-red-100 rounded-full flex items-center justify-center dark:bg-red-900"
-                    >
-                        <Trash2
-                            class="w-6 h-6 text-red-600 dark:text-red-400"
-                        />
-                    </div>
-                </div>
-                <div class="text-center">
-                    <h3
-                        class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2"
-                    >
-                        Eliminar Contacto
-                    </h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                        Tem certeza que pretende eliminar este contacto? Esta
-                        ação não pode ser desfeita.
-                    </p>
-                    <div class="flex justify-center space-x-3">
-                        <Button
-                            variant="outline"
-                            @click="closeDeleteModal"
-                            :disabled="processing"
-                        >
-                            Cancelar
-                        </Button>
-                        <Button
-                            variant="destructive"
-                            @click="confirmDelete"
-                            :disabled="processing"
-                        >
-                            <Loader2
-                                v-if="processing"
-                                class="w-4 h-4 mr-2 animate-spin"
-                            />
-                            Eliminar
-                        </Button>
-                    </div>
-                </div>
-            </div>
-        </Modal>
+        <!-- Confirm Delete Dialog -->
+        <ConfirmDialog
+            :show="showDeleteDialog"
+            type="danger"
+            title="Eliminar Contacto"
+            message="Tem certeza que pretende eliminar este contacto? Esta ação não pode ser desfeita."
+            confirm-text="Eliminar"
+            cancel-text="Cancelar"
+            :is-processing="processing"
+            @confirm="confirmDelete"
+            @cancel="cancelDelete"
+        />
     </AuthenticatedLayout>
 </template>
 
@@ -107,9 +74,8 @@ import { ref } from "vue";
 import { Head, Link, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import ContactsDataTable from "@/Components/ui/ContactsDataTable.vue";
-import Modal from "@/Components/Modal.vue";
-import Button from "@/Components/ui/Button.vue";
-import { Users, Trash2, Loader2 } from "lucide-vue-next";
+import ConfirmDialog from "@/Components/ConfirmDialog.vue";
+import { Users } from "lucide-vue-next";
 
 const props = defineProps({
     contacts: {
@@ -136,7 +102,7 @@ const props = defineProps({
 });
 
 // Estado para modal de confirmação
-const showDeleteModal = ref(false);
+const showDeleteDialog = ref(false);
 const contactToDelete = ref(null);
 const processing = ref(false);
 
@@ -155,7 +121,7 @@ const handleCreate = () => {
 
 const handleDelete = (contactId) => {
     contactToDelete.value = contactId;
-    showDeleteModal.value = true;
+    showDeleteDialog.value = true;
 };
 
 const confirmDelete = () => {
@@ -164,20 +130,16 @@ const confirmDelete = () => {
     processing.value = true;
 
     router.delete(route("contacts.destroy", contactToDelete.value), {
-        onSuccess: () => {
-            closeDeleteModal();
-        },
-        onError: () => {
-            processing.value = false;
-        },
         onFinish: () => {
+            showDeleteDialog.value = false;
+            contactToDelete.value = null;
             processing.value = false;
         },
     });
 };
 
-const closeDeleteModal = () => {
-    showDeleteModal.value = false;
+const cancelDelete = () => {
+    showDeleteDialog.value = false;
     contactToDelete.value = null;
     processing.value = false;
 };

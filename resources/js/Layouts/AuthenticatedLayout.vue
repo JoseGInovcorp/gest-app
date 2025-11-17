@@ -358,8 +358,14 @@ const getNavRoute = (href) => {
 // Auto-expand menus based on current route
 const currentRouteName = route().current();
 
-// Expandir Financeiro se rota atual está em itens financeiros
+// Expandir Ordens de Trabalho se rota atual está em work-orders
 if (currentRouteName) {
+    const workOrderRoutes = ["work-orders"];
+    if (workOrderRoutes.some((r) => currentRouteName.includes(r))) {
+        workOrdersExpanded.value = true;
+    }
+
+    // Expandir Financeiro se rota atual está em itens financeiros
     const financialRoutes = [
         "bank-accounts",
         "client-accounts",
@@ -385,6 +391,7 @@ if (currentRouteName) {
         "articles",
         "vat-rates",
         "logs",
+        "task-templates",
     ];
     if (configRoutes.some((r) => currentRouteName.includes(r))) {
         configurationExpanded.value = true;
@@ -612,53 +619,74 @@ const logout = () => {
 
                                 <!-- Financial Section -->
                                 <li v-if="financialNavigationItems.length > 0">
-                                    <button
-                                        @click="toggleFinancial"
-                                        class="w-full text-left flex items-center justify-between text-xs font-semibold leading-6 text-gray-400 uppercase tracking-wide mb-1 hover:text-gray-300 transition-colors"
-                                    >
-                                        <span>Financeiro</span>
-                                        <ChevronDown
-                                            :class="[
-                                                'h-4 w-4 transition-transform duration-200',
-                                                financialExpanded
-                                                    ? 'rotate-180'
-                                                    : '',
-                                            ]"
-                                        />
-                                    </button>
-                                    <ul
-                                        v-show="financialExpanded"
-                                        role="list"
-                                        class="-mx-2 space-y-1 transition-all duration-300"
-                                    >
-                                        <li
-                                            v-for="item in financialNavigationItems"
-                                            :key="item.name"
-                                        >
-                                            <Link
-                                                :href="
-                                                    route(
-                                                        getNavRoute(item.href)
-                                                    )
-                                                "
+                                    <ul role="list" class="-mx-2 space-y-1">
+                                        <li>
+                                            <button
+                                                @click="toggleFinancial"
                                                 :class="[
-                                                    isActive(item.href)
-                                                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
-                                                        : 'text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
-                                                    'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-medium transition-all',
+                                                    'text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
+                                                    'group flex w-full items-center justify-between gap-x-3 rounded-md p-2 text-sm leading-6 font-medium transition-all',
                                                 ]"
                                             >
-                                                <component
-                                                    :is="item.icon"
+                                                <div
+                                                    class="flex items-center gap-x-3"
+                                                >
+                                                    <Banknote
+                                                        :class="[
+                                                            'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
+                                                            'h-5 w-5 shrink-0',
+                                                        ]"
+                                                    />
+                                                    Financeiro
+                                                </div>
+                                                <ChevronDown
                                                     :class="[
-                                                        isActive(item.href)
-                                                            ? 'text-blue-600 dark:text-blue-400'
-                                                            : 'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
-                                                        'h-5 w-5 shrink-0',
+                                                        'h-4 w-4 transition-transform duration-200',
+                                                        financialExpanded
+                                                            ? 'rotate-180'
+                                                            : '',
                                                     ]"
                                                 />
-                                                {{ item.name }}
-                                            </Link>
+                                            </button>
+                                            <!-- Submenu items -->
+                                            <ul
+                                                v-show="financialExpanded"
+                                                class="mt-1 space-y-1 pl-9"
+                                            >
+                                                <li
+                                                    v-for="item in financialNavigationItems"
+                                                    :key="item.name"
+                                                >
+                                                    <Link
+                                                        :href="
+                                                            route(
+                                                                getNavRoute(
+                                                                    item.href
+                                                                )
+                                                            )
+                                                        "
+                                                        :class="[
+                                                            isActive(item.href)
+                                                                ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
+                                                                : 'text-gray-600 dark:text-gray-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
+                                                            'group flex gap-x-3 rounded-md p-2 text-sm leading-6 transition-all',
+                                                        ]"
+                                                    >
+                                                        <component
+                                                            :is="item.icon"
+                                                            :class="[
+                                                                isActive(
+                                                                    item.href
+                                                                )
+                                                                    ? 'text-blue-600 dark:text-blue-400'
+                                                                    : 'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
+                                                                'h-4 w-4 shrink-0',
+                                                            ]"
+                                                        />
+                                                        {{ item.name }}
+                                                    </Link>
+                                                </li>
+                                            </ul>
                                         </li>
                                     </ul>
                                 </li>
@@ -700,119 +728,161 @@ const logout = () => {
 
                                 <!-- Access Management Section -->
                                 <li v-if="accessManagementItems.length > 0">
-                                    <button
-                                        @click="toggleAccessManagement"
-                                        class="w-full text-left flex items-center justify-between text-xs font-semibold leading-6 text-gray-400 uppercase tracking-wide mb-1 hover:text-gray-300 transition-colors"
-                                    >
-                                        <span>Gestão de Acessos</span>
-                                        <ChevronDown
-                                            :class="[
-                                                'h-4 w-4 transition-transform duration-200',
-                                                accessManagementExpanded
-                                                    ? 'rotate-180'
-                                                    : '',
-                                            ]"
-                                        />
-                                    </button>
-                                    <ul
-                                        v-show="accessManagementExpanded"
-                                        role="list"
-                                        class="-mx-2 space-y-1 transition-all duration-300"
-                                    >
-                                        <li
-                                            v-for="item in accessManagementItems"
-                                            :key="item.name"
-                                        >
-                                            <Link
-                                                :href="
-                                                    route(
-                                                        getNavRoute(item.href)
-                                                    )
-                                                "
+                                    <ul role="list" class="-mx-2 space-y-1">
+                                        <li>
+                                            <button
+                                                @click="toggleAccessManagement"
                                                 :class="[
-                                                    isActive(item.href)
-                                                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
-                                                        : 'text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
-                                                    'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-medium transition-all',
+                                                    'text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
+                                                    'group flex w-full items-center justify-between gap-x-3 rounded-md p-2 text-sm leading-6 font-medium transition-all',
                                                 ]"
                                             >
-                                                <component
-                                                    :is="item.icon"
+                                                <div
+                                                    class="flex items-center gap-x-3"
+                                                >
+                                                    <Shield
+                                                        :class="[
+                                                            'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
+                                                            'h-5 w-5 shrink-0',
+                                                        ]"
+                                                    />
+                                                    Gestão de Acessos
+                                                </div>
+                                                <ChevronDown
                                                     :class="[
-                                                        isActive(item.href)
-                                                            ? 'text-blue-600 dark:text-blue-400'
-                                                            : 'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
-                                                        'h-5 w-5 shrink-0',
+                                                        'h-4 w-4 transition-transform duration-200',
+                                                        accessManagementExpanded
+                                                            ? 'rotate-180'
+                                                            : '',
                                                     ]"
                                                 />
-                                                {{ item.name }}
-                                            </Link>
+                                            </button>
+                                            <!-- Submenu items -->
+                                            <ul
+                                                v-show="
+                                                    accessManagementExpanded
+                                                "
+                                                class="mt-1 space-y-1 pl-9"
+                                            >
+                                                <li
+                                                    v-for="item in accessManagementItems"
+                                                    :key="item.name"
+                                                >
+                                                    <Link
+                                                        :href="
+                                                            route(
+                                                                getNavRoute(
+                                                                    item.href
+                                                                )
+                                                            )
+                                                        "
+                                                        :class="[
+                                                            isActive(item.href)
+                                                                ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
+                                                                : 'text-gray-600 dark:text-gray-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
+                                                            'group flex gap-x-3 rounded-md p-2 text-sm leading-6 transition-all',
+                                                        ]"
+                                                    >
+                                                        <component
+                                                            :is="item.icon"
+                                                            :class="[
+                                                                isActive(
+                                                                    item.href
+                                                                )
+                                                                    ? 'text-blue-600 dark:text-blue-400'
+                                                                    : 'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
+                                                                'h-4 w-4 shrink-0',
+                                                            ]"
+                                                        />
+                                                        {{ item.name }}
+                                                    </Link>
+                                                </li>
+                                            </ul>
                                         </li>
                                     </ul>
                                 </li>
 
                                 <!-- Configuration Section -->
                                 <li v-if="configurationItems.length > 0">
-                                    <button
-                                        @click="toggleConfiguration"
-                                        class="w-full text-left flex items-center justify-between text-xs font-semibold leading-6 text-gray-400 uppercase tracking-wide mb-1 hover:text-gray-300 transition-colors"
-                                    >
-                                        <span>Configurações</span>
-                                        <ChevronDown
-                                            :class="[
-                                                'h-4 w-4 transition-transform duration-200',
-                                                configurationExpanded
-                                                    ? 'rotate-180'
-                                                    : '',
-                                            ]"
-                                        />
-                                    </button>
-                                    <ul
-                                        v-show="configurationExpanded"
-                                        role="list"
-                                        class="-mx-2 space-y-1 transition-all duration-300"
-                                    >
-                                        <li
-                                            v-for="item in configurationItems"
-                                            :key="item.name"
-                                        >
-                                            <Link
-                                                v-if="!item.disabled"
-                                                :href="
-                                                    route(
-                                                        getNavRoute(item.href)
-                                                    )
-                                                "
+                                    <ul role="list" class="-mx-2 space-y-1">
+                                        <li>
+                                            <button
+                                                @click="toggleConfiguration"
                                                 :class="[
-                                                    isActive(item.href)
-                                                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
-                                                        : 'text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
-                                                    'group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-medium transition-all',
+                                                    'text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
+                                                    'group flex w-full items-center justify-between gap-x-3 rounded-md p-2 text-sm leading-6 font-medium transition-all',
                                                 ]"
                                             >
-                                                <component
-                                                    :is="item.icon"
+                                                <div
+                                                    class="flex items-center gap-x-3"
+                                                >
+                                                    <Settings
+                                                        :class="[
+                                                            'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
+                                                            'h-5 w-5 shrink-0',
+                                                        ]"
+                                                    />
+                                                    Configurações
+                                                </div>
+                                                <ChevronDown
                                                     :class="[
-                                                        isActive(item.href)
-                                                            ? 'text-blue-600 dark:text-blue-400'
-                                                            : 'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
-                                                        'h-4 w-4 shrink-0',
+                                                        'h-4 w-4 transition-transform duration-200',
+                                                        configurationExpanded
+                                                            ? 'rotate-180'
+                                                            : '',
                                                     ]"
                                                 />
-                                                {{ item.name }}
-                                            </Link>
-                                            <div
-                                                v-else
-                                                :class="[
-                                                    'group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-medium text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50',
-                                                ]"
+                                            </button>
+                                            <!-- Submenu items -->
+                                            <ul
+                                                v-show="configurationExpanded"
+                                                class="mt-1 space-y-1 pl-9"
                                             >
-                                                <component
-                                                    :is="item.icon"
-                                                    class="h-4 w-4 shrink-0 text-gray-400"
-                                                />
-                                                {{ item.name }}
-                                            </div>
+                                                <li
+                                                    v-for="item in configurationItems"
+                                                    :key="item.name"
+                                                >
+                                                    <Link
+                                                        v-if="!item.disabled"
+                                                        :href="
+                                                            route(
+                                                                getNavRoute(
+                                                                    item.href
+                                                                )
+                                                            )
+                                                        "
+                                                        :class="[
+                                                            isActive(item.href)
+                                                                ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
+                                                                : 'text-gray-600 dark:text-gray-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
+                                                            'group flex gap-x-3 rounded-md p-2 text-sm leading-6 transition-all',
+                                                        ]"
+                                                    >
+                                                        <component
+                                                            :is="item.icon"
+                                                            :class="[
+                                                                isActive(
+                                                                    item.href
+                                                                )
+                                                                    ? 'text-blue-600 dark:text-blue-400'
+                                                                    : 'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
+                                                                'h-4 w-4 shrink-0',
+                                                            ]"
+                                                        />
+                                                        {{ item.name }}
+                                                    </Link>
+                                                    <div
+                                                        v-else
+                                                        class="group flex gap-x-3 rounded-md p-2 text-sm leading-6 text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50"
+                                                    >
+                                                        <component
+                                                            :is="item.icon"
+                                                            class="h-4 w-4 shrink-0 text-gray-400"
+                                                        />
+                                                        {{ item.name }}
+                                                    </div>
+                                                </li>
+                                            </ul>
                                         </li>
                                     </ul>
                                 </li>
@@ -998,47 +1068,68 @@ const logout = () => {
 
                         <!-- Financial Section -->
                         <li v-if="financialNavigationItems.length > 0">
-                            <button
-                                @click="toggleFinancial"
-                                class="w-full text-left flex items-center justify-between text-xs font-semibold leading-6 text-gray-400 uppercase tracking-wide mb-2 hover:text-gray-300 transition-colors"
-                            >
-                                <span>Financeiro</span>
-                                <ChevronDown
-                                    :class="[
-                                        'h-4 w-4 transition-transform duration-200',
-                                        financialExpanded ? 'rotate-180' : '',
-                                    ]"
-                                />
-                            </button>
-                            <ul
-                                v-show="financialExpanded"
-                                role="list"
-                                class="-mx-2 space-y-1 transition-all duration-300"
-                            >
-                                <li
-                                    v-for="item in financialNavigationItems"
-                                    :key="item.name"
-                                >
-                                    <Link
-                                        :href="route(getNavRoute(item.href))"
+                            <ul role="list" class="-mx-2 space-y-1">
+                                <li>
+                                    <button
+                                        @click="toggleFinancial"
                                         :class="[
-                                            isActive(item.href)
-                                                ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
-                                                : 'text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
-                                            'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-medium transition-all',
+                                            'text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
+                                            'group flex w-full items-center justify-between gap-x-3 rounded-md p-2 text-sm leading-6 font-medium transition-all',
                                         ]"
                                     >
-                                        <component
-                                            :is="item.icon"
+                                        <div class="flex items-center gap-x-3">
+                                            <Banknote
+                                                :class="[
+                                                    'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
+                                                    'h-5 w-5 shrink-0',
+                                                ]"
+                                            />
+                                            Financeiro
+                                        </div>
+                                        <ChevronDown
                                             :class="[
-                                                isActive(item.href)
-                                                    ? 'text-blue-600 dark:text-blue-400'
-                                                    : 'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
-                                                'h-5 w-5 shrink-0',
+                                                'h-4 w-4 transition-transform duration-200',
+                                                financialExpanded
+                                                    ? 'rotate-180'
+                                                    : '',
                                             ]"
                                         />
-                                        {{ item.name }}
-                                    </Link>
+                                    </button>
+                                    <!-- Submenu items -->
+                                    <ul
+                                        v-show="financialExpanded"
+                                        class="mt-1 space-y-1 pl-9"
+                                    >
+                                        <li
+                                            v-for="item in financialNavigationItems"
+                                            :key="item.name"
+                                        >
+                                            <Link
+                                                :href="
+                                                    route(
+                                                        getNavRoute(item.href)
+                                                    )
+                                                "
+                                                :class="[
+                                                    isActive(item.href)
+                                                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
+                                                        : 'text-gray-600 dark:text-gray-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
+                                                    'group flex gap-x-3 rounded-md p-2 text-sm leading-6 transition-all',
+                                                ]"
+                                            >
+                                                <component
+                                                    :is="item.icon"
+                                                    :class="[
+                                                        isActive(item.href)
+                                                            ? 'text-blue-600 dark:text-blue-400'
+                                                            : 'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
+                                                        'h-4 w-4 shrink-0',
+                                                    ]"
+                                                />
+                                                {{ item.name }}
+                                            </Link>
+                                        </li>
+                                    </ul>
                                 </li>
                             </ul>
                         </li>
@@ -1076,113 +1167,147 @@ const logout = () => {
 
                         <!-- Access Management Section -->
                         <li v-if="accessManagementItems.length > 0">
-                            <button
-                                @click="toggleAccessManagement"
-                                class="w-full text-left flex items-center justify-between text-xs font-semibold leading-6 text-gray-400 uppercase tracking-wide mb-2 hover:text-gray-300 transition-colors"
-                            >
-                                <span>Gestão de Acessos</span>
-                                <ChevronDown
-                                    :class="[
-                                        'h-4 w-4 transition-transform duration-200',
-                                        accessManagementExpanded
-                                            ? 'rotate-180'
-                                            : '',
-                                    ]"
-                                />
-                            </button>
-                            <ul
-                                v-show="accessManagementExpanded"
-                                role="list"
-                                class="-mx-2 space-y-1 transition-all duration-300"
-                            >
-                                <li
-                                    v-for="item in accessManagementItems"
-                                    :key="item.name"
-                                >
-                                    <Link
-                                        :href="route(getNavRoute(item.href))"
+                            <ul role="list" class="-mx-2 space-y-1">
+                                <li>
+                                    <button
+                                        @click="toggleAccessManagement"
                                         :class="[
-                                            isActive(item.href)
-                                                ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
-                                                : 'text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
-                                            'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-medium transition-all',
+                                            'text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
+                                            'group flex w-full items-center justify-between gap-x-3 rounded-md p-2 text-sm leading-6 font-medium transition-all',
                                         ]"
                                     >
-                                        <component
-                                            :is="item.icon"
+                                        <div class="flex items-center gap-x-3">
+                                            <Shield
+                                                :class="[
+                                                    'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
+                                                    'h-5 w-5 shrink-0',
+                                                ]"
+                                            />
+                                            Gestão de Acessos
+                                        </div>
+                                        <ChevronDown
                                             :class="[
-                                                isActive(item.href)
-                                                    ? 'text-blue-600 dark:text-blue-400'
-                                                    : 'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
-                                                'h-5 w-5 shrink-0',
+                                                'h-4 w-4 transition-transform duration-200',
+                                                accessManagementExpanded
+                                                    ? 'rotate-180'
+                                                    : '',
                                             ]"
                                         />
-                                        {{ item.name }}
-                                    </Link>
+                                    </button>
+                                    <!-- Submenu items -->
+                                    <ul
+                                        v-show="accessManagementExpanded"
+                                        class="mt-1 space-y-1 pl-9"
+                                    >
+                                        <li
+                                            v-for="item in accessManagementItems"
+                                            :key="item.name"
+                                        >
+                                            <Link
+                                                :href="
+                                                    route(
+                                                        getNavRoute(item.href)
+                                                    )
+                                                "
+                                                :class="[
+                                                    isActive(item.href)
+                                                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
+                                                        : 'text-gray-600 dark:text-gray-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
+                                                    'group flex gap-x-3 rounded-md p-2 text-sm leading-6 transition-all',
+                                                ]"
+                                            >
+                                                <component
+                                                    :is="item.icon"
+                                                    :class="[
+                                                        isActive(item.href)
+                                                            ? 'text-blue-600 dark:text-blue-400'
+                                                            : 'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
+                                                        'h-4 w-4 shrink-0',
+                                                    ]"
+                                                />
+                                                {{ item.name }}
+                                            </Link>
+                                        </li>
+                                    </ul>
                                 </li>
                             </ul>
                         </li>
 
                         <!-- Configuration Section -->
                         <li v-if="configurationItems.length > 0">
-                            <button
-                                @click="toggleConfiguration"
-                                class="w-full text-left flex items-center justify-between text-xs font-semibold leading-6 text-gray-400 uppercase tracking-wide mb-2 hover:text-gray-300 transition-colors"
-                            >
-                                <span>Configurações</span>
-                                <ChevronDown
-                                    :class="[
-                                        'h-4 w-4 transition-transform duration-200',
-                                        configurationExpanded
-                                            ? 'rotate-180'
-                                            : '',
-                                    ]"
-                                />
-                            </button>
-                            <ul
-                                v-show="configurationExpanded"
-                                role="list"
-                                class="-mx-2 space-y-1 transition-all duration-300"
-                            >
-                                <li
-                                    v-for="item in configurationItems"
-                                    :key="item.name"
-                                >
-                                    <Link
-                                        v-if="!item.disabled"
-                                        :href="route(getNavRoute(item.href))"
+                            <ul role="list" class="-mx-2 space-y-1">
+                                <li>
+                                    <button
+                                        @click="toggleConfiguration"
                                         :class="[
-                                            isActive(item.href)
-                                                ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
-                                                : 'text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
-                                            'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-medium transition-all',
+                                            'text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
+                                            'group flex w-full items-center justify-between gap-x-3 rounded-md p-2 text-sm leading-6 font-medium transition-all',
                                         ]"
                                     >
-                                        <component
-                                            :is="item.icon"
+                                        <div class="flex items-center gap-x-3">
+                                            <Settings
+                                                :class="[
+                                                    'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
+                                                    'h-5 w-5 shrink-0',
+                                                ]"
+                                            />
+                                            Configurações
+                                        </div>
+                                        <ChevronDown
                                             :class="[
-                                                isActive(item.href)
-                                                    ? 'text-blue-600 dark:text-blue-400'
-                                                    : 'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
-                                                'h-4 w-4 shrink-0',
+                                                'h-4 w-4 transition-transform duration-200',
+                                                configurationExpanded
+                                                    ? 'rotate-180'
+                                                    : '',
                                             ]"
                                         />
-                                        <span class="text-xs">{{
-                                            item.name
-                                        }}</span>
-                                    </Link>
-                                    <div
-                                        v-else
-                                        class="group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-medium text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50"
+                                    </button>
+                                    <!-- Submenu items -->
+                                    <ul
+                                        v-show="configurationExpanded"
+                                        class="mt-1 space-y-1 pl-9"
                                     >
-                                        <component
-                                            :is="item.icon"
-                                            class="h-4 w-4 shrink-0 text-gray-400"
-                                        />
-                                        <span class="text-xs">{{
-                                            item.name
-                                        }}</span>
-                                    </div>
+                                        <li
+                                            v-for="item in configurationItems"
+                                            :key="item.name"
+                                        >
+                                            <Link
+                                                v-if="!item.disabled"
+                                                :href="
+                                                    route(
+                                                        getNavRoute(item.href)
+                                                    )
+                                                "
+                                                :class="[
+                                                    isActive(item.href)
+                                                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600'
+                                                        : 'text-gray-600 dark:text-gray-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10',
+                                                    'group flex gap-x-3 rounded-md p-2 text-sm leading-6 transition-all',
+                                                ]"
+                                            >
+                                                <component
+                                                    :is="item.icon"
+                                                    :class="[
+                                                        isActive(item.href)
+                                                            ? 'text-blue-600 dark:text-blue-400'
+                                                            : 'text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400',
+                                                        'h-4 w-4 shrink-0',
+                                                    ]"
+                                                />
+                                                {{ item.name }}
+                                            </Link>
+                                            <div
+                                                v-else
+                                                class="group flex gap-x-3 rounded-md p-2 text-sm leading-6 text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50"
+                                            >
+                                                <component
+                                                    :is="item.icon"
+                                                    class="h-4 w-4 shrink-0 text-gray-400"
+                                                />
+                                                {{ item.name }}
+                                            </div>
+                                        </li>
+                                    </ul>
                                 </li>
                             </ul>
                         </li>

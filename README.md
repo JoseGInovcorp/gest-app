@@ -8,7 +8,7 @@ Este é o meu projeto final de estágio, desenvolvido na **Inovcorp** entre 6 e 
 
 O objetivo é criar um sistema de gestão empresarial para PMEs, com funcionalidades de gestão comercial, financeira e operacional.
 
-**Versão Atual:** v0.20.0  
+**Versão Atual:** v0.21.0  
 **Progresso:** 100% (20 de 20 módulos concluídos)  
 **Prazo de Entrega:** 18 Nov 2025
 
@@ -18,11 +18,15 @@ O objetivo é criar um sistema de gestão empresarial para PMEs, com funcionalid
 -   ✅ Sistema de permissões completo
 -   ✅ Histórico de atividades (logs)
 -   ✅ Logo da empresa integrado
--   ✅ Interface uniformizada
+-   ✅ **Interface 100% uniformizada e consistente**
+-   ✅ **Componente ConfirmDialog reutilizável**
+-   ✅ **Botões de ação padronizados (cinza/azul/vermelho)**
+-   ✅ **Headers de página com estrutura consistente**
 -   ✅ Módulo financeiro (contas bancárias, conta corrente, faturas)
 -   ✅ Sistema de email configurado
 -   ✅ Testes automatizados
 -   ✅ Calendário com FullCalendar
+-   ✅ **Dark mode completo em toda aplicação**
 
 ## 🛠️ Tecnologias Usadas
 

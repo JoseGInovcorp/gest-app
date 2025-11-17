@@ -341,21 +341,21 @@
                             </a>
                             <Link
                                 :href="route('client-accounts.show', item.id)"
-                                class="p-1.5 text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
+                                class="p-1.5 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded transition-colors"
                                 title="Ver detalhes"
                             >
                                 <Eye class="h-4 w-4" />
                             </Link>
                             <Link
                                 :href="route('client-accounts.edit', item.id)"
-                                class="p-1.5 text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
+                                class="p-1.5 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
                                 title="Editar"
                             >
                                 <Pencil class="h-4 w-4" />
                             </Link>
                             <button
-                                @click="deleteMovement(item.id)"
-                                class="p-1.5 text-gray-600 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
+                                @click="openDeleteDialog(item.id)"
+                                class="p-1.5 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
                                 title="Eliminar"
                             >
                                 <Trash2 class="h-4 w-4" />
@@ -415,6 +415,18 @@
                 </div>
             </div>
         </div>
+
+        <!-- Confirm Delete Dialog -->
+        <ConfirmDialog
+            :show="showDeleteDialog"
+            type="danger"
+            title="Eliminar Movimento"
+            message="Tem a certeza que deseja eliminar este movimento?"
+            confirm-text="Eliminar"
+            cancel-text="Cancelar"
+            @confirm="deleteMovement"
+            @cancel="cancelDelete"
+        />
     </AuthenticatedLayout>
 </template>
 
@@ -423,6 +435,7 @@ import { ref, computed } from "vue";
 import { Head, Link, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import DataTable from "@/Components/ui/DataTable.vue";
+import ConfirmDialog from "@/Components/ConfirmDialog.vue";
 import {
     DollarSign,
     Search,
@@ -488,12 +501,27 @@ const applyFilters = () => {
     );
 };
 
-const deleteMovement = (id) => {
-    if (confirm("Tem a certeza que deseja eliminar este movimento?")) {
-        router.delete(route("client-accounts.destroy", id), {
-            preserveScroll: true,
-        });
-    }
+const showDeleteDialog = ref(false);
+const movementToDelete = ref(null);
+
+const openDeleteDialog = (id) => {
+    movementToDelete.value = id;
+    showDeleteDialog.value = true;
+};
+
+const deleteMovement = () => {
+    router.delete(route("client-accounts.destroy", movementToDelete.value), {
+        preserveScroll: true,
+        onFinish: () => {
+            showDeleteDialog.value = false;
+            movementToDelete.value = null;
+        },
+    });
+};
+
+const cancelDelete = () => {
+    showDeleteDialog.value = false;
+    movementToDelete.value = null;
 };
 
 const formatDate = (date) => {

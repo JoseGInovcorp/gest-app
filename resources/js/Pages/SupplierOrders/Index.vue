@@ -210,9 +210,10 @@
                                                 order.id
                                             )
                                         "
-                                        class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
+                                        class="p-1.5 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
+                                        title="Editar"
                                     >
-                                        <Pencil class="h-5 w-5" />
+                                        <Pencil class="h-4 w-4" />
                                     </Link>
                                     <button
                                         v-if="
@@ -220,10 +221,11 @@
                                                 'supplier-orders.delete'
                                             )
                                         "
-                                        @click="deleteOrder(order.id)"
-                                        class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
+                                        @click="confirmDelete(order.id)"
+                                        class="p-1.5 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                                        title="Eliminar"
                                     >
-                                        <Trash2 class="h-5 w-5" />
+                                        <Trash2 class="h-4 w-4" />
                                     </button>
                                 </div>
                             </td>
@@ -284,6 +286,18 @@
                 </div>
             </div>
         </div>
+
+        <!-- Confirm Delete Dialog -->
+        <ConfirmDialog
+            :show="showDeleteDialog"
+            type="danger"
+            title="Eliminar Encomenda"
+            message="Tens a certeza que desejas eliminar esta encomenda?"
+            confirm-text="Eliminar"
+            cancel-text="Cancelar"
+            @confirm="deleteOrder"
+            @cancel="cancelDelete"
+        />
     </AuthenticatedLayout>
 </template>
 
@@ -291,6 +305,7 @@
 import { ref } from "vue";
 import { Head, Link, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import ConfirmDialog from "@/Components/ConfirmDialog.vue";
 import {
     Search,
     Plus,
@@ -322,10 +337,26 @@ const filterOrders = () => {
     );
 };
 
-const deleteOrder = (id) => {
-    if (confirm("Tem a certeza que deseja eliminar esta encomenda?")) {
-        router.delete(route("supplier-orders.destroy", id));
-    }
+const showDeleteDialog = ref(false);
+const itemToDelete = ref(null);
+
+const confirmDelete = (id) => {
+    itemToDelete.value = id;
+    showDeleteDialog.value = true;
+};
+
+const deleteOrder = () => {
+    router.delete(route("supplier-orders.destroy", itemToDelete.value), {
+        onFinish: () => {
+            showDeleteDialog.value = false;
+            itemToDelete.value = null;
+        },
+    });
+};
+
+const cancelDelete = () => {
+    showDeleteDialog.value = false;
+    itemToDelete.value = null;
 };
 
 const formatDate = (date) => {

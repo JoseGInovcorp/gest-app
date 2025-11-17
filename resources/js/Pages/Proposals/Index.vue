@@ -184,7 +184,7 @@
                                     'proposals.delete'
                                 )
                             "
-                            @click="confirmDelete(item)"
+                            @click="openDeleteDialog(item)"
                             class="p-1.5 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
                             title="Eliminar"
                         >
@@ -256,6 +256,22 @@
                 </div>
             </div>
         </div>
+
+        <!-- Confirm Delete Dialog -->
+        <ConfirmDialog
+            :show="showDeleteDialog"
+            type="danger"
+            title="Eliminar Proposta"
+            :message="
+                proposalToDelete
+                    ? `Tem a certeza que pretende eliminar a proposta ${proposalToDelete.numero}?`
+                    : ''
+            "
+            confirm-text="Eliminar"
+            cancel-text="Cancelar"
+            @confirm="confirmDelete"
+            @cancel="cancelDelete"
+        />
     </AuthenticatedLayout>
 </template>
 
@@ -264,6 +280,7 @@ import { ref, computed } from "vue";
 import { Head, Link, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import DataTable from "@/Components/ui/DataTable.vue";
+import ConfirmDialog from "@/Components/ConfirmDialog.vue";
 import { FileText, Search, Plus, Pencil, Trash2, FileX } from "lucide-vue-next";
 
 const props = defineProps({
@@ -327,16 +344,27 @@ const formatCurrency = (value) => {
     }).format(value || 0);
 };
 
-const confirmDelete = (proposal) => {
-    if (
-        confirm(
-            `Tem a certeza que pretende eliminar a proposta ${proposal.numero}?`
-        )
-    ) {
-        router.delete(route("proposals.destroy", proposal.id), {
-            preserveScroll: true,
-        });
-    }
+const showDeleteDialog = ref(false);
+const proposalToDelete = ref(null);
+
+const openDeleteDialog = (proposal) => {
+    proposalToDelete.value = proposal;
+    showDeleteDialog.value = true;
+};
+
+const confirmDelete = () => {
+    router.delete(route("proposals.destroy", proposalToDelete.value.id), {
+        preserveScroll: true,
+        onFinish: () => {
+            showDeleteDialog.value = false;
+            proposalToDelete.value = null;
+        },
+    });
+};
+
+const cancelDelete = () => {
+    showDeleteDialog.value = false;
+    proposalToDelete.value = null;
 };
 
 const filterProposals = () => {

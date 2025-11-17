@@ -38,7 +38,7 @@
                     <!-- Botão Converter (só aparece se fechado) -->
                     <Button
                         v-if="form.estado === 'fechado'"
-                        @click="convertToOrder"
+                        @click="openConvertDialog"
                         :disabled="converting"
                         variant="success"
                     >
@@ -492,6 +492,19 @@
                 </Button>
             </div>
         </Form>
+
+        <!-- Confirm Convert Dialog -->
+        <ConfirmDialog
+            :show="showConvertDialog"
+            type="info"
+            title="Converter para Encomenda"
+            message="Deseja converter esta proposta em encomenda de cliente? A encomenda será criada no estado Rascunho."
+            confirm-text="Converter"
+            cancel-text="Cancelar"
+            :is-processing="converting"
+            @confirm="convertToOrder"
+            @cancel="cancelConvert"
+        />
     </AuthenticatedLayout>
 </template>
 
@@ -505,6 +518,7 @@ import Input from "@/Components/ui/Input.vue";
 import Select from "@/Components/ui/Select.vue";
 import Textarea from "@/Components/ui/Textarea.vue";
 import Button from "@/Components/ui/Button.vue";
+import ConfirmDialog from "@/Components/ConfirmDialog.vue";
 import { FileText, Plus, Trash2, Package, Truck } from "lucide-vue-next";
 
 const props = defineProps({
@@ -575,23 +589,28 @@ const calculateItemTotal = (index) => {
     // Reactivity will handle this automatically
 };
 
+const showConvertDialog = ref(false);
+
+const openConvertDialog = () => {
+    showConvertDialog.value = true;
+};
+
 const convertToOrder = () => {
-    if (
-        confirm(
-            "Deseja converter esta proposta em encomenda de cliente? A encomenda será criada no estado Rascunho."
-        )
-    ) {
-        converting.value = true;
-        router.post(
-            route("proposals.convert-to-order", props.proposal.id),
-            {},
-            {
-                onFinish: () => {
-                    converting.value = false;
-                },
-            }
-        );
-    }
+    converting.value = true;
+    router.post(
+        route("proposals.convert-to-order", props.proposal.id),
+        {},
+        {
+            onFinish: () => {
+                converting.value = false;
+                showConvertDialog.value = false;
+            },
+        }
+    );
+};
+
+const cancelConvert = () => {
+    showConvertDialog.value = false;
 };
 
 const totalValue = computed(() => {

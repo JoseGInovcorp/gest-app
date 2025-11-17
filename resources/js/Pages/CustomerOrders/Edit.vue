@@ -38,7 +38,7 @@
                     <!-- Botão Converter (só aparece se fechado) -->
                     <Button
                         v-if="form.status === 'closed'"
-                        @click="convertToSupplierOrders"
+                        @click="openConvertDialog"
                         :disabled="converting"
                         variant="success"
                     >
@@ -479,6 +479,19 @@
                 </Button>
             </div>
         </Form>
+
+        <!-- Confirm Convert Dialog -->
+        <ConfirmDialog
+            :show="showConvertDialog"
+            type="info"
+            title="Converter para Encomendas de Fornecedor"
+            message="Deseja converter esta encomenda em encomendas de fornecedor? Serão criadas encomendas para cada fornecedor associado aos artigos."
+            confirm-text="Converter"
+            cancel-text="Cancelar"
+            :is-processing="converting"
+            @confirm="convertToSupplierOrders"
+            @cancel="cancelConvert"
+        />
     </AuthenticatedLayout>
 </template>
 
@@ -492,6 +505,7 @@ import Input from "@/Components/ui/Input.vue";
 import Select from "@/Components/ui/Select.vue";
 import Textarea from "@/Components/ui/Textarea.vue";
 import Button from "@/Components/ui/Button.vue";
+import ConfirmDialog from "@/Components/ConfirmDialog.vue";
 import {
     ShoppingCart,
     Plus,
@@ -569,23 +583,28 @@ const calculateItemTotal = (index) => {
     // Reactivity will handle this automatically
 };
 
+const showConvertDialog = ref(false);
+
+const openConvertDialog = () => {
+    showConvertDialog.value = true;
+};
+
 const convertToSupplierOrders = () => {
-    if (
-        confirm(
-            "Deseja converter esta encomenda em encomendas de fornecedor? Serão criadas encomendas para cada fornecedor associado aos artigos."
-        )
-    ) {
-        converting.value = true;
-        router.post(
-            route("customer-orders.convert", props.order.id),
-            {},
-            {
-                onFinish: () => {
-                    converting.value = false;
-                },
-            }
-        );
-    }
+    converting.value = true;
+    router.post(
+        route("customer-orders.convert", props.order.id),
+        {},
+        {
+            onFinish: () => {
+                converting.value = false;
+                showConvertDialog.value = false;
+            },
+        }
+    );
+};
+
+const cancelConvert = () => {
+    showConvertDialog.value = false;
 };
 
 const totalValue = computed(() => {

@@ -1,8 +1,10 @@
 <script setup>
+import { ref } from "vue";
 import { Head, Link, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Button from "@/Components/ui/Button.vue";
 import Badge from "@/Components/ui/Badge.vue";
+import ConfirmDialog from "@/Components/ConfirmDialog.vue";
 import {
     Calendar,
     ArrowLeft,
@@ -19,18 +21,25 @@ const props = defineProps({
     event: Object,
 });
 
+const showDeleteDialog = ref(false);
+
+const openDeleteDialog = () => {
+    showDeleteDialog.value = true;
+};
+
 const deleteEvent = () => {
-    if (
-        confirm(
-            "Tem certeza que deseja eliminar este evento? Esta ação não pode ser revertida."
-        )
-    ) {
-        router.delete(route("calendar-events.destroy", props.event.id), {
-            onSuccess: () => {
-                router.visit(route("calendar.index"));
-            },
-        });
-    }
+    router.delete(route("calendar-events.destroy", props.event.id), {
+        onSuccess: () => {
+            router.visit(route("calendar.index"));
+        },
+        onFinish: () => {
+            showDeleteDialog.value = false;
+        },
+    });
+};
+
+const cancelDelete = () => {
+    showDeleteDialog.value = false;
 };
 </script>
 
@@ -81,7 +90,7 @@ const deleteEvent = () => {
                                 'calendar-events.delete'
                             )
                         "
-                        @click="deleteEvent"
+                        @click="openDeleteDialog"
                         variant="destructive"
                     >
                         <Trash2 class="h-4 w-4 mr-2" />
@@ -365,5 +374,17 @@ const deleteEvent = () => {
                 </div>
             </div>
         </div>
+
+        <!-- Confirm Delete Dialog -->
+        <ConfirmDialog
+            :show="showDeleteDialog"
+            type="danger"
+            title="Eliminar Evento"
+            message="Tem certeza que deseja eliminar este evento? Esta ação não pode ser revertida."
+            confirm-text="Eliminar"
+            cancel-text="Cancelar"
+            @confirm="deleteEvent"
+            @cancel="cancelDelete"
+        />
     </AuthenticatedLayout>
 </template>

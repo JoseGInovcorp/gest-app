@@ -1,8 +1,10 @@
 <script setup>
 import { router } from "@inertiajs/vue3";
 import { Head, Link } from "@inertiajs/vue3";
+import { ref } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import EntitiesDataTable from "@/Components/ui/EntitiesDataTable.vue";
+import ConfirmDialog from "@/Components/ConfirmDialog.vue";
 import { Users } from "lucide-vue-next";
 
 const props = defineProps({
@@ -12,6 +14,9 @@ const props = defineProps({
     entityType: String,
     can: Object,
 });
+
+const showDeleteDialog = ref(false);
+const itemToDelete = ref(null);
 
 // Event handlers
 const handleCreate = () => {
@@ -26,12 +31,23 @@ const handleEdit = (entity) => {
     router.visit(route("clients.edit", entity.id));
 };
 
-const handleDelete = (entity) => {
-    if (
-        confirm(`Tem certeza que deseja eliminar o cliente "${entity.name}"?`)
-    ) {
-        router.delete(route("clients.destroy", entity.id));
-    }
+const confirmDelete = (entity) => {
+    itemToDelete.value = entity;
+    showDeleteDialog.value = true;
+};
+
+const handleDelete = () => {
+    router.delete(route("clients.destroy", itemToDelete.value.id), {
+        onFinish: () => {
+            showDeleteDialog.value = false;
+            itemToDelete.value = null;
+        },
+    });
+};
+
+const cancelDelete = () => {
+    showDeleteDialog.value = false;
+    itemToDelete.value = null;
 };
 </script>
 
@@ -85,7 +101,23 @@ const handleDelete = (entity) => {
             @create="handleCreate"
             @view="handleView"
             @edit="handleEdit"
-            @delete="handleDelete"
+            @delete="confirmDelete"
+        />
+
+        <!-- Confirm Delete Dialog -->
+        <ConfirmDialog
+            :show="showDeleteDialog"
+            type="danger"
+            title="Eliminar Cliente"
+            :message="
+                itemToDelete
+                    ? `Tens a certeza que desejas eliminar o cliente &quot;${itemToDelete.name}&quot;?`
+                    : ''
+            "
+            confirm-text="Eliminar"
+            cancel-text="Cancelar"
+            @confirm="handleDelete"
+            @cancel="cancelDelete"
         />
     </AuthenticatedLayout>
 </template>

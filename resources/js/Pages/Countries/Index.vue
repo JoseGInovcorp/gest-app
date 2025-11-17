@@ -3,6 +3,7 @@ import { ref, computed, inject } from "vue";
 import { Head, Link, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Button from "@/Components/ui/Button.vue";
+import ConfirmDialog from "@/Components/ConfirmDialog.vue";
 import Table from "@/Components/ui/table/Table.vue";
 import TableBody from "@/Components/ui/table/TableBody.vue";
 import TableCell from "@/Components/ui/table/TableCell.vue";
@@ -47,10 +48,26 @@ const filteredCountries = computed(() => {
     );
 });
 
-const deleteCountry = (code) => {
-    if (confirm("Tem certeza que deseja eliminar este país?")) {
-        router.delete(route("countries.destroy", code));
-    }
+const showDeleteDialog = ref(false);
+const itemToDelete = ref(null);
+
+const confirmDelete = (code) => {
+    itemToDelete.value = code;
+    showDeleteDialog.value = true;
+};
+
+const deleteCountry = () => {
+    router.delete(route("countries.destroy", itemToDelete.value), {
+        onFinish: () => {
+            showDeleteDialog.value = false;
+            itemToDelete.value = null;
+        },
+    });
+};
+
+const cancelDelete = () => {
+    showDeleteDialog.value = false;
+    itemToDelete.value = null;
 };
 </script>
 
@@ -217,7 +234,11 @@ const deleteCountry = (code) => {
                                                 )
                                             "
                                         >
-                                            <Button variant="ghost" size="sm">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                class="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950"
+                                            >
                                                 <Pencil class="h-4 w-4" />
                                             </Button>
                                         </Link>
@@ -225,11 +246,10 @@ const deleteCountry = (code) => {
                                             v-if="can.delete"
                                             variant="ghost"
                                             size="sm"
-                                            @click="deleteCountry(country.code)"
+                                            class="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
+                                            @click="confirmDelete(country.code)"
                                         >
-                                            <Trash2
-                                                class="h-4 w-4 text-destructive"
-                                            />
+                                            <Trash2 class="h-4 w-4" />
                                         </Button>
                                     </div>
                                 </TableCell>
@@ -244,5 +264,17 @@ const deleteCountry = (code) => {
                 </div>
             </div>
         </div>
+
+        <!-- Confirm Delete Dialog -->
+        <ConfirmDialog
+            :show="showDeleteDialog"
+            type="danger"
+            title="Eliminar País"
+            message="Tens a certeza que desejas eliminar este país?"
+            confirm-text="Eliminar"
+            cancel-text="Cancelar"
+            @confirm="deleteCountry"
+            @cancel="cancelDelete"
+        />
     </AuthenticatedLayout>
 </template>

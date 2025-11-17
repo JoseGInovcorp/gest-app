@@ -4,6 +4,120 @@ Registo das principais mudanças e desenvolvimentos realizados durante o estági
 
 ---
 
+## v0.21.0 — 17 Nov 2025
+
+**UI/UX Standardization — Complete Interface Consistency**
+
+### O que foi feito
+
+**Componentes de Diálogo Uniformizados**
+
+-   ✅ **ConfirmDialog Component**
+    -   Componente reutilizável com 4 variantes: warning, danger, info, success
+    -   Props: show, title, message, type, confirmText, cancelText, isProcessing
+    -   Ícones dinâmicos: AlertTriangle, Trash2, Info, CheckCircle
+    -   Suporte para slot customizado de conteúdo
+    -   Dark mode completo
+-   ✅ **Substituição Global de Popups**
+    -   27+ páginas atualizadas (todos os Index.vue)
+    -   Removidos todos `confirm()`, `alert()`, `prompt()` nativos
+    -   MyTasks.vue: Custom dialog com Textarea para notas de conclusão
+    -   UI consistente em toda a aplicação
+
+**Padronização de Botões de Ação**
+
+-   ✅ **Esquema de Cores Consistente**
+    -   Ver (Eye): Cinza (`text-gray-600 hover:text-gray-800 hover:bg-gray-100`)
+    -   Editar (Pencil): Azul (`text-blue-600 hover:text-blue-700 hover:bg-blue-50`)
+    -   Eliminar (Trash2): Vermelho (`text-red-600 hover:text-red-700 hover:bg-red-50`)
+    -   Dark mode suportado em todos
+-   ✅ **Componentes Atualizados**
+    -   EntitiesDataTable.vue (usado por Clients e Suppliers)
+    -   ContactsDataTable.vue (usado por Contacts)
+    -   27+ páginas Index.vue com botões inline
+    -   Formatação: `<div class="flex items-center justify-end space-x-2">`
+
+**Headers de Página Uniformizados**
+
+-   ✅ **Estrutura Padrão Implementada**
+    -   Ícone colorido com fundo (`p-2 bg-[color]-100 dark:bg-[color]-900/20 rounded-lg`)
+    -   Título: `text-2xl font-bold text-gray-900 dark:text-white`
+    -   Descrição: `text-gray-500 dark:text-gray-400`
+    -   Breadcrumbs adicionados a todas as páginas
+    -   Main Card estruturado: Toolbar → Filtros → Conteúdo
+-   ✅ **Páginas Corrigidas**
+    -   WorkOrders/Index.vue (era text-3xl, agora text-2xl)
+    -   TaskTemplates/Index.vue (era text-3xl, agora text-2xl)
+    -   WorkOrders/MyTasks.vue (era text-3xl, agora text-2xl)
+    -   SupplierInvoices/Index.vue (formatação de botões corrigida)
+
+**Sidebar Uniformizada**
+
+-   ✅ **Dropdowns Consistentes**
+    -   Financeiro, Gestão de Acessos, Configurações
+    -   Auto-expansão quando rota ativa
+    -   Ícone + Título + ChevronDown
+    -   Animação de rotação em ChevronDown
+-   ✅ **Ícones sem Emojis**
+    -   Apenas ícones Lucide mantidos
+    -   Layout profissional e limpo
+
+### Bug Fixes
+
+-   🐛 **SupplierInvoices Action Buttons**
+    -   Problema: Botões com `space-x-2` inline (alinhamento incorreto)
+    -   Solução: Container `<div class="flex items-center justify-end space-x-2">`
+-   🐛 **Headers Inconsistentes**
+    -   Problema: WorkOrders, TaskTemplates, MyTasks com `text-3xl` e `dark:text-gray-100`
+    -   Solução: Padronizado para `text-2xl` e `dark:text-white` com ícone colorido
+-   🐛 **Card Structure**
+    -   Problema: Filtros e conteúdo fora do Main Card em algumas páginas
+    -   Solução: Estrutura consistente Main Card → Toolbar → Filtros → Conteúdo
+
+### Ficheiros Modificados
+
+**Dialog Component:**
+
+-   `resources/js/Components/ConfirmDialog.vue` - NEW
+
+**Data Tables:**
+
+-   `resources/js/Components/ui/EntitiesDataTable.vue` - Button colors
+-   `resources/js/Components/ui/ContactsDataTable.vue` - Button colors
+
+**Pages Updated (27+ files):**
+
+-   `resources/js/Pages/SupplierInvoices/Index.vue`
+-   `resources/js/Pages/SupplierOrders/Index.vue`
+-   `resources/js/Pages/CustomerOrders/Index.vue`
+-   `resources/js/Pages/Proposals/Index.vue`
+-   `resources/js/Pages/WorkOrders/Index.vue` - Header + structure
+-   `resources/js/Pages/WorkOrders/MyTasks.vue` - Header + structure
+-   `resources/js/Pages/TaskTemplates/Index.vue` - Header + structure
+-   `resources/js/Pages/ClientAccounts/Index.vue`
+-   `resources/js/Pages/VatRates/Index.vue`
+-   `resources/js/Pages/Users/Index.vue`
+-   `resources/js/Pages/Roles/Index.vue`
+-   `resources/js/Pages/Countries/Index.vue`
+-   `resources/js/Pages/ContactFunctions/Index.vue`
+-   `resources/js/Pages/CalendarEventTypes/Index.vue`
+-   `resources/js/Pages/CalendarEventActions/Index.vue`
+-   E mais 12 páginas...
+
+**Layout:**
+
+-   `resources/js/Layouts/AuthenticatedLayout.vue` - Sidebar dropdowns
+
+### Impact
+
+-   **UX Excellence** - Interface totalmente consistente em 30+ páginas
+-   **Professional Look** - Diálogos modernos, cores padronizadas, layout limpo
+-   **Maintainability** - Componente ConfirmDialog reutilizável reduz código duplicado
+-   **Accessibility** - Dark mode completo, cores com contraste adequado
+-   **Developer Experience** - Padrões claros facilitam desenvolvimento futuro
+
+---
+
 ## v0.20.0 — 17 Nov 2025
 
 **Task Templates Management + Form Validations & Business Rules**

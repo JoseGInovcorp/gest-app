@@ -277,7 +277,7 @@
                         </Link>
                         <button
                             v-if="can.delete"
-                            @click="deleteArticle(item.id)"
+                            @click="confirmDelete(item.id)"
                             class="p-1.5 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
                             title="Eliminar"
                         >
@@ -327,14 +327,27 @@
                 </div>
             </div>
         </div>
+
+        <!-- Confirm Delete Dialog -->
+        <ConfirmDialog
+            :show="showDeleteDialog"
+            type="danger"
+            title="Eliminar Artigo"
+            message="Tens a certeza que desejas eliminar este artigo?"
+            confirm-text="Eliminar"
+            cancel-text="Cancelar"
+            @confirm="deleteArticle"
+            @cancel="cancelDelete"
+        />
     </AuthenticatedLayout>
 </template>
 
 <script setup>
-import { reactive, computed } from "vue";
+import { reactive, computed, ref } from "vue";
 import { router, Head, Link } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import DataTable from "@/Components/ui/DataTable.vue";
+import ConfirmDialog from "@/Components/ConfirmDialog.vue";
 import { Package, Search, Plus, Pencil, Trash2 } from "lucide-vue-next";
 
 const props = defineProps({
@@ -422,12 +435,27 @@ const search = () => {
     );
 };
 
-const deleteArticle = (id) => {
-    if (confirm("Tem certeza que deseja eliminar este artigo?")) {
-        router.delete(route("articles.destroy", id), {
-            preserveState: true,
-        });
-    }
+const showDeleteDialog = ref(false);
+const itemToDelete = ref(null);
+
+const confirmDelete = (id) => {
+    itemToDelete.value = id;
+    showDeleteDialog.value = true;
+};
+
+const deleteArticle = () => {
+    router.delete(route("articles.destroy", itemToDelete.value), {
+        preserveState: true,
+        onFinish: () => {
+            showDeleteDialog.value = false;
+            itemToDelete.value = null;
+        },
+    });
+};
+
+const cancelDelete = () => {
+    showDeleteDialog.value = false;
+    itemToDelete.value = null;
 };
 
 const formatCurrency = (value) => {

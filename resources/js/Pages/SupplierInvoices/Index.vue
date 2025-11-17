@@ -2,6 +2,7 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, Link, router } from "@inertiajs/vue3";
 import { ref, computed } from "vue";
+import ConfirmDialog from "@/Components/ConfirmDialog.vue";
 import {
     FileText,
     Plus,
@@ -89,15 +90,28 @@ const getEstadoLabel = (estado) => {
     }
 };
 
+const showDeleteDialog = ref(false);
+const itemToDelete = ref(null);
+
+const confirmDelete = (invoice) => {
+    itemToDelete.value = invoice;
+    showDeleteDialog.value = true;
+};
+
 // Actions
-const deleteInvoice = (invoice) => {
-    if (
-        confirm(`Tem a certeza que deseja eliminar a fatura ${invoice.numero}?`)
-    ) {
-        router.delete(route("supplier-invoices.destroy", invoice.id), {
-            preserveScroll: true,
-        });
-    }
+const deleteInvoice = () => {
+    router.delete(route("supplier-invoices.destroy", itemToDelete.value.id), {
+        preserveScroll: true,
+        onFinish: () => {
+            showDeleteDialog.value = false;
+            itemToDelete.value = null;
+        },
+    });
+};
+
+const cancelDelete = () => {
+    showDeleteDialog.value = false;
+    itemToDelete.value = null;
 };
 
 const downloadDocument = (invoice) => {
@@ -341,42 +355,46 @@ const downloadDocument = (invoice) => {
                                 </span>
                             </td>
                             <td
-                                class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2"
+                                class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
                             >
-                                <Link
-                                    v-if="can.view"
-                                    :href="
-                                        route(
-                                            'supplier-invoices.show',
-                                            invoice.id
-                                        )
-                                    "
-                                    class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 inline-flex items-center"
-                                    title="Visualizar"
+                                <div
+                                    class="flex items-center justify-end space-x-2"
                                 >
-                                    <Eye class="h-4 w-4" />
-                                </Link>
-                                <Link
-                                    v-if="can.edit"
-                                    :href="
-                                        route(
-                                            'supplier-invoices.edit',
-                                            invoice.id
-                                        )
-                                    "
-                                    class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 inline-flex items-center"
-                                    title="Editar"
-                                >
-                                    <Pencil class="h-4 w-4" />
-                                </Link>
-                                <button
-                                    v-if="can.delete"
-                                    @click="deleteInvoice(invoice)"
-                                    class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 inline-flex items-center"
-                                    title="Eliminar"
-                                >
-                                    <Trash2 class="h-4 w-4" />
-                                </button>
+                                    <Link
+                                        v-if="can.view"
+                                        :href="
+                                            route(
+                                                'supplier-invoices.show',
+                                                invoice.id
+                                            )
+                                        "
+                                        class="p-1.5 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded transition-colors"
+                                        title="Ver Detalhes"
+                                    >
+                                        <Eye class="h-4 w-4" />
+                                    </Link>
+                                    <Link
+                                        v-if="can.edit"
+                                        :href="
+                                            route(
+                                                'supplier-invoices.edit',
+                                                invoice.id
+                                            )
+                                        "
+                                        class="p-1.5 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
+                                        title="Editar"
+                                    >
+                                        <Pencil class="h-4 w-4" />
+                                    </Link>
+                                    <button
+                                        v-if="can.delete"
+                                        @click="confirmDelete(invoice)"
+                                        class="p-1.5 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                                        title="Eliminar"
+                                    >
+                                        <Trash2 class="h-4 w-4" />
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                         <tr v-if="!invoices.data || invoices.data.length === 0">
@@ -469,5 +487,21 @@ const downloadDocument = (invoice) => {
                 </div>
             </div>
         </div>
+
+        <!-- Confirm Delete Dialog -->
+        <ConfirmDialog
+            :show="showDeleteDialog"
+            type="danger"
+            title="Eliminar Fatura"
+            :message="
+                itemToDelete
+                    ? `Tens a certeza que desejas eliminar a fatura &quot;${itemToDelete.numero}&quot;?`
+                    : ''
+            "
+            confirm-text="Eliminar"
+            cancel-text="Cancelar"
+            @confirm="deleteInvoice"
+            @cancel="cancelDelete"
+        />
     </AuthenticatedLayout>
 </template>

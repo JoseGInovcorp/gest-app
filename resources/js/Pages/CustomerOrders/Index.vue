@@ -191,7 +191,7 @@
                                     'customer-orders.delete'
                                 )
                             "
-                            @click="confirmDelete(item)"
+                            @click="openDeleteDialog(item)"
                             class="p-1.5 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
                             title="Eliminar"
                         >
@@ -263,6 +263,22 @@
                 </div>
             </div>
         </div>
+
+        <!-- Confirm Delete Dialog -->
+        <ConfirmDialog
+            :show="showDeleteDialog"
+            type="danger"
+            title="Eliminar Encomenda"
+            :message="
+                orderToDelete
+                    ? `Tem a certeza que pretende eliminar a encomenda ${orderToDelete.number}?`
+                    : ''
+            "
+            confirm-text="Eliminar"
+            cancel-text="Cancelar"
+            @confirm="confirmDelete"
+            @cancel="cancelDelete"
+        />
     </AuthenticatedLayout>
 </template>
 
@@ -271,6 +287,7 @@ import { ref, computed } from "vue";
 import { Head, Link, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import DataTable from "@/Components/ui/DataTable.vue";
+import ConfirmDialog from "@/Components/ConfirmDialog.vue";
 import {
     ShoppingCart,
     Search,
@@ -342,16 +359,27 @@ const formatCurrency = (value) => {
     }).format(value);
 };
 
-const confirmDelete = (order) => {
-    if (
-        confirm(
-            `Tem a certeza que pretende eliminar a encomenda ${order.number}?`
-        )
-    ) {
-        router.delete(route("customer-orders.destroy", order.id), {
-            preserveScroll: true,
-        });
-    }
+const showDeleteDialog = ref(false);
+const orderToDelete = ref(null);
+
+const openDeleteDialog = (order) => {
+    orderToDelete.value = order;
+    showDeleteDialog.value = true;
+};
+
+const confirmDelete = () => {
+    router.delete(route("customer-orders.destroy", orderToDelete.value.id), {
+        preserveScroll: true,
+        onFinish: () => {
+            showDeleteDialog.value = false;
+            orderToDelete.value = null;
+        },
+    });
+};
+
+const cancelDelete = () => {
+    showDeleteDialog.value = false;
+    orderToDelete.value = null;
 };
 
 const filterOrders = () => {

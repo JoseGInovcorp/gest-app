@@ -1,5 +1,6 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import ConfirmDialog from "@/Components/ConfirmDialog.vue";
 import { Head, Link, router } from "@inertiajs/vue3";
 import { ref } from "vue";
 import {
@@ -34,16 +35,25 @@ const downloadDocument = () => {
 };
 
 // Eliminar
+const showDeleteDialog = ref(false);
+
+const openDeleteDialog = () => {
+    showDeleteDialog.value = true;
+};
+
 const deleteDocument = () => {
-    if (
-        confirm(`Tem a certeza que deseja eliminar "${props.document.name}"?`)
-    ) {
-        router.delete(route("digital-archive.destroy", props.document.id), {
-            onSuccess: () => {
-                router.visit(route("digital-archive.index"));
-            },
-        });
-    }
+    router.delete(route("digital-archive.destroy", props.document.id), {
+        onSuccess: () => {
+            router.visit(route("digital-archive.index"));
+        },
+        onFinish: () => {
+            showDeleteDialog.value = false;
+        },
+    });
+};
+
+const cancelDelete = () => {
+    showDeleteDialog.value = false;
 };
 
 // Formatar data
@@ -116,7 +126,7 @@ const canPreview = () => {
                     </Button>
                     <Button
                         v-if="can.delete"
-                        @click="deleteDocument"
+                        @click="openDeleteDialog"
                         variant="destructive"
                     >
                         <Trash2 class="h-4 w-4 mr-2" />
@@ -495,5 +505,17 @@ const canPreview = () => {
                 </div>
             </div>
         </div>
+
+        <!-- Confirm Delete Dialog -->
+        <ConfirmDialog
+            :show="showDeleteDialog"
+            type="danger"
+            title="Eliminar Documento"
+            :message="`Tem a certeza que deseja eliminar &quot;${document.name}&quot;?`"
+            confirm-text="Eliminar"
+            cancel-text="Cancelar"
+            @confirm="deleteDocument"
+            @cancel="cancelDelete"
+        />
     </AuthenticatedLayout>
 </template>
