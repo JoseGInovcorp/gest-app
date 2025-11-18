@@ -307,7 +307,10 @@ const cancelComplete = () => {
                                         <p v-if="task.description">
                                             {{ task.description }}
                                         </p>
-                                        <div class="flex items-center gap-4">
+                                        <div
+                                            v-if="task.work_order"
+                                            class="flex items-center gap-4"
+                                        >
                                             <span
                                                 class="flex items-center gap-1"
                                             >
@@ -391,6 +394,7 @@ const cancelComplete = () => {
                                     </Button>
 
                                     <Link
+                                        v-if="task.work_order"
                                         :href="
                                             route(
                                                 'work-orders.show',

@@ -108,30 +108,33 @@ const features = [
                 <div class="flex lg:flex-1">
                     <div class="flex items-center space-x-4">
                         <!-- Company Logo if available -->
-                        <img
-                            v-if="companyLogo"
-                            :src="companyLogo"
-                            :alt="companyName"
-                            class="h-20 w-auto max-w-[280px] object-contain rounded-lg"
-                        />
-                        <!-- Fallback icon when no logo -->
-                        <div
-                            v-else
-                            class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-lg"
-                        >
-                            <Building2 class="h-7 w-7" />
-                        </div>
-                        <!-- Company name and subtitle (always show) -->
-                        <div>
-                            <h1
-                                class="text-2xl font-bold text-gray-900 dark:text-white"
+                        <template v-if="companyLogo">
+                            <img
+                                :src="companyLogo"
+                                :alt="companyName"
+                                class="h-20 w-auto max-w-[280px] object-contain rounded-lg"
+                            />
+                        </template>
+                        <!-- Fallback: icon + company name when no logo -->
+                        <template v-else>
+                            <div
+                                class="flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-lg"
                             >
-                                {{ companyName }}
-                            </h1>
-                            <p class="text-sm text-gray-600 dark:text-gray-400">
-                                Sistema de Gestão Empresarial
-                            </p>
-                        </div>
+                                <Building2 class="h-9 w-9" />
+                            </div>
+                            <div>
+                                <h1
+                                    class="text-2xl font-bold text-gray-900 dark:text-white"
+                                >
+                                    {{ companyName }}
+                                </h1>
+                                <p
+                                    class="text-sm text-gray-600 dark:text-gray-400"
+                                >
+                                    Sistema de Gestão Empresarial
+                                </p>
+                            </div>
+                        </template>
                     </div>
                 </div>
 

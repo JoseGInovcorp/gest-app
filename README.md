@@ -8,19 +8,23 @@ Este é o meu projeto final de estágio, desenvolvido na **Inovcorp** entre 6 e 
 
 O objetivo é criar um sistema de gestão empresarial para PMEs, com funcionalidades de gestão comercial, financeira e operacional.
 
-**Versão Atual:** v0.24.0  
-**Progresso:** 100% (20 de 20 módulos concluídos + Dashboard + Gestão Stock + **Integração Financeira**)  
+**Versão Atual:** v0.25.0  
+**Progresso:** 100% (20 de 20 módulos concluídos + Dashboard + Gestão Stock + **Integração Financeira** + **Segurança Reforçada**)  
 **Prazo de Entrega:** 18 Nov 2025
 
 ## ✅ O que já está pronto
 
 -   ✅ MySQL configurado e a funcionar
--   ✅ Sistema de permissões completo
+-   ✅ **Sistema de permissões completo e efetivo**
+-   ✅ **Controlo de acesso baseado em roles granulares**
+-   ✅ **UI adaptativa às permissões do utilizador**
 -   ✅ Histórico de atividades (logs)
 -   ✅ Logo da empresa integrado
 -   ✅ **Dashboard adaptativo baseado em permissões**
 -   ✅ **Gestão automática de stock nas encomendas**
 -   ✅ **Integração financeira automática** (Encomendas → Conta Corrente + Banco)
+-   ✅ **Movimentos manuais sincronizados com banco**
+-   ✅ **Arquivo digital com autenticação segura**
 -   ✅ **Interface 100% uniformizada e consistente**
 -   ✅ **Componente ConfirmDialog reutilizável**
 -   ✅ **Botões de ação padronizados (cinza/azul/vermelho)**

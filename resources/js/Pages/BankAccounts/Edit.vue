@@ -346,7 +346,7 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.put(route("bank-accounts.update", props.account.id), {
+    form.patch(route("bank-accounts.update", props.account.id), {
         onSuccess: () => {
             // Redireciona para o show após sucesso
         },

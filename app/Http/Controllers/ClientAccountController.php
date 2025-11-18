@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\ClientAccount;
 use App\Models\Entity;
 use App\Models\Invoice;
+use App\Models\BankTransaction;
+use App\Models\BankAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -87,6 +90,11 @@ class ClientAccountController extends Controller
                 'end_date' => $endDate,
                 'search' => $search,
             ],
+            'can' => [
+                'create' => $request->user()->can('client-accounts.create'),
+                'update' => $request->user()->can('client-accounts.update'),
+                'delete' => $request->user()->can('client-accounts.delete'),
+            ],
         ]);
     }
 
@@ -140,6 +148,43 @@ class ClientAccountController extends Controller
         }
 
         $clientAccount = ClientAccount::create($validated);
+
+        // Se for um pagamento (débito), criar movimento bancário correspondente
+        if ($validated['tipo'] === 'debito' && $validated['categoria'] === 'pagamento') {
+            Log::info('Criando transação bancária para pagamento', [
+                'tipo' => $validated['tipo'],
+                'categoria' => $validated['categoria']
+            ]);
+
+            // Obter a conta bancária principal (ou a primeira disponível)
+            $bankAccount = BankAccount::where('estado', 'ativa')
+                ->orderBy('id')
+                ->first();
+
+            Log::info('Conta bancária encontrada', ['conta' => $bankAccount ? $bankAccount->id : 'nenhuma']);
+
+            if ($bankAccount) {
+                // Obter o nome do cliente
+                $entity = Entity::find($validated['entity_id']);
+
+                $bankTransactionData = [
+                    'bank_account_id' => $bankAccount->id,
+                    'data_movimento' => $validated['data_movimento'],
+                    'descricao' => $validated['descricao'] . ($entity ? " - {$entity->name}" : ''),
+                    'tipo' => 'credito', // Entrada de dinheiro na conta bancária
+                    'valor' => $validated['valor'],
+                    'referencia' => $validated['referencia'],
+                    'categoria' => 'recebimento',
+                    'observacoes' => $validated['observacoes'] ?? "Cliente: " . ($entity ? $entity->name : ''),
+                ];
+
+                Log::info('Dados da transação bancária', $bankTransactionData);
+
+                $bankTransaction = BankTransaction::create($bankTransactionData);
+
+                Log::info('Transação bancária criada', ['id' => $bankTransaction->id]);
+            }
+        }
 
         activity()
             ->performedOn($clientAccount)

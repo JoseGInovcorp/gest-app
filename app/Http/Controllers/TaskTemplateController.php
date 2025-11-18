@@ -44,6 +44,11 @@ class TaskTemplateController extends Controller
         return Inertia::render('TaskTemplates/Index', [
             'templates' => $templates,
             'filters' => $request->only(['search', 'is_active']),
+            'can' => [
+                'create' => $request->user()->can('task-templates.create'),
+                'update' => $request->user()->can('task-templates.update'),
+                'delete' => $request->user()->can('task-templates.delete'),
+            ],
         ]);
     }
 

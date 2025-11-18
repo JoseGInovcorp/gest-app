@@ -35,16 +35,16 @@
                         <span>Download PDF</span>
                     </a>
 
-                    <!-- Botão Converter (só aparece se fechado) -->
+                    <!-- Botão Converter (só aparece se há itens com fornecedor e stock insuficiente) -->
                     <Button
-                        v-if="form.status === 'closed'"
+                        v-if="hasItemsNeedingSupplierOrder"
                         @click="openConvertDialog"
                         :disabled="converting"
-                        variant="success"
+                        variant="warning"
                     >
                         <Truck class="h-4 w-4 mr-2" />
                         <span v-if="converting">Convertendo...</span>
-                        <span v-else>Converter para Encomendas Fornecedor</span>
+                        <span v-else>Gerar Encomendas Fornecedor</span>
                     </Button>
                 </div>
             </div>
@@ -653,6 +653,24 @@ const convertToSupplierOrders = () => {
 const cancelConvert = () => {
     showConvertDialog.value = false;
 };
+
+// Verificar se há itens que necessitam de encomenda a fornecedor
+const hasItemsNeedingSupplierOrder = computed(() => {
+    // Só mostrar se a encomenda estiver fechada
+    if (form.status !== "closed") return false;
+
+    return form.items.some((item) => {
+        if (!item.article_id || !item.supplier_id) return false;
+
+        const article = props.articles.find((a) => a.id == item.article_id);
+        if (!article || article.tipo === "servico") return false;
+
+        const stock = parseFloat(article.stock_quantidade) || 0;
+        const quantity = parseFloat(item.quantity) || 0;
+
+        return stock < quantity;
+    });
+});
 
 const totalValue = computed(() => {
     return form.items.reduce((sum, item) => {

@@ -162,6 +162,7 @@
                         <!-- Botão Novo Movimento -->
                         <div class="flex items-end">
                             <Link
+                                v-if="can.create"
                                 :href="route('client-accounts.create')"
                                 class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                             >
@@ -347,6 +348,7 @@
                                 <Eye class="h-4 w-4" />
                             </Link>
                             <Link
+                                v-if="can.update"
                                 :href="route('client-accounts.edit', item.id)"
                                 class="p-1.5 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
                                 title="Editar"
@@ -354,6 +356,7 @@
                                 <Pencil class="h-4 w-4" />
                             </Link>
                             <button
+                                v-if="can.delete"
                                 @click="openDeleteDialog(item.id)"
                                 class="p-1.5 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
                                 title="Eliminar"
@@ -451,6 +454,14 @@ const props = defineProps({
     entities: Array,
     stats: Object,
     filters: Object,
+    can: {
+        type: Object,
+        default: () => ({
+            create: false,
+            update: false,
+            delete: false,
+        }),
+    },
 });
 
 const filters = ref({

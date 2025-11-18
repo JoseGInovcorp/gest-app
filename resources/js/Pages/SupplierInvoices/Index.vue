@@ -324,7 +324,7 @@ const downloadDocument = (invoice) => {
                             <td
                                 class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"
                             >
-                                {{ invoice.supplier?.nome || "-" }}
+                                {{ invoice.supplier?.name || "-" }}
                             </td>
                             <td
                                 class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"

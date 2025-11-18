@@ -77,7 +77,7 @@ class Document extends Model
      */
     public function getFileUrlAttribute(): string
     {
-        return Storage::url($this->file_path);
+        return route('digital-archive.view', $this->id);
     }
 
     /**
@@ -157,11 +157,11 @@ class Document extends Model
             'contrato' => 'Contrato',
             'fatura' => 'Fatura',
             'proposta' => 'Proposta',
-            'identificacao' => 'Identificação',
-            'certificado' => 'Certificado',
             'relatorio' => 'Relatório',
             'comprovativo' => 'Comprovativo',
-            'correspondencia' => 'Correspondência',
+            'encomenda_cliente' => 'Encomenda Cliente',
+            'encomenda_fornecedor' => 'Encomenda Fornecedor',
+            'extrato_bancario' => 'Extrato Bancário',
             'outros' => 'Outros',
         ];
     }

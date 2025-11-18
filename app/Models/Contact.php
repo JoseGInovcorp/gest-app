@@ -130,7 +130,7 @@ class Contact extends Model
     // Métodos auxiliares
     public static function getNextNumber(): int
     {
-        return (int) static::max('number') + 1;
+        return (int) static::withTrashed()->max('number') + 1;
     }
 
     public function activate(): bool

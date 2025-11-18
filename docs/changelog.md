@@ -4,6 +4,113 @@ Registo das principais mudanças e desenvolvimentos realizados durante o estági
 
 ---
 
+## v0.25.0 — 18 Nov 2025
+
+**Correções de Segurança, Integração Financeira e Bugs Críticos**
+
+### O que foi feito
+
+**Segurança - Sistema de Permissões Reforçado**
+
+-   ✅ **Templates de Tarefas - Controlo de acesso baseado em permissões**
+
+    -   Controller envia array `can` com permissões create/update/delete
+    -   Interface esconde botões "Novo Template", editar e eliminar sem permissões
+    -   Utilizadores com apenas `task-templates.read` não veem opções de modificação
+    -   Props com defaults seguros (false) para prevenir acesso acidental
+
+-   ✅ **Conta Corrente Clientes - Proteção de ações**
+    -   Botão "Novo Movimento" apenas visível com `client-accounts.create`
+    -   Ícones de edição apenas visíveis com `client-accounts.update`
+    -   Ícones de eliminação apenas visíveis com `client-accounts.delete`
+    -   Ícone de visualização sempre acessível (permissão read)
+    -   Padrão seguro: todas as permissões false por defeito
+
+**Integração Financeira - Movimentos Manuais**
+
+-   ✅ **ClientAccountController - Criação automática de transações bancárias**
+    -   Quando movimento manual tipo='debito' e categoria='pagamento'
+    -   Cria automaticamente BankTransaction (tipo='credito')
+    -   Usa primeira conta bancária ativa disponível
+    -   Inclui nome da entidade na descrição
+    -   Mantém referências cruzadas (client_account_id)
+    -   Logs de debug para rastreabilidade
+
+**Correções de Bugs**
+
+-   ✅ **MyTasks.vue - Proteção contra null reference**
+
+    -   Adicionado `v-if="task.work_order"` antes de aceder a propriedades
+    -   Previne crash quando WorkOrderTask não tem WorkOrder associada
+    -   Afeta visualização de detalhes e link "Ver Ordem"
+    -   Suporta tarefas órfãs sem erro
+
+-   ✅ **BankAccounts/Edit.vue - Correção de método HTTP**
+
+    -   Alterado `form.put()` para `form.patch()`
+    -   Alinha com Route::patch() definido nas rotas
+    -   Resolve erro "405 Method Not Allowed"
+    -   Edições de contas bancárias agora funcionam corretamente
+
+-   ✅ **SupplierInvoices/Index.vue - Nome do fornecedor**
+    -   Campo corrigido de `.nome` para `.name`
+    -   Alinhado com estrutura da tabela entities
+    -   Nomes de fornecedores agora aparecem corretamente
+
+**Segurança de Ficheiros - Arquivo Digital**
+
+-   ✅ **DocumentController - Visualização segura de ficheiros privados**
+    -   Novo método `view()` para servir ficheiros inline
+    -   Usa `response()->file()` com Content-Disposition: inline
+    -   Rota autenticada `/digital-archive/{document}/view`
+    -   Middleware `permission:digital-archive.read` obrigatório
+    -   Model accessor atualizado para usar route() em vez de Storage::url()
+    -   Resolve erro 403 Forbidden ao visualizar documentos
+
+**Configuração - Categorias de Documentos**
+
+-   ✅ **Document Model - Atualização de categorias**
+    -   **Adicionadas:** encomenda_cliente, encomenda_fornecedor, extrato_bancario
+    -   **Removidas:** identificacao, certificado, correspondencia
+    -   **Mantidas:** contrato, fatura, proposta, relatorio, comprovativo, outros
+    -   Categorias alinhadas com necessidades do negócio
+
+**Proteção de Dados**
+
+-   ✅ **Utilizadores - Proteção de Super Admin**
+    -   Botão eliminar funcional mas protegido
+    -   Não permite eliminar utilizadores com role "Super Admin"
+    -   Validação no backend previne eliminação acidental
+    -   Interface reflete corretamente as proteções de segurança
+
+### Impacto
+
+-   **Segurança:** Sistema de permissões agora efetivamente impede acesso não autorizado a ações
+-   **Integridade:** Movimentos manuais de pagamento refletem corretamente no banco
+-   **Estabilidade:** Eliminados crashes por null references em tarefas
+-   **Usabilidade:** Ficheiros privados agora visualizáveis com autenticação correta
+-   **Conformidade:** Categorias de documentos alinhadas com processos de negócio
+
+### Arquivos Modificados
+
+**Backend:**
+
+-   `app/Http/Controllers/ClientAccountController.php` - Integração bancária + permissões
+-   `app/Http/Controllers/TaskTemplateController.php` - Permissões
+-   `app/Http/Controllers/DocumentController.php` - Método view()
+-   `app/Models/Document.php` - Categorias + file_url accessor
+-   `routes/web.php` - Rota digital-archive.view
+
+**Frontend:**
+
+-   `resources/js/Pages/WorkOrders/MyTasks.vue` - Null safety
+-   `resources/js/Pages/BankAccounts/Edit.vue` - HTTP method
+-   `resources/js/Pages/SupplierInvoices/Index.vue` - Supplier name field
+-   `resources/js/Pages/TaskTemplates/Index.vue` - Permission checks
+-   `resources/js/Pages/ClientAccounts/Index.vue` - Permission checks
+
+---
+
 ## v0.24.0 — 18 Nov 2025
 
 **Integração Financeira Completa - Sistema Automático de Movimentos Bancários e Conta Corrente**

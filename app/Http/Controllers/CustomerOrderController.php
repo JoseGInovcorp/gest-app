@@ -114,12 +114,18 @@ class CustomerOrderController extends Controller
             // Gerar número automaticamente
             $number = CustomerOrder::generateNumber();
 
+            // Calcular total_value
+            $totalValue = collect($validated['items'])->sum(function ($item) {
+                return $item['quantity'] * $item['unit_price'];
+            });
+
             $order = CustomerOrder::create([
                 'number' => $number,
                 'proposal_date' => $validated['proposal_date'],
                 'validity_date' => $validated['validity_date'],
                 'customer_id' => $validated['customer_id'],
                 'status' => $validated['status'],
+                'total_value' => $totalValue,
                 'notes' => $validated['notes'] ?? null,
             ]);
 
@@ -272,12 +278,18 @@ class CustomerOrderController extends Controller
                 }
             }
 
+            // Calcular total_value
+            $totalValue = collect($validated['items'])->sum(function ($item) {
+                return $item['quantity'] * $item['unit_price'];
+            });
+
             $customerOrder->update([
                 'number' => $validated['number'],
                 'proposal_date' => $validated['proposal_date'],
                 'validity_date' => $validated['validity_date'],
                 'customer_id' => $validated['customer_id'],
                 'status' => $validated['status'],
+                'total_value' => $totalValue,
                 'notes' => $validated['notes'] ?? null,
             ]);
 

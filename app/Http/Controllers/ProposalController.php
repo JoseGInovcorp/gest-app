@@ -352,6 +352,12 @@ class ProposalController extends Controller
 
         DB::beginTransaction();
         try {
+            // Calcular valor total dos itens
+            $totalValue = $proposal->lines->sum(function ($line) {
+                $unitPrice = $line->preco_custo ?? $line->article->preco_com_iva ?? 0;
+                return $line->quantidade * $unitPrice;
+            });
+
             // Criar encomenda de cliente
             $order = CustomerOrder::create([
                 'number' => CustomerOrder::generateNumber(),
@@ -359,10 +365,11 @@ class ProposalController extends Controller
                 'proposal_date' => $proposal->data_proposta,
                 'validity_date' => $proposal->validade,
                 'status' => 'draft',
+                'total_value' => $totalValue,
                 'notes' => "Gerada a partir da proposta {$proposal->numero}\n\n" . ($proposal->observacoes ?? ''),
             ]);
 
-            Log::info('Order created: ' . $order->id);
+            Log::info('Order created: ' . $order->id . ' with total_value: ' . $totalValue);
 
             // Adicionar itens
             foreach ($proposal->lines as $line) {

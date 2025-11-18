@@ -208,6 +208,23 @@ class DocumentController extends Controller
     }
 
     /**
+     * Visualizar o documento no navegador
+     */
+    public function view(Document $document)
+    {
+        $path = Storage::disk('private')->path($document->file_path);
+
+        if (!file_exists($path)) {
+            abort(404, 'Ficheiro não encontrado');
+        }
+
+        return response()->file($path, [
+            'Content-Type' => $document->mime_type,
+            'Content-Disposition' => 'inline; filename="' . $document->original_filename . '"'
+        ]);
+    }
+
+    /**
      * Obter entidades para associação (AJAX)
      */
     public function getEntities(Request $request)

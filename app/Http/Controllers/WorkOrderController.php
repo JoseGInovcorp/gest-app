@@ -112,7 +112,7 @@ class WorkOrderController extends Controller
                 'due_date' => $task->due_date,
                 'can_start' => $task->can_start,
                 'is_overdue' => $task->is_overdue,
-                'work_order' => [
+                'work_order' => $task->workOrder ? [
                     'id' => $task->workOrder->id,
                     'title' => $task->workOrder->title,
                     'customer_order' => $task->workOrder->customerOrder ? [
@@ -120,7 +120,7 @@ class WorkOrderController extends Controller
                             'name' => $task->workOrder->customerOrder->customer->name ?? null,
                         ],
                     ] : null,
-                ],
+                ] : null,
                 'depends_on' => $task->dependsOn ? [
                     'id' => $task->dependsOn->id,
                     'title' => $task->dependsOn->title,

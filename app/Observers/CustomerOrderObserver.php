@@ -18,6 +18,23 @@ class CustomerOrderObserver
      */
     public function created(CustomerOrder $customerOrder): void
     {
+        // Criar movimento de CRÉDITO na conta corrente do cliente
+        // (cliente ficou a dever à empresa)
+        ClientAccount::create([
+            'entity_id' => $customerOrder->customer_id,
+            'data_movimento' => now(),
+            'tipo' => 'credito',
+            'valor' => $customerOrder->total_value,
+            'descricao' => "Encomenda {$customerOrder->number}",
+            'categoria' => 'fatura',
+            'referencia' => $customerOrder->number,
+        ]);
+
+        // Só criar Work Order se NÃO for rascunho
+        if ($customerOrder->status === 'draft') {
+            return;
+        }
+
         // Criar Work Order automaticamente
         $workOrder = WorkOrder::create([
             'customer_order_id' => $customerOrder->id,
@@ -58,6 +75,49 @@ class CustomerOrderObserver
      */
     public function updated(CustomerOrder $customerOrder): void
     {
+        // Se mudou de 'draft' para outro status, criar Work Order
+        if (
+            $customerOrder->isDirty('status') &&
+            $customerOrder->getOriginal('status') === 'draft' &&
+            $customerOrder->status !== 'draft'
+        ) {
+            // Criar Work Order se ainda não existir
+            if (!$customerOrder->workOrder) {
+                $workOrder = WorkOrder::create([
+                    'customer_order_id' => $customerOrder->id,
+                    'title' => "Processar Encomenda {$customerOrder->number}",
+                    'description' => "Workflow automático para encomenda de cliente",
+                    'priority' => 'normal',
+                    'status' => 'pendente',
+                    'created_by' => Auth::id() ?? 1,
+                ]);
+
+                // Buscar templates ativos ordenados por sequência
+                $templates = TaskTemplate::active()
+                    ->orderedBySequence()
+                    ->get();
+
+                // Criar tarefas baseadas nos templates
+                $previousTask = null;
+
+                foreach ($templates as $index => $template) {
+                    $task = WorkOrderTask::create([
+                        'work_order_id' => $workOrder->id,
+                        'task_type' => $template->code,
+                        'title' => $template->label,
+                        'description' => $template->description,
+                        'assigned_group' => $template->assigned_group,
+                        'status' => 'pendente',
+                        'sequence_order' => $template->default_sequence,
+                        'depends_on_task_id' => $previousTask ? $previousTask->id : null,
+                        'due_date' => now()->addDays($template->default_sequence),
+                    ]);
+
+                    $previousTask = $task;
+                }
+            }
+        }
+
         // Verificar se o status mudou para 'closed' (encomenda fechada/paga)
         if ($customerOrder->isDirty('status') && $customerOrder->status === 'closed') {
             // Buscar conta bancária principal (Conta Corrente Principal)

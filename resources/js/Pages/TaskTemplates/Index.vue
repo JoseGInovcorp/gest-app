@@ -9,6 +9,14 @@ import ConfirmDialog from "@/Components/ConfirmDialog.vue";
 const props = defineProps({
     templates: Object,
     filters: Object,
+    can: {
+        type: Object,
+        default: () => ({
+            create: false,
+            update: false,
+            delete: false,
+        }),
+    },
 });
 
 const search = ref(props.filters.search || "");
@@ -106,6 +114,7 @@ const cancelDelete = () => {
                 <div class="flex flex-col sm:flex-row justify-between gap-4">
                     <div class="flex-1"></div>
                     <Link
+                        v-if="can.create"
                         :href="route('task-templates.create')"
                         class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm transition duration-150"
                     >
@@ -260,6 +269,7 @@ const cancelDelete = () => {
                                 class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
                             >
                                 <Link
+                                    v-if="can.update"
                                     :href="
                                         route(
                                             'task-templates.edit',
@@ -271,11 +281,18 @@ const cancelDelete = () => {
                                     <Pencil class="h-4 w-4 inline" />
                                 </Link>
                                 <button
+                                    v-if="can.delete"
                                     @click="confirmDelete(template)"
                                     class="text-red-600 hover:text-red-900 dark:text-red-400"
                                 >
                                     <Trash2 class="h-4 w-4 inline" />
                                 </button>
+                                <span
+                                    v-if="!can.update && !can.delete"
+                                    class="text-gray-400 dark:text-gray-600"
+                                >
+                                    -
+                                </span>
                             </td>
                         </tr>
                     </tbody>

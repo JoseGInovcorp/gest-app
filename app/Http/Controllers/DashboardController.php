@@ -55,13 +55,13 @@ class DashboardController extends Controller
 
         // Clientes com Saldo Devedor (se tiver permissão)
         if ($user->can('client-accounts.read')) {
-            // Obter o último movimento de cada cliente e contar quantos têm saldo negativo
+            // Obter o último movimento de cada cliente e contar quantos têm saldo positivo (devem à empresa)
             $stats['clients_with_debt'] = ClientAccount::selectRaw('entity_id, MAX(id) as last_movement_id')
                 ->groupBy('entity_id')
                 ->get()
                 ->filter(function ($item) {
                     $lastMovement = ClientAccount::find($item->last_movement_id);
-                    return $lastMovement && $lastMovement->saldo_apos < 0;
+                    return $lastMovement && $lastMovement->saldo_apos > 0;
                 })
                 ->count();
         }

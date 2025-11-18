@@ -325,6 +325,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/digital-archive', [DocumentController::class, 'index'])->name('digital-archive.index');
         Route::get('/digital-archive/{document}', [DocumentController::class, 'show'])->name('digital-archive.show');
         Route::get('/digital-archive/{document}/download', [DocumentController::class, 'download'])->name('digital-archive.download');
+        Route::get('/digital-archive/{document}/view', [DocumentController::class, 'view'])->name('digital-archive.view');
     });
     Route::post('/digital-archive', [DocumentController::class, 'store'])->name('digital-archive.store')->middleware('permission:digital-archive.create');
     Route::patch('/digital-archive/{document}', [DocumentController::class, 'update'])->name('digital-archive.update')->middleware('permission:digital-archive.edit');

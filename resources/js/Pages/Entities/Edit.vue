@@ -75,7 +75,13 @@ const isFormValid = computed(() => {
 
 // Methods
 const handleSubmit = () => {
-    form.patch(route("clients.update", props.entity.id), {
+    // Determinar a rota correta baseado no tipo da entidade
+    const routeName =
+        props.entity.type === "supplier" || props.entity.type === "both"
+            ? "suppliers.update"
+            : "clients.update";
+
+    form.patch(route(routeName, props.entity.id), {
         onSuccess: (response) => {
             // Redireciona para a lista após sucesso
         },
@@ -575,11 +581,19 @@ watch(
                                     : '',
                             ]"
                         >
-                            <span v-if="form.processing">A criar...</span>
+                            <span v-if="form.processing">A atualizar...</span>
                             <span v-else-if="!isFormValid"
                                 >Preencha os campos obrigatórios</span
                             >
-                            <span v-else>Criar Cliente</span>
+                            <span v-else
+                                >Atualizar
+                                {{
+                                    entity.type === "supplier" ||
+                                    entity.type === "both"
+                                        ? "Fornecedor"
+                                        : "Cliente"
+                                }}</span
+                            >
                         </Button>
                     </div>
                 </Form>

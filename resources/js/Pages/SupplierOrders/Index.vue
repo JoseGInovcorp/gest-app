@@ -185,7 +185,9 @@
                             <td
                                 class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
                             >
-                                <div class="flex justify-end gap-2">
+                                <div
+                                    class="flex items-center justify-end gap-2"
+                                >
                                     <a
                                         :href="
                                             route(
@@ -193,10 +195,10 @@
                                                 order.id
                                             )
                                         "
-                                        class="text-purple-600 dark:text-purple-400 hover:text-purple-900 dark:hover:text-purple-300"
+                                        class="p-1.5 text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded transition-colors"
                                         title="Descarregar PDF"
                                     >
-                                        <FileText class="h-5 w-5" />
+                                        <FileText class="h-4 w-4" />
                                     </a>
                                     <Link
                                         v-if="
