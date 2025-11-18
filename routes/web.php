@@ -293,7 +293,7 @@ Route::middleware('auth')->group(function () {
     })->name('financial.index');
     // Calendário - aplicação principal
     Route::get('/calendar', [\App\Http\Controllers\CalendarEventController::class, 'index'])
-        ->name('calendar.index')->middleware('permission:calendar-events.read');
+        ->name('calendar.index')->middleware('permission:calendar.read');
 
     // JSON endpoint usado pelo FullCalendar (events)
     Route::get('/calendar/events-json', [\App\Http\Controllers\CalendarEventController::class, 'events'])
@@ -301,24 +301,24 @@ Route::middleware('auth')->group(function () {
 
     // Rotas CRUD para eventos do calendário
     Route::get('/calendar-events/create', [\App\Http\Controllers\CalendarEventController::class, 'create'])
-        ->name('calendar-events.create')->middleware('permission:calendar-events.create');
+        ->name('calendar-events.create')->middleware('permission:calendar.create');
 
-    Route::middleware('permission:calendar-events.read')->group(function () {
+    Route::middleware('permission:calendar.read')->group(function () {
         Route::get('/calendar-events', [\App\Http\Controllers\CalendarEventController::class, 'index'])->name('calendar-events.index');
         Route::get('/calendar-events/{calendarEvent}', [\App\Http\Controllers\CalendarEventController::class, 'show'])->name('calendar-events.show');
     });
 
     Route::post('/calendar-events', [\App\Http\Controllers\CalendarEventController::class, 'store'])
-        ->name('calendar-events.store')->middleware('permission:calendar-events.create');
+        ->name('calendar-events.store')->middleware('permission:calendar.create');
 
     Route::get('/calendar-events/{calendarEvent}/edit', [\App\Http\Controllers\CalendarEventController::class, 'edit'])
-        ->name('calendar-events.edit')->middleware('permission:calendar-events.update');
+        ->name('calendar-events.edit')->middleware('permission:calendar.update');
 
     Route::patch('/calendar-events/{calendarEvent}', [\App\Http\Controllers\CalendarEventController::class, 'update'])
-        ->name('calendar-events.update')->middleware('permission:calendar-events.update');
+        ->name('calendar-events.update')->middleware('permission:calendar.update');
 
     Route::delete('/calendar-events/{calendarEvent}', [\App\Http\Controllers\CalendarEventController::class, 'destroy'])
-        ->name('calendar-events.destroy')->middleware('permission:calendar-events.delete');
+        ->name('calendar-events.destroy')->middleware('permission:calendar.delete');
 
     // Arquivo Digital
     Route::middleware('permission:digital-archive.read')->group(function () {

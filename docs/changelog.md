@@ -4,6 +4,105 @@ Registo das principais mudanças e desenvolvimentos realizados durante o estági
 
 ---
 
+## v0.26.0 — 18 Nov 2025
+
+**Cifra de Dados Sensíveis (RGPD) + Correção Permissões Calendário**
+
+### O que foi feito
+
+**Segurança - Cifra de Dados Pessoais (Compliance RGPD)**
+
+-   ✅ **Implementação de AES-256-CBC em dados sensíveis**
+
+    -   Algoritmo de cifra simétrica padrão da indústria
+    -   Usa APP_KEY do Laravel para cifrar/decifrar automaticamente
+    -   Totalmente transparente para o código da aplicação
+    -   Cifra ao guardar, decifra ao ler - processo automático
+
+-   ✅ **Campos cifrados implementados**
+
+    -   **Entity:** tax_number, phone, mobile, email, iban
+    -   **Contact:** phone, mobile, email
+    -   **User:** mobile (email não cifrado pois é usado para login)
+    -   **BankAccount:** iban, swift_bic
+    -   Total: 13 campos sensíveis protegidos
+
+-   ✅ **Migration de estrutura da base de dados**
+
+    -   Campos VARCHAR convertidos para TEXT
+    -   Necessário para acomodar dados cifrados (3-4x maior que texto simples)
+    -   Migration: `increase_encrypted_fields_size`
+
+-   ✅ **Script de migração de dados**
+
+    -   `migrate_to_encrypted.php` criado
+    -   Cifrou automaticamente 50 registos existentes
+    -   Deteta e ignora dados já cifrados (idempotente)
+    -   18 entities, 26 contacts, 2 bank accounts, 4 users migrados
+
+-   ✅ **Documentação completa**
+    -   `docs/security-encryption.md` criado
+    -   Explica algoritmo, campos cifrados, limitações
+    -   Guia de troubleshooting e backup da APP_KEY
+    -   Conformidade RGPD documentada
+
+**Correções de Permissões**
+
+-   ✅ **Menu Calendário - Correção de visibilidade**
+
+    -   Alterado `permission: "calendar-events"` para `permission: "calendar"`
+    -   Alinhado com permissões reais do sistema (calendar.read, calendar.create, etc.)
+    -   Menu agora aparece corretamente para utilizadores com permissão
+
+-   ✅ **Rotas do Calendário - Correção de middleware**
+    -   `calendar.index`: `calendar-events.read` → `calendar.read`
+    -   `calendar-events.create`: `calendar-events.create` → `calendar.create`
+    -   `calendar-events.edit`: `calendar-events.update` → `calendar.update`
+    -   `calendar-events.destroy`: `calendar-events.delete` → `calendar.delete`
+    -   Erro 403 resolvido para utilizadores com permissões corretas
+
+### Impacto
+
+-   **Compliance:** Sistema agora cumpre requisitos RGPD de cifra de dados pessoais
+-   **Segurança:** Dados sensíveis protegidos mesmo em caso de acesso não autorizado à BD
+-   **Integridade:** APP_KEY é crítica - backup obrigatório antes de produção
+-   **Funcionalidade:** Calendário acessível para todos os utilizadores com permissão
+-   **Transparência:** Cifra/decifra automática - código não precisa alterações
+
+### Arquivos Criados/Modificados
+
+**Cifra de Dados:**
+
+-   `app/Models/Entity.php` - Activated encrypted casts
+-   `app/Models/Contact.php` - Activated encrypted casts
+-   `app/Models/User.php` - Activated encrypted cast (mobile)
+-   `app/Models/BankAccount.php` - Activated encrypted casts
+-   `database/migrations/2025_11_18_140148_increase_encrypted_fields_size.php` - NEW
+-   `scripts/migrate_to_encrypted.php` - NEW
+-   `scripts/test_encryption.php` - NEW
+-   `docs/security-encryption.md` - NEW (documentação completa)
+
+**Permissões Calendário:**
+
+-   `resources/js/Layouts/AuthenticatedLayout.vue` - Menu permission fix
+-   `routes/web.php` - Calendar routes middleware fix
+
+### Notas Importantes
+
+⚠️ **CRÍTICO - APP_KEY:**
+
+-   Fazer backup da APP_KEY antes de deploy
+-   Se a chave for perdida/alterada, dados cifrados são IRRECUPERÁVEIS
+-   Guardar backup em local seguro separado do repositório
+
+⚠️ **Limitações de Pesquisa:**
+
+-   Não é possível fazer WHERE/LIKE direto em campos cifrados
+-   Soluções: pesquisar por campos não cifrados ou filtrar em memória
+-   Ver `docs/security-encryption.md` para estratégias
+
+---
+
 ## v0.25.0 — 18 Nov 2025
 
 **Correções de Segurança, Integração Financeira e Bugs Críticos**

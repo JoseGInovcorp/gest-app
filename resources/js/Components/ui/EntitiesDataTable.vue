@@ -282,13 +282,13 @@ const columns = computed(() => [
         key: "phone",
         title: "Telefone",
         sortable: false,
-        class: "w-32",
+        class: "w-44",
     },
     {
         key: "mobile",
         title: "Telemóvel",
         sortable: false,
-        class: "w-32",
+        class: "w-44",
     },
     {
         key: "website",

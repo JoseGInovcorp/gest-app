@@ -25,6 +25,7 @@ Thumbs.db
 
 # Relatórios internos
 relatorio-progresso.md
+REGISTO_ATIVIDADES_ESTAGIO.md
 
 # Documentos de segurança sensíveis (NÃO fazer commit - repositório público)
 docs/APP_KEY-BACKUP-GUIDE.md

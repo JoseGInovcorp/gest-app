@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\EncryptedString;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -66,12 +67,12 @@ class Entity extends Model
         'tax_exempt' => 'boolean',
         'active' => 'boolean',
         'custom_fields' => 'array',
-        // Campos sensíveis cifrados (DESATIVADO EM DEV - Ativar antes de produção)
-        // 'tax_number' => 'encrypted',
-        // 'phone' => 'encrypted',
-        // 'mobile' => 'encrypted',
-        // 'email' => 'encrypted',
-        // 'iban' => 'encrypted',
+        // Campos sensíveis cifrados com AES-256-CBC (sem serialização)
+        'tax_number' => EncryptedString::class,
+        'phone' => EncryptedString::class,
+        'mobile' => EncryptedString::class,
+        'email' => EncryptedString::class,
+        'iban' => EncryptedString::class,
     ];
 
     protected $appends = [

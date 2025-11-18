@@ -131,7 +131,7 @@ const allMainNavigationItems = [
         href: "calendar.index",
         icon: Calendar,
         disabled: false,
-        permission: "calendar-events", // Requer permissões de calendar-events
+        permission: "calendar", // Requer permissões de calendar
     },
 ];
 

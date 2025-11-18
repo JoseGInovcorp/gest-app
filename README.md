@@ -8,8 +8,8 @@ Este é o meu projeto final de estágio, desenvolvido na **Inovcorp** entre 6 e 
 
 O objetivo é criar um sistema de gestão empresarial para PMEs, com funcionalidades de gestão comercial, financeira e operacional.
 
-**Versão Atual:** v0.25.0  
-**Progresso:** 100% (20 de 20 módulos concluídos + Dashboard + Gestão Stock + **Integração Financeira** + **Segurança Reforçada**)  
+**Versão Atual:** v0.26.0  
+**Progresso:** 100% (20 de 20 módulos concluídos + Dashboard + Gestão Stock + **Integração Financeira** + **Segurança Reforçada** + **Cifra RGPD**)  
 **Prazo de Entrega:** 18 Nov 2025
 
 ## ✅ O que já está pronto
@@ -18,6 +18,8 @@ O objetivo é criar um sistema de gestão empresarial para PMEs, com funcionalid
 -   ✅ **Sistema de permissões completo e efetivo**
 -   ✅ **Controlo de acesso baseado em roles granulares**
 -   ✅ **UI adaptativa às permissões do utilizador**
+-   ✅ **Cifra AES-256-CBC de dados sensíveis (RGPD)**
+-   ✅ **13 campos pessoais cifrados automaticamente**
 -   ✅ Histórico de atividades (logs)
 -   ✅ Logo da empresa integrado
 -   ✅ **Dashboard adaptativo baseado em permissões**
@@ -222,7 +224,7 @@ O objetivo é criar um sistema de gestão empresarial para PMEs, com funcionalid
 -   Estados Ativo/Inativo
 -   Usado no campo de próxima ação dos eventos
 
-### Módulo 17: Propostas Comerciais (v0.20.0)
+### Módulo 16: Propostas Comerciais (v0.20.0)
 
 Criação e gestão de propostas a clientes com workflow completo e business rules.
 
@@ -241,7 +243,7 @@ Criação e gestão de propostas a clientes com workflow completo e business rul
 -   Validação condicional baseada em estado
 -   Auto-fill de preços com IVA ao selecionar artigo
 
-### Módulo 18: Arquivo Digital (v0.17.0)
+### Módulo 17: Arquivo Digital (v0.17.0)
 
 Sistema completo de gestão de documentos digitais com versioning e metadata.
 
@@ -420,16 +422,17 @@ CRUD completo em Configurações para gerir templates:
 8. ✅ Histórico de Atividades
 9. ✅ Configurações da Empresa
 10. ✅ Contas Bancárias
-11. ✅ Conta Corrente Bancária
-12. ✅ Conta Corrente de Clientes
-13. ✅ Calendário de Eventos
-14. ✅ Tipos de Eventos
-15. ✅ Ações de Eventos
-16. ✅ Faturas de Fornecedores
+11. ✅ Faturas de Fornecedores
+12. ✅ Conta Corrente Bancária
+13. ✅ Conta Corrente de Clientes
+14. ✅ Calendário de Eventos
+15. ✅ Tipos de Eventos
+16. ✅ Ações de Eventos
 17. ✅ Propostas Comerciais
-18. ✅ Encomendas Cliente
-19. ✅ Arquivo Digital
-20. ✅ Ordens de Trabalho + Task Templates
+18. ✅ Arquivo Digital
+19. ✅ Encomendas Cliente
+20. ✅ Encomendas Fornecedor
+21. ✅ Ordens de Trabalho + Task Templates
 
 ## 🔧 Como Executar
 

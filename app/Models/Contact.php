@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\EncryptedString;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -32,10 +33,10 @@ class Contact extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
-        // Campos sensíveis cifrados (DESATIVADO EM DEV - Ativar antes de produção)
-        // 'phone' => 'encrypted',
-        // 'mobile' => 'encrypted',
-        // 'email' => 'encrypted',
+        // Campos sensíveis cifrados com AES-256-CBC (sem serialização)
+        'phone' => EncryptedString::class,
+        'mobile' => EncryptedString::class,
+        'email' => EncryptedString::class,
     ];
 
     protected $appends = [
