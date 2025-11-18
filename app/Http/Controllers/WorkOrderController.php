@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Role;
 
 class WorkOrderController extends Controller
@@ -422,6 +423,56 @@ class WorkOrderController extends Controller
             ->log('created');
 
         return back()->with('success', 'Tarefa adicionada com sucesso!');
+    }
+
+    /**
+     * Sync work order tasks with current template settings
+     */
+    public function syncWithTemplate(WorkOrder $workOrder)
+    {
+        try {
+            $templates = TaskTemplate::active()->get()->keyBy('code');
+            $updatedCount = 0;
+
+            foreach ($workOrder->tasks as $task) {
+                $template = $templates->get($task->task_type);
+
+                if ($template) {
+                    // Atualiza sempre todas as tarefas com os valores atuais do template
+                    $task->update([
+                        'assigned_group' => $template->assigned_group,
+                        'title' => $template->label,
+                        'description' => $template->description,
+                    ]);
+                    $updatedCount++;
+
+                    Log::info("Tarefa {$task->id} sincronizada", [
+                        'tipo' => $task->task_type,
+                        'grupo_anterior' => $task->getOriginal('assigned_group'),
+                        'grupo_novo' => $template->assigned_group,
+                    ]);
+                }
+            }
+
+            Log::info("Sincronização concluída", [
+                'work_order_id' => $workOrder->id,
+                'tarefas_atualizadas' => $updatedCount,
+            ]);
+
+            activity()
+                ->performedOn($workOrder)
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'updated_tasks' => $updatedCount,
+                    'ip' => request()->ip(),
+                    'user_agent' => request()->userAgent()
+                ])
+                ->log('synced_with_template');
+
+            return back()->with('success', "Workflow sincronizado! {$updatedCount} tarefas atualizadas.");
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Erro ao sincronizar: ' . $e->getMessage()]);
+        }
     }
 
     /**

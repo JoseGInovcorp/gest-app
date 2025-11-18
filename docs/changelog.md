@@ -4,6 +4,135 @@ Registo das principais mudanças e desenvolvimentos realizados durante o estági
 
 ---
 
+## v0.24.0 — 18 Nov 2025
+
+**Integração Financeira Completa - Sistema Automático de Movimentos Bancários e Conta Corrente**
+
+### O que foi feito
+
+**Backend - Sistema de Integração Financeira**
+
+-   ✅ **CustomerOrderObserver - Criação automática de movimentos**
+
+    -   Quando encomenda cliente muda para status "closed"
+    -   Cria movimento **DÉBITO** na Conta Corrente Cliente (cliente pagou)
+    -   Cria movimento **CRÉDITO** na Conta Bancária (entrada de dinheiro)
+    -   Relaciona ambos com referência da encomenda
+    -   Observações incluem nome do cliente
+
+-   ✅ **BankTransaction Observer - Cálculo automático de saldos**
+
+    -   Auto-cálculo de `saldo_apos` em cada transação
+    -   Triggers automáticos em create/update/delete
+    -   Recalcula saldo da conta bancária (`saldo_atual`)
+    -   Ordenação cronológica correta dos movimentos
+
+-   ✅ **ClientAccount Observer - Gestão de saldos de clientes**
+    -   Cálculo automático de `saldo_apos` por cliente
+    -   Atualização em cascata de movimentos subsequentes
+    -   Suporte a débitos e créditos
+
+**Backend - Correções e Ajustes**
+
+-   ✅ **Correção de campo entidade**: `nome` → `name`
+
+    -   CustomerOrderObserver corrigido
+    -   SupplierOrderObserver corrigido
+    -   Scripts de migração atualizados
+    -   Transações existentes corrigidas
+
+-   ✅ **Scripts de manutenção criados**
+    -   `update_transaction_customer_names.php` - Atualiza nomes de clientes nas transações
+    -   `fix_client_account_payments.php` - Corrige tipo de movimento (crédito→débito)
+    -   `process_existing_closed_orders.php` - Processa encomendas fechadas retroativamente
+
+**Frontend - BankAccounts/Show.vue**
+
+-   ✅ **Header padronizado** (match com Entities/Show.vue)
+
+    -   Ícone CreditCard em container azul arredondado
+    -   Layout: Ícone + Título | Botões de ação
+    -   Border-bottom separador
+    -   Botão "Voltar" com variant outline
+    -   Botão "Exportar PDF" verde
+    -   Botão "Editar" azul com ícone Pencil
+    -   Dark mode completo
+
+-   ✅ **Layout consistente**
+
+    -   Container principal com `space-y-6`
+    -   Largura ajustada (removido max-w-7xl extra)
+    -   Indentação correta
+    -   Espaçamento entre seções
+
+-   ✅ **Extrato de movimentos melhorado**
+    -   Exibe observações com nome do cliente
+    -   Badges coloridos por categoria
+    -   Valores com cores (verde/vermelho)
+    -   Saldo após cada movimento
+
+**Frontend - ClientAccounts/Show.vue**
+
+-   ✅ **Header padronizado**
+
+    -   Mesmo padrão do BankAccounts/Show.vue
+    -   Ícone DollarSign
+    -   Título: Nome do cliente
+    -   Subtítulo: Descrição do movimento
+    -   Botões: Voltar (outline), Editar (primary), Eliminar (destructive)
+
+-   ✅ **Estrutura simplificada**
+    -   Removido card de ações (ações no header)
+    -   Layout limpo com space-y-6
+    -   Border-bottom no header
+    -   Componente Button reutilizável
+
+**PDF Export**
+
+-   ✅ **Template profissional para extrato bancário**
+    -   Header com detalhes da conta (nome, banco, IBAN)
+    -   4 cards de resumo (Saldo Inicial, Créditos, Débitos, Saldo Atual)
+    -   Tabela completa de transações
+    -   Badges coloridos por categoria
+    -   Saldo após cada movimento
+    -   Footer com timestamp de geração
+    -   Estilo consistente com faturas
+
+**Lógica Financeira**
+
+-   ✅ **Encomenda Cliente Fechada**:
+
+    -   Conta Corrente Cliente: DÉBITO (cliente pagou, reduz dívida)
+    -   Conta Bancária: CRÉDITO (entrada de dinheiro)
+
+-   ✅ **Encomenda Fornecedor Fechada** (preparado):
+    -   Conta Bancária: DÉBITO (saída de dinheiro)
+
+### Testes Realizados
+
+-   ✅ Encomenda EC-2025-0001 (627 EUR)
+    -   Movimento bancário criado: +627 EUR (25.000 → 25.627 EUR)
+    -   Movimento conta cliente criado: -627 EUR (débito)
+    -   Nome cliente exibido corretamente nas observações
+
+### Scripts Executados
+
+```bash
+php update_transaction_customer_names.php  # Corrigiu nome do cliente
+php fix_client_account_payments.php        # Corrigiu tipo crédito→débito
+php process_existing_closed_orders.php     # Processou EC-2025-0001
+```
+
+### Impacto
+
+-   🎯 **Automação completa** do ciclo financeiro
+-   📊 **Rastreabilidade total** de movimentos
+-   💰 **Saldos sempre corretos** e atualizados
+-   🔗 **Integração perfeita** entre módulos
+-   🎨 **UI consistente** em todas as páginas Show
+
+---
+
 ## v0.23.0 — 17 Nov 2025
 
 **Gestão Automática de Stock nas Encomendas de Cliente**

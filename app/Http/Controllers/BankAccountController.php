@@ -6,6 +6,7 @@ use App\Models\BankAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class BankAccountController extends Controller
 {
@@ -183,5 +184,33 @@ class BankAccountController extends Controller
 
         return redirect()->route('bank-accounts.index')
             ->with('success', 'Conta bancária eliminada com sucesso!');
+    }
+
+    /**
+     * Exportar extrato bancário em PDF
+     */
+    public function exportPdf(BankAccount $bankAccount)
+    {
+        $bankAccount->load(['transactions' => function ($query) {
+            $query->orderBy('data_movimento', 'desc')
+                ->orderBy('id', 'desc');
+        }]);
+
+        // Calcular totais
+        $totais = [
+            'creditos' => $bankAccount->transactions()
+                ->where('tipo', 'credito')
+                ->sum('valor'),
+            'debitos' => $bankAccount->transactions()
+                ->where('tipo', 'debito')
+                ->sum('valor'),
+        ];
+
+        $pdf = Pdf::loadView('pdfs.bank-account-statement', [
+            'account' => $bankAccount,
+            'totais' => $totais,
+        ]);
+
+        return $pdf->download("extrato_{$bankAccount->nome}_" . now()->format('Y-m-d') . ".pdf");
     }
 }

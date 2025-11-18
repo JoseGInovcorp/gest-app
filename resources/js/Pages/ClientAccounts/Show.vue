@@ -2,64 +2,55 @@
     <Head title="Detalhes do Movimento" />
 
     <AuthenticatedLayout>
-        <!-- Header -->
-        <div class="mb-6">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <div class="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-                        <DollarSign
-                            class="h-6 w-6 text-blue-600 dark:text-blue-400"
-                        />
-                    </div>
-                    <div>
-                        <h1
-                            class="text-2xl font-bold text-gray-900 dark:text-white"
+        <div class="space-y-6">
+            <!-- Header -->
+            <div class="border-b border-gray-200 dark:border-gray-800 pb-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div
+                            class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600/10 dark:bg-blue-400/10"
                         >
-                            Detalhes do Movimento
-                        </h1>
-                        <p class="text-gray-500 dark:text-gray-400">
-                            Visualizar informações do movimento
-                        </p>
+                            <DollarSign
+                                class="h-6 w-6 text-blue-600 dark:text-blue-400"
+                            />
+                        </div>
+                        <div>
+                            <h1
+                                class="text-2xl font-bold text-gray-900 dark:text-white"
+                            >
+                                {{ movement.entity.name }}
+                            </h1>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                                {{ movement.descricao }}
+                            </p>
+                        </div>
                     </div>
-                </div>
-                <div class="flex gap-2">
-                    <Link
-                        :href="route('client-accounts.edit', movement.id)"
-                        class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                        <Pencil class="h-4 w-4" />
-                        Editar
-                    </Link>
+
+                    <div class="flex space-x-3">
+                        <Link :href="route('client-accounts.index')">
+                            <Button variant="outline">
+                                <ArrowLeft class="h-4 w-4 mr-2" />
+                                Voltar
+                            </Button>
+                        </Link>
+
+                        <Link
+                            :href="route('client-accounts.edit', movement.id)"
+                        >
+                            <Button>
+                                <Pencil class="h-4 w-4 mr-2" />
+                                Editar
+                            </Button>
+                        </Link>
+
+                        <Button variant="destructive" @click="openDeleteDialog">
+                            <Trash2 class="h-4 w-4 mr-2" />
+                            Eliminar
+                        </Button>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <!-- Breadcrumbs -->
-        <nav class="mb-6">
-            <ol
-                class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400"
-            >
-                <li>
-                    <Link
-                        :href="route('dashboard')"
-                        class="hover:text-gray-700 dark:hover:text-gray-200"
-                    >
-                        Dashboard
-                    </Link>
-                </li>
-                <li>/</li>
-                <li>
-                    <Link
-                        :href="route('client-accounts.index')"
-                        class="hover:text-gray-700 dark:hover:text-gray-200"
-                    >
-                        Conta Corrente Clientes
-                    </Link>
-                </li>
-                <li>/</li>
-                <li class="text-gray-900 dark:text-white">Detalhes</li>
-            </ol>
-        </nav>
 
         <!-- Content -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -307,43 +298,7 @@
                     </div>
                 </div>
 
-                <!-- Actions Card -->
-                <div
-                    class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg"
-                >
-                    <div class="p-6">
-                        <h3
-                            class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4"
-                        >
-                            Ações
-                        </h3>
-                        <div class="space-y-2">
-                            <Link
-                                :href="
-                                    route('client-accounts.edit', movement.id)
-                                "
-                                class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                            >
-                                <Pencil class="h-4 w-4" />
-                                Editar Movimento
-                            </Link>
-                            <button
-                                @click="openDeleteDialog"
-                                class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                            >
-                                <Trash2 class="h-4 w-4" />
-                                Eliminar Movimento
-                            </button>
-                            <Link
-                                :href="route('client-accounts.index')"
-                                class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                            >
-                                <ArrowLeft class="h-4 w-4" />
-                                Voltar à Lista
-                            </Link>
-                        </div>
-                    </div>
-                </div>
+                <!-- Actions Card - Removida porque as ações estão no header -->
             </div>
         </div>
 
@@ -365,6 +320,7 @@
 import { ref } from "vue";
 import { Head, Link, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import Button from "@/Components/ui/Button.vue";
 import ConfirmDialog from "@/Components/ConfirmDialog.vue";
 import { DollarSign, Pencil, Trash2, ArrowLeft } from "lucide-vue-next";
 

@@ -19,6 +19,7 @@ class CustomerOrderController extends Controller
     public function index(Request $request)
     {
         $query = CustomerOrder::with('customer')
+            ->whereHas('customer') // Apenas encomendas com clientes válidos
             ->orderBy('created_at', 'desc');
 
         // Filtro de pesquisa
@@ -58,7 +59,7 @@ class CustomerOrderController extends Controller
 
         $articles = Article::ativos()
             ->orderBy('nome')
-            ->get(['id', 'nome as name', 'preco_com_iva as unit_price', 'referencia as reference']);
+            ->get(['id', 'nome as name', 'preco_com_iva as unit_price', 'referencia as reference', 'tipo', 'stock_quantidade']);
 
         $suppliers = Entity::whereIn('type', ['supplier', 'both'])
             ->where('active', true)
@@ -83,7 +84,9 @@ class CustomerOrderController extends Controller
     {
         $validated = $request->validate([
             'proposal_date' => 'nullable|date',
+            'validity_date' => 'nullable|date',
             'customer_id' => 'required|exists:entities,id',
+            'status' => 'required|in:draft,closed',
             'notes' => 'nullable|string',
             'items' => 'required|array|min:1',
             'items.*.article_id' => 'required|exists:articles,id',
@@ -179,7 +182,7 @@ class CustomerOrderController extends Controller
 
         $articles = Article::ativos()
             ->orderBy('nome')
-            ->get(['id', 'nome as name', 'preco_com_iva as unit_price', 'referencia as reference']);
+            ->get(['id', 'nome as name', 'preco_com_iva as unit_price', 'referencia as reference', 'tipo', 'stock_quantidade']);
 
         $suppliers = Entity::whereIn('type', ['supplier', 'both'])
             ->where('active', true)
@@ -338,6 +341,16 @@ class CustomerOrderController extends Controller
     public function destroy(CustomerOrder $customerOrder)
     {
         try {
+            // Verificar se o cliente ainda existe
+            if (!$customerOrder->customer) {
+                // Se não existe, fazer forceDelete direto
+                $customerOrder->items()->forceDelete();
+                $customerOrder->forceDelete();
+
+                return redirect()->route('customer-orders.index')
+                    ->with('success', 'Encomenda órfã eliminada com sucesso!');
+            }
+
             activity()
                 ->performedOn($customerOrder)
                 ->causedBy(Auth::user())

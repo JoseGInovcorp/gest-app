@@ -23,6 +23,7 @@ class ProposalController extends Controller
     public function index(Request $request)
     {
         $query = Proposal::with('entity')
+            ->whereHas('entity') // Apenas propostas com entidades válidas
             ->orderBy('created_at', 'desc');
 
         // Filtro de pesquisa
@@ -292,6 +293,16 @@ class ProposalController extends Controller
     public function destroy(Proposal $proposal)
     {
         try {
+            // Verificar se a entidade ainda existe
+            if (!$proposal->entity) {
+                // Se não existe, fazer forceDelete direto
+                $proposal->lines()->forceDelete();
+                $proposal->forceDelete();
+
+                return redirect()->route('proposals.index')
+                    ->with('success', 'Proposta órfã eliminada com sucesso!');
+            }
+
             activity()
                 ->performedOn($proposal)
                 ->causedBy(Auth::user())

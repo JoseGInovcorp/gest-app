@@ -133,6 +133,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('permission:bank-accounts.read')->group(function () {
         Route::get('/bank-accounts', [BankAccountController::class, 'index'])->name('bank-accounts.index');
         Route::get('/bank-accounts/{bankAccount}', [BankAccountController::class, 'show'])->name('bank-accounts.show');
+        Route::get('/bank-accounts/{bankAccount}/export-pdf', [BankAccountController::class, 'exportPdf'])->name('bank-accounts.export-pdf');
     });
     Route::post('/bank-accounts', [BankAccountController::class, 'store'])->name('bank-accounts.store')->middleware('permission:bank-accounts.create');
     Route::get('/bank-accounts/{bankAccount}/edit', [BankAccountController::class, 'edit'])->name('bank-accounts.edit')->middleware('permission:bank-accounts.update');
@@ -245,6 +246,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/work-orders', [WorkOrderController::class, 'store'])->name('work-orders.store')->middleware('permission:work-orders.create');
     Route::patch('/work-orders/{workOrder}', [WorkOrderController::class, 'update'])->name('work-orders.update')->middleware('permission:work-orders.update');
     Route::delete('/work-orders/{workOrder}', [WorkOrderController::class, 'destroy'])->name('work-orders.destroy')->middleware('permission:work-orders.delete');
+    Route::post('/work-orders/{workOrder}/sync-template', [WorkOrderController::class, 'syncWithTemplate'])->name('work-orders.sync-template')->middleware('permission:work-orders.update');
 
     // Ações de tarefas
     Route::post('/work-order-tasks/{task}/assign', [WorkOrderController::class, 'assignTask'])->name('work-order-tasks.assign')->middleware('permission:work-orders.update');

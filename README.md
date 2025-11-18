@@ -8,8 +8,8 @@ Este é o meu projeto final de estágio, desenvolvido na **Inovcorp** entre 6 e 
 
 O objetivo é criar um sistema de gestão empresarial para PMEs, com funcionalidades de gestão comercial, financeira e operacional.
 
-**Versão Atual:** v0.23.0  
-**Progresso:** 100% (20 de 20 módulos concluídos + Dashboard + Gestão Stock)  
+**Versão Atual:** v0.24.0  
+**Progresso:** 100% (20 de 20 módulos concluídos + Dashboard + Gestão Stock + **Integração Financeira**)  
 **Prazo de Entrega:** 18 Nov 2025
 
 ## ✅ O que já está pronto
@@ -20,10 +20,12 @@ O objetivo é criar um sistema de gestão empresarial para PMEs, com funcionalid
 -   ✅ Logo da empresa integrado
 -   ✅ **Dashboard adaptativo baseado em permissões**
 -   ✅ **Gestão automática de stock nas encomendas**
+-   ✅ **Integração financeira automática** (Encomendas → Conta Corrente + Banco)
 -   ✅ **Interface 100% uniformizada e consistente**
 -   ✅ **Componente ConfirmDialog reutilizável**
 -   ✅ **Botões de ação padronizados (cinza/azul/vermelho)**
 -   ✅ **Headers de página com estrutura consistente**
+-   ✅ **Export PDF de extratos bancários**
 -   ✅ Módulo financeiro (contas bancárias, conta corrente, faturas)
 -   ✅ Sistema de email configurado
 -   ✅ Testes automatizados
@@ -155,7 +157,10 @@ O objetivo é criar um sistema de gestão empresarial para PMEs, com funcionalid
 -   Campos: banco, número conta, IBAN, SWIFT/BIC, moeda
 -   Estados Ativa/Inativa
 -   Checkbox para conta padrão
--   Integrado com transações e reconciliação
+-   **Extrato de movimentos com saldo após cada transação**
+-   **Export PDF profissional do extrato**
+-   **Atualização automática de saldo** (observers)
+-   **Integração com encomendas fechadas**
 
 ### Módulo 10: Conta Corrente Bancária
 
@@ -165,6 +170,7 @@ O objetivo é criar um sistema de gestão empresarial para PMEs, com funcionalid
 -   Modal de criação rápida
 -   Associação a entidades e documentos
 -   Reconciliação bancária
+-   **Cálculo automático de `saldo_apos`** em cada transação
 
 ### Módulo 11: Faturas de Fornecedores
 
@@ -182,6 +188,9 @@ O objetivo é criar um sistema de gestão empresarial para PMEs, com funcionalid
 -   Saldo automaticamente calculado
 -   Filtros por cliente, tipo documento, período
 -   Mostra débitos, créditos e saldo atual
+-   **Criação automática de movimento ao fechar encomenda**
+-   **Débito = Cliente pagou (reduz dívida)**
+-   **Crédito = Cliente deve (aumenta dívida)**
 -   Integração com faturas de clientes (quando criado)
 
 ### Módulo 13: Calendário
@@ -287,21 +296,31 @@ Sistema completo de gestão de documentos digitais com versioning e metadata.
 -   Preço de custo ≥ 0
 -   Total calculado automaticamente
 
-### Módulo 18: Encomendas Cliente (v0.15.0)
+### Módulo 18: Encomendas Cliente (v0.15.0 - v0.24.0)
 
-Gestão de encomendas de clientes com conversão para encomendas de fornecedores.
+Gestão de encomendas de clientes com conversão para encomendas de fornecedores e **integração financeira automática**.
 
 **Campos:**
 
 -   Numeração automática: EC-YEAR-#### (ex: EC-2025-0001)
 -   Data, validade, cliente, proposta origem (opcional)
--   Estado: Rascunho, Em Curso, Concluído, Cancelado, Faturado
+-   Estado: Rascunho, Em Curso, Concluído, Cancelado, Faturado, **Closed**
 -   Notas
 
 **Funcionalidades:**
 
 -   ✅ CRUD completo herdado (já existia como "Encomendas")
 -   ✅ Conversão multi-fornecedor para Encomendas Fornecedor
+-   ✅ **Integração financeira automática (v0.24.0)**:
+    -   Quando status muda para "closed"
+    -   Cria movimento **DÉBITO** na Conta Corrente Cliente
+    -   Cria movimento **CRÉDITO** na Conta Bancária
+    -   Ambos relacionados com referência da encomenda
+    -   Observer CustomerOrderObserver
+-   ✅ **Gestão automática de stock (v0.23.0)**:
+    -   Validação ao criar/editar
+    -   Decremento ao fechar
+    -   Reposição ao reabrir
 -   ✅ Download PDF profissional:
     -   Título "ENCOMENDA CLIENTE"
     -   Layout matching Propostas
@@ -518,6 +537,60 @@ Cada módulo tem documentação própria em `docs/`:
 -   `client-accounts-module.md` - Conta corrente clientes
 -   `customer-orders-module.md` - Encomendas e PDFs
 -   `database-config.md` - Configuração MySQL
+-   `stock-management.md` - Gestão automática de stock
+-   `work-orders-module.md` - Workflow e tarefas
+-   `changelog.md` - Histórico completo de versões
+-   `relatorio-progresso.md` - Relatório detalhado do estágio
+
+## 🎯 Funcionalidades Destacadas
+
+### Automação Financeira (v0.24.0)
+
+Sistema completamente automatizado de integração entre módulos:
+
+1. **Encomenda Cliente fechada** → Automático:
+
+    - ✅ Cria movimento na Conta Corrente Cliente (débito)
+    - ✅ Cria movimento na Conta Bancária (crédito)
+    - ✅ Atualiza saldos automaticamente
+    - ✅ Relaciona com referência da encomenda
+
+2. **Laravel Observers** para automação:
+
+    - `CustomerOrderObserver` - Detecta status closed
+    - `BankTransactionObserver` - Calcula saldos
+    - `ClientAccountObserver` - Atualiza conta corrente
+
+3. **Rastreabilidade total**:
+    - Cada movimento tem referência à encomenda
+    - Nome do cliente nas observações
+    - Saldo após cada movimento
+    - Export PDF do extrato completo
+
+### Gestão de Stock (v0.23.0)
+
+-   Validação em tempo real ao criar/editar encomendas
+-   Indicadores visuais (verde/laranja/vermelho)
+-   Alertas de stock insuficiente
+-   Decremento automático ao fechar encomenda
+-   Reposição automática ao reabrir
+-   Serviços não afetam stock
+
+### Interface Consistente
+
+-   Headers padronizados em todas as páginas Show
+-   Ícones em containers coloridos
+-   Botões com componente reutilizável
+-   Layout: Ícone+Título | Botões de ação
+-   Dark mode em 100% da aplicação
+
+---
+
+**Desenvolvido por:** [Nome]  
+**Orientador:** [Nome do Orientador]  
+**Empresa:** Inovcorp  
+**GitHub:** [github.com/JoseGInovcorp/gest-app](https://github.com/JoseGInovcorp/gest-app)
+
 -   `mailhog-setup.md` - Setup de email
 -   `changelog.md` - Histórico de versões
 -   `relatorio-progresso.md` - Progresso diário

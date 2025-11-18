@@ -6,7 +6,9 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use App\Models\CustomerOrder;
+use App\Models\SupplierOrder;
 use App\Observers\CustomerOrderObserver;
+use App\Observers\SupplierOrderObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -32,5 +34,6 @@ class AppServiceProvider extends ServiceProvider
 
         // Registar observers
         CustomerOrder::observe(CustomerOrderObserver::class);
+        SupplierOrder::observe(SupplierOrderObserver::class);
     }
 }

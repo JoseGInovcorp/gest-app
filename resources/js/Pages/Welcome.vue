@@ -12,7 +12,9 @@ import {
     ChevronRight,
     Github,
     Mail,
-    Globe,
+    ClipboardList,
+    ShoppingCart,
+    UserCheck,
 } from "lucide-vue-next";
 
 const page = usePage();
@@ -42,51 +44,52 @@ defineProps({
 const features = [
     {
         icon: Users,
-        title: "Gestão de Clientes",
+        title: "Gestão de Entidades",
         description:
-            "Sistema completo de CRM com validação automática de VAT europeu via VIES.",
+            "CRM completo com clientes e fornecedores, validação automática de VAT europeu via VIES e gestão de contactos com RGPD.",
+    },
+    {
+        icon: ClipboardList,
+        title: "Ordens de Trabalho",
+        description:
+            "Sistema de workflow com templates configuráveis, atribuição de tarefas por grupos e sincronização automática.",
+    },
+    {
+        icon: ShoppingCart,
+        title: "Encomendas & Propostas",
+        description:
+            "Gestão completa de propostas comerciais, encomendas de clientes e fornecedores com controlo de estado.",
     },
     {
         icon: Package,
         title: "Controlo de Stock",
         description:
-            "Gestão avançada de produtos e serviços com categorização inteligente.",
-    },
-    {
-        icon: FileText,
-        title: "Faturação Eletrónica",
-        description:
-            "Propostas, orçamentos e faturas automáticas com conformidade fiscal portuguesa.",
+            "Gestão avançada de artigos (produtos e serviços) com categorização, stock em tempo real e indicadores visuais.",
     },
     {
         icon: Calendar,
         title: "Calendário Empresarial",
         description:
-            "Agendamento integrado de reuniões, follow-ups e tarefas comerciais.",
+            "Agendamento integrado de eventos, reuniões e follow-ups com sistema de permissões granular por utilizador.",
     },
     {
         icon: CreditCard,
-        title: "Financeiro Completo",
+        title: "Gestão Financeira",
         description:
-            "Reconciliação bancária, relatórios fiscais e análise de cash-flow.",
+            "Contas bancárias, movimentos financeiros, reconciliação e relatórios com análise de cash-flow.",
     },
     {
         icon: Shield,
-        title: "Segurança 2FA",
+        title: "Segurança Avançada",
         description:
-            "Autenticação de dois fatores e sistema granular de permissões por role.",
+            "Autenticação 2FA, sistema de roles e permissões granulares, auditoria completa com activity log.",
     },
-];
-
-const stats = [
     {
-        number: "8",
-        label: "Módulos Core",
-        sublabel: "Sistema integrado completo",
+        icon: UserCheck,
+        title: "Gestão de Utilizadores",
+        description:
+            "Controlo de acessos com 6 roles hierárquicos, permissões personalizadas e gestão de equipas por departamento.",
     },
-    { number: "27", label: "Países UE", sublabel: "Validação VAT VIES" },
-    { number: "70+", label: "Permissões", sublabel: "Controlo granular" },
-    { number: "6", label: "Roles", sublabel: "Hierarquia empresarial" },
 ];
 </script>
 
@@ -126,7 +129,7 @@ const stats = [
                                 {{ companyName }}
                             </h1>
                             <p class="text-sm text-gray-600 dark:text-gray-400">
-                                Sistema Empresarial powered by Inovcorp
+                                Sistema de Gestão Empresarial
                             </p>
                         </div>
                     </div>
@@ -187,14 +190,6 @@ const stats = [
                 <div class="mx-auto max-w-4xl py-16 sm:py-24 lg:py-32">
                     <!-- Main Title -->
                     <div class="text-center">
-                        <div class="mb-8 flex justify-center">
-                            <div
-                                class="relative rounded-full px-4 py-2 text-sm leading-6 text-gray-600 dark:text-gray-400 ring-1 ring-gray-900/10 dark:ring-gray-100/10 hover:ring-gray-900/20 dark:hover:ring-gray-100/20"
-                            >
-                                🚀 Projeto Final de Estágio | Inovcorp
-                            </div>
-                        </div>
-
                         <h1
                             class="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl"
                         >
@@ -209,13 +204,10 @@ const stats = [
                         <p
                             class="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-400 max-w-2xl mx-auto"
                         >
-                            Solução completa de CRM/ERP para PMEs portuguesas.
-                            Desenvolvido com
-                            <strong>Laravel 12</strong>,
-                            <strong>Vue.js 3</strong> e
-                            <strong>Inertia.js</strong>
-                            seguindo os mais altos padrões de segurança e
-                            conformidade fiscal.
+                            Solução completa de gestão empresarial para PMEs
+                            portuguesas. Gestão integrada de clientes, produtos,
+                            faturação e finanças com conformidade fiscal e
+                            segurança avançada.
                         </p>
 
                         <div
@@ -232,7 +224,7 @@ const stats = [
                             <a
                                 href="https://github.com/JoseGInovcorp/gest-app"
                                 target="_blank"
-                                class="text-sm font-semibold leading-6 text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center space-x-2"
+                                class="rounded-lg border border-gray-300 dark:border-gray-600 px-6 py-3 text-sm font-semibold text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition-all flex items-center space-x-2"
                             >
                                 <Github class="h-4 w-4" />
                                 <span>Ver Código</span>
@@ -329,140 +321,6 @@ const stats = [
                     </div>
                 </div>
             </div>
-
-            <!-- Stats Section -->
-            <div class="py-16 sm:py-24">
-                <div class="mx-auto max-w-7xl px-6 lg:px-8">
-                    <div class="mx-auto max-w-2xl text-center">
-                        <h2
-                            class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl"
-                        >
-                            Sistema em Números
-                        </h2>
-                        <p
-                            class="mt-4 text-lg leading-8 text-gray-600 dark:text-gray-400"
-                        >
-                            Arquitectura robusta e escalável desenvolvida para
-                            performance empresarial
-                        </p>
-                    </div>
-
-                    <div
-                        class="mx-auto mt-16 grid max-w-4xl grid-cols-2 gap-8 sm:grid-cols-4"
-                    >
-                        <div
-                            v-for="stat in stats"
-                            :key="stat.label"
-                            class="text-center"
-                        >
-                            <div
-                                class="text-4xl font-bold text-blue-600 dark:text-blue-400 sm:text-5xl"
-                            >
-                                {{ stat.number }}
-                            </div>
-                            <div
-                                class="mt-2 text-lg font-semibold text-gray-900 dark:text-white"
-                            >
-                                {{ stat.label }}
-                            </div>
-                            <div
-                                class="text-sm text-gray-600 dark:text-gray-400"
-                            >
-                                {{ stat.sublabel }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tech Stack -->
-            <div
-                class="py-16 sm:py-24 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm"
-            >
-                <div class="mx-auto max-w-7xl px-6 lg:px-8">
-                    <div class="mx-auto max-w-2xl text-center">
-                        <h2
-                            class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl"
-                        >
-                            Stack Tecnológico Moderno
-                        </h2>
-                        <p
-                            class="mt-4 text-lg leading-8 text-gray-600 dark:text-gray-400"
-                        >
-                            Construído com as melhores tecnologias e frameworks
-                            do mercado
-                        </p>
-                    </div>
-
-                    <div
-                        class="mx-auto mt-16 flex max-w-4xl flex-wrap items-center justify-center gap-8"
-                    >
-                        <div class="flex flex-col items-center space-y-2">
-                            <div
-                                class="rounded-lg bg-red-50 dark:bg-red-900/20 p-4"
-                            >
-                                <img
-                                    src="https://laravel.com/img/logomark.min.svg"
-                                    alt="Laravel"
-                                    class="h-8 w-8"
-                                />
-                            </div>
-                            <span
-                                class="text-sm font-medium text-gray-900 dark:text-white"
-                                >Laravel 12</span
-                            >
-                        </div>
-
-                        <div class="flex flex-col items-center space-y-2">
-                            <div
-                                class="rounded-lg bg-green-50 dark:bg-green-900/20 p-4"
-                            >
-                                <img
-                                    src="https://vuejs.org/images/logo.png"
-                                    alt="Vue.js"
-                                    class="h-8 w-8"
-                                />
-                            </div>
-                            <span
-                                class="text-sm font-medium text-gray-900 dark:text-white"
-                                >Vue.js 3</span
-                            >
-                        </div>
-
-                        <div class="flex flex-col items-center space-y-2">
-                            <div
-                                class="rounded-lg bg-purple-50 dark:bg-purple-900/20 p-4"
-                            >
-                                <div
-                                    class="h-8 w-8 rounded bg-purple-600 flex items-center justify-center text-white text-sm font-bold"
-                                >
-                                    I
-                                </div>
-                            </div>
-                            <span
-                                class="text-sm font-medium text-gray-900 dark:text-white"
-                                >Inertia.js</span
-                            >
-                        </div>
-
-                        <div class="flex flex-col items-center space-y-2">
-                            <div
-                                class="rounded-lg bg-cyan-50 dark:bg-cyan-900/20 p-4"
-                            >
-                                <div
-                                    class="h-8 w-8 rounded bg-cyan-500 flex items-center justify-center text-white text-sm font-bold"
-                                >
-                                    T
-                                </div>
-                            </div>
-                            <span
-                                class="text-sm font-medium text-gray-900 dark:text-white"
-                                >Tailwind CSS</span
-                            >
-                        </div>
-                    </div>
-                </div>
-            </div>
         </main>
 
         <!-- Footer -->
@@ -474,21 +332,25 @@ const stats = [
                     class="flex flex-col items-center justify-between space-y-4 sm:flex-row sm:space-y-0"
                 >
                     <div class="flex items-center space-x-3">
+                        <!-- Company Logo if available -->
+                        <img
+                            v-if="companyLogo"
+                            :src="companyLogo"
+                            :alt="companyName"
+                            class="h-8 w-auto max-w-[120px] object-contain rounded"
+                        />
+                        <!-- Fallback icon when no logo -->
                         <div
+                            v-else
                             class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-700 text-white"
                         >
                             <Building2 class="h-4 w-4" />
                         </div>
-                        <div>
-                            <p
-                                class="text-sm font-semibold text-gray-900 dark:text-white"
-                            >
-                                Gest-App
-                            </p>
-                            <p class="text-xs text-gray-600 dark:text-gray-400">
-                                v{{ laravelVersion }} | PHP {{ phpVersion }}
-                            </p>
-                        </div>
+                        <p
+                            class="text-sm font-semibold text-gray-900 dark:text-white"
+                        >
+                            {{ companyName }}
+                        </p>
                     </div>
 
                     <div
@@ -499,7 +361,7 @@ const stats = [
                             class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center space-x-1"
                         >
                             <Mail class="h-4 w-4" />
-                            <span>Contacto</span>
+                            <span>Suporte</span>
                         </a>
                         <a
                             href="https://github.com/JoseGInovcorp/gest-app"
@@ -510,7 +372,8 @@ const stats = [
                             <span>GitHub</span>
                         </a>
                         <span class="text-xs"
-                            >© 2025 José Gonçalves | Inovcorp</span
+                            >© 2025 Inovcorp. Todos os direitos
+                            reservados.</span
                         >
                     </div>
                 </div>

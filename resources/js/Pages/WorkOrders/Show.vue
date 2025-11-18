@@ -15,6 +15,7 @@ import {
     Unlock,
 } from "lucide-vue-next";
 import Button from "@/Components/ui/Button.vue";
+import ConfirmDialog from "@/Components/ConfirmDialog.vue";
 
 const props = defineProps({
     workOrder: Object,
@@ -49,6 +50,7 @@ const getPriorityBadge = (priority) => {
 };
 
 const assigningTask = ref(null);
+const showSyncDialog = ref(false);
 const assignForm = useForm({
     assigned_to: null,
     assigned_group: null,
@@ -90,6 +92,27 @@ const completeTask = (taskId) => {
             preserveScroll: true,
         }
     );
+};
+
+const openSyncDialog = () => {
+    showSyncDialog.value = true;
+};
+
+const confirmSync = () => {
+    router.post(
+        route("work-orders.sync-template", props.workOrder.id),
+        {},
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                showSyncDialog.value = false;
+            },
+        }
+    );
+};
+
+const cancelSync = () => {
+    showSyncDialog.value = false;
 };
 </script>
 
@@ -226,6 +249,29 @@ const completeTask = (taskId) => {
                 >
                     Tarefas ({{ workOrder.tasks?.length || 0 }})
                 </h2>
+
+                <!-- Botão Sincronizar com Template -->
+                <button
+                    v-if="can.edit"
+                    @click="openSyncDialog"
+                    class="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                    title="Atualizar tarefas com configurações atuais do template"
+                >
+                    <svg
+                        class="w-4 h-4 mr-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                        ></path>
+                    </svg>
+                    Sincronizar Template
+                </button>
             </div>
 
             <div class="space-y-4">
@@ -484,5 +530,14 @@ const completeTask = (taskId) => {
                 </div>
             </div>
         </div>
+
+        <!-- Diálogo Sincronizar Template -->
+        <ConfirmDialog
+            :show="showSyncDialog"
+            title="Sincronizar com Template"
+            message="Tem a certeza que pretende sincronizar as tarefas com as configurações atuais do template? Isto irá atualizar os grupos atribuídos, títulos e descrições de todas as tarefas."
+            @confirm="confirmSync"
+            @cancel="cancelSync"
+        />
     </AuthenticatedLayout>
 </template>

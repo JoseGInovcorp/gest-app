@@ -124,7 +124,7 @@ class Invoice extends Model
     /**
      * Registra um pagamento
      */
-    public function registrarPagamento(float $valor, string $referencia = null): ClientAccount
+    public function registrarPagamento(float $valor, string $referencia = null, int $bankAccountId = null): ClientAccount
     {
         // Atualizar valor pago
         $this->valor_pago += $valor;
@@ -141,6 +141,20 @@ class Invoice extends Model
             'categoria' => 'pagamento',
             'referencia' => $referencia,
         ]);
+
+        // Criar movimento bancário (crédito na conta bancária) se conta fornecida
+        if ($bankAccountId) {
+            BankTransaction::create([
+                'bank_account_id' => $bankAccountId,
+                'data_movimento' => now(),
+                'descricao' => "Recebimento Fatura {$this->numero} - {$this->entity->nome}",
+                'tipo' => 'credito',
+                'valor' => $valor,
+                'referencia' => $referencia,
+                'categoria' => 'recebimento',
+                'observacoes' => "Cliente: {$this->entity->nome}",
+            ]);
+        }
 
         return $movement;
     }

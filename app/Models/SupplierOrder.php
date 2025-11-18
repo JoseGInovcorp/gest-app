@@ -93,4 +93,24 @@ class SupplierOrder extends Model
     {
         return $this->hasMany(SupplierOrderItem::class);
     }
+
+    /**
+     * Registrar pagamento a fornecedor
+     */
+    public function registrarPagamento(float $valor, string $referencia = null, int $bankAccountId = null): void
+    {
+        // Criar movimento bancário (débito na conta bancária - saída de dinheiro)
+        if ($bankAccountId) {
+            BankTransaction::create([
+                'bank_account_id' => $bankAccountId,
+                'data_movimento' => now(),
+                'descricao' => "Pagamento Encomenda {$this->number} - {$this->supplier->nome}",
+                'tipo' => 'debito',
+                'valor' => $valor,
+                'referencia' => $referencia,
+                'categoria' => 'pagamento',
+                'observacoes' => "Fornecedor: {$this->supplier->nome}",
+            ]);
+        }
+    }
 }

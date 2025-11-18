@@ -348,13 +348,25 @@ const showDeleteDialog = ref(false);
 const proposalToDelete = ref(null);
 
 const openDeleteDialog = (proposal) => {
+    console.log("openDeleteDialog called with:", proposal);
     proposalToDelete.value = proposal;
     showDeleteDialog.value = true;
 };
 
 const confirmDelete = () => {
+    console.log("confirmDelete called for proposal:", proposalToDelete.value);
+    if (!proposalToDelete.value) {
+        console.error("No proposal to delete");
+        return;
+    }
     router.delete(route("proposals.destroy", proposalToDelete.value.id), {
         preserveScroll: true,
+        onSuccess: () => {
+            console.log("Delete successful");
+        },
+        onError: (errors) => {
+            console.error("Delete failed:", errors);
+        },
         onFinish: () => {
             showDeleteDialog.value = false;
             proposalToDelete.value = null;

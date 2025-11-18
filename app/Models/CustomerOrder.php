@@ -15,6 +15,7 @@ class CustomerOrder extends Model
     protected $fillable = [
         'number',
         'proposal_date',
+        'validity_date',
         'customer_id',
         'status',
         'total_value',
@@ -23,6 +24,7 @@ class CustomerOrder extends Model
 
     protected $casts = [
         'proposal_date' => 'date',
+        'validity_date' => 'date',
         'total_value' => 'decimal:2',
     ];
 
@@ -80,5 +82,36 @@ class CustomerOrder extends Model
         }
 
         return $prefix . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Registrar pagamento de cliente
+     */
+    public function registrarPagamento(float $valor, string $referencia = null, int $bankAccountId = null): void
+    {
+        // Criar movimento de crédito na conta corrente do cliente
+        ClientAccount::create([
+            'entity_id' => $this->customer_id,
+            'data_movimento' => now(),
+            'tipo' => 'credito',
+            'valor' => $valor,
+            'descricao' => "Pagamento Encomenda {$this->number}",
+            'categoria' => 'pagamento',
+            'referencia' => $referencia,
+        ]);
+
+        // Criar movimento bancário (crédito na conta bancária - entrada de dinheiro)
+        if ($bankAccountId) {
+            BankTransaction::create([
+                'bank_account_id' => $bankAccountId,
+                'data_movimento' => now(),
+                'descricao' => "Recebimento Encomenda {$this->number} - {$this->customer->nome}",
+                'tipo' => 'credito',
+                'valor' => $valor,
+                'referencia' => $referencia,
+                'categoria' => 'recebimento',
+                'observacoes' => "Cliente: {$this->customer->nome}",
+            ]);
+        }
     }
 }
